@@ -1,0 +1,123 @@
+{
+  "old_model": "gpt-4",
+  "candidate": "gpt-5.6-sol",
+  "runs": 3,
+  "baseline_file": "agent__gpt-4.jsonl",
+  "candidate_file": "agent__gpt-5.6-sol.jsonl",
+  "regressed": [
+    "t07"
+  ],
+  "summary": {
+    "classify": {
+      "explains": 0,
+      "of": 1,
+      "pct": 0
+    },
+    "decide": {
+      "explains": 1,
+      "of": 1,
+      "pct": 100
+    },
+    "draft": {
+      "explains": 0,
+      "of": 1,
+      "pct": 0
+    },
+    "tone": {
+      "explains": 0,
+      "of": 1,
+      "pct": 0
+    }
+  },
+  "unexplained": [],
+  "tickets": [
+    {
+      "input_id": "t07",
+      "text": "The clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.",
+      "tricky": true,
+      "baseline_output": "damaged/replace",
+      "candidate_output": "damaged/deny",
+      "causal_steps": [
+        "decide"
+      ],
+      "status": "confirmed",
+      "necessity": {
+        "classify": {
+          "verdict": "REGRESSED",
+          "output": "damaged/deny",
+          "score_runs": [
+            0.75,
+            0.75,
+            0.75
+          ],
+          "file": "agent__gpt-5.6-sol__classify-gpt-4.jsonl"
+        },
+        "decide": {
+          "verdict": "SAME",
+          "output": "damaged/replace",
+          "score_runs": [
+            1.0,
+            0.75,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol__decide-gpt-4.jsonl"
+        },
+        "draft": {
+          "verdict": "REGRESSED",
+          "output": "damaged/deny",
+          "score_runs": [
+            0.75,
+            0.75,
+            0.75
+          ],
+          "file": "agent__gpt-5.6-sol__draft-gpt-4.jsonl"
+        },
+        "tone": {
+          "verdict": "REGRESSED",
+          "output": "damaged/deny",
+          "score_runs": [
+            0.75,
+            0.75,
+            0.75
+          ],
+          "file": "agent__gpt-5.6-sol__tone-gpt-4.jsonl"
+        }
+      },
+      "pairs": {},
+      "sufficiency": {
+        "decide": {
+          "verdict": "REGRESSED",
+          "output": "damaged/deny",
+          "score_runs": [
+            0.75,
+            0.75,
+            0.75
+          ],
+          "file": "agent__gpt-4__decide-gpt-5.6-sol.jsonl"
+        }
+      },
+      "step_outputs": {
+        "decide": {
+          "new": {
+            "model": "gpt-5.6-sol",
+            "raw": "{\"action\":\"deny\",\"policy_id\":\"DAMAGE-02\",\"amount\":null,\"reason\":\"The damaged lamp is a final-sale item and is not eligible for a refund or replacement.\"}"
+          },
+          "old": {
+            "model": "gpt-4",
+            "raw": "{\"action\": \"replace\", \"policy_id\": \"DAMAGE-02\", \"amount\": null, \"reason\": \"The item arrived damaged within 30 days of delivery.\"}"
+          }
+        }
+      }
+    }
+  ],
+  "live_calls": {
+    "gpt-4": {
+      "calls": 18,
+      "usd": 0.1834
+    },
+    "gpt-5.6-sol": {
+      "calls": 21,
+      "usd": null
+    }
+  }
+}

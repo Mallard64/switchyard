@@ -331,6 +331,18 @@ def run_ticket(ticket, plan, reuse=None, call=call_openai):
             "checks": checks, "passed_all": all(checks.values()), "gold_score": score_row(ctx, ticket)}
 
 
+def record_row(ticket, run, plan, label, reuse=None, **meta):
+    """One cache row for (ticket, run); errors are recorded, not raised, so runs can resume."""
+    row = {"task": "agent", "input_id": ticket["id"], "run": run, "config": label, "plan": plan, **meta,
+           "ts": datetime.now(timezone.utc).isoformat(), "text": ticket["text"],
+           "tricky": ticket.get("tricky", False)}
+    try:
+        row.update(run_ticket(ticket, plan, reuse=reuse), error=None)
+    except Exception as e:
+        row["error"] = f"{type(e).__name__}: {e}"[:1000]
+    return row
+
+
 def load_tickets(limit=None):
     return [json.loads(l) for l in open(TICKETS) if l.strip()][:limit]
 
@@ -435,12 +447,7 @@ def main():
     lock = threading.Lock()
 
     def work(t, r):
-        row = {"task": "agent", "input_id": t["id"], "run": r, "config": label, "plan": plan,
-               "ts": datetime.now(timezone.utc).isoformat(), "text": t["text"], "tricky": t.get("tricky", False)}
-        try:
-            row.update(run_ticket(t, plan), error=None)
-        except Exception as e:
-            row["error"] = f"{type(e).__name__}: {e}"[:1000]
+        row = record_row(t, r, plan, label)
         with lock, open(out, "a") as f:
             f.write(json.dumps(row) + "\n")
         return row
