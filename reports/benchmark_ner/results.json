@@ -1,0 +1,234 @@
+{
+  "breaks": [
+    {
+      "id": "break01",
+      "component": "description",
+      "kind": "delete",
+      "new_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs are not entities.",
+      "caught": false,
+      "n_regressed": 0,
+      "regressed_ids": [],
+      "suspects_seen": [],
+      "component_named": false,
+      "component_top": false,
+      "fix_attempted": false,
+      "fix_accepted": null,
+      "fix_edit": null
+    },
+    {
+      "id": "break02",
+      "component": "description",
+      "kind": "delete",
+      "new_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nPronouns are not entities.",
+      "caught": true,
+      "n_regressed": 1,
+      "regressed_ids": [
+        "ner-03"
+      ],
+      "suspects_seen": [
+        "description",
+        "label_definitions.EQUIPMENT"
+      ],
+      "component_named": true,
+      "component_top": false,
+      "fix_attempted": true,
+      "fix_accepted": false,
+      "fix_edit": {
+        "component": "label_definitions.EQUIPMENT",
+        "new_text": "Any kind of tangible cooking equipment. e.g. oven, cooking pot, grill. This does not include actions or processes, such as 'whisk' or 'blend'.",
+        "rationale": "Added 'tangible' and explicitly excluded 'actions or processes' in the definition of equipment to clarify that a 'whisk' as an action is not regarded as equipment.",
+        "old_text": "Any kind of cooking equipment. e.g. oven, cooking pot, grill"
+      },
+      "fix_verdict_counts": {
+        "REGRESSED": 1,
+        "IMPROVED": 0,
+        "CHANGED": 0,
+        "SAME": 19
+      }
+    },
+    {
+      "id": "break03",
+      "component": "description",
+      "kind": "contradict",
+      "new_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, and adverbs can also be entities when they name a cooking action or quality.\nPronouns are not entities.",
+      "caught": true,
+      "n_regressed": 1,
+      "regressed_ids": [
+        "ner-03"
+      ],
+      "suspects_seen": [
+        "description",
+        "label_definitions.EQUIPMENT"
+      ],
+      "component_named": true,
+      "component_top": false,
+      "fix_attempted": true,
+      "fix_accepted": false,
+      "fix_edit": {
+        "component": "label_definitions.EQUIPMENT",
+        "new_text": "Any physical items used in the cooking process, such as oven, cooking pot, grill. Do not include actions or verbs that imply the use of equipment e.g. 'whisking', 'blending'",
+        "rationale": "The new model appears to be considering verbs that imply the usage of certain equipment as the equipment itself, which is incorrect. This edit clarifies the concept of 'equipment' to the model.",
+        "old_text": "Any kind of cooking equipment. e.g. oven, cooking pot, grill"
+      },
+      "fix_verdict_counts": {
+        "REGRESSED": 1,
+        "IMPROVED": 0,
+        "CHANGED": 0,
+        "SAME": 19
+      }
+    },
+    {
+      "id": "break04",
+      "component": "description",
+      "kind": "delete",
+      "new_text": "Entities are the names food dishes,\ningredients,.\nAdjectives, verbs, adverbs are not entities.\nPronouns are not entities.",
+      "caught": false,
+      "n_regressed": 0,
+      "regressed_ids": [],
+      "suspects_seen": [],
+      "component_named": false,
+      "component_top": false,
+      "fix_attempted": false,
+      "fix_accepted": null,
+      "fix_edit": null
+    },
+    {
+      "id": "break05",
+      "component": "label_definitions.DISH",
+      "kind": "blur",
+      "new_text": "Known food dishes.",
+      "caught": false,
+      "n_regressed": 0,
+      "regressed_ids": [],
+      "suspects_seen": [],
+      "component_named": false,
+      "component_top": false,
+      "fix_attempted": false,
+      "fix_accepted": null,
+      "fix_edit": null
+    },
+    {
+      "id": "break06",
+      "component": "label_definitions.DISH",
+      "kind": "contradict",
+      "new_text": "Known food dishes, e.g. Lobster Ravioli, garlic bread, including raw ingredients plated for serving, e.g. sliced tomatoes",
+      "caught": true,
+      "n_regressed": 2,
+      "regressed_ids": [
+        "ner-15",
+        "ner-20"
+      ],
+      "suspects_seen": [
+        "description",
+        "label_definitions.DISH"
+      ],
+      "component_named": true,
+      "component_top": true,
+      "fix_attempted": true,
+      "fix_accepted": true,
+      "fix_edit": {
+        "component": "label_definitions.INGREDIENT",
+        "new_text": "Individual parts of a food dish, including herbs and spices, and components not yet fully combined into a final dish.",
+        "rationale": "Extended the definition of ingredient to include components not yet fully integrated into a final dish to improve model performance on these cases.",
+        "old_text": "Individual parts of a food dish, including herbs and spices."
+      },
+      "fix_verdict_counts": {
+        "REGRESSED": 0,
+        "IMPROVED": 1,
+        "CHANGED": 0,
+        "SAME": 19
+      }
+    },
+    {
+      "id": "break07",
+      "component": "label_definitions.INGREDIENT",
+      "kind": "blur",
+      "new_text": "Individual parts of a food dish.",
+      "caught": false,
+      "n_regressed": 0,
+      "regressed_ids": [],
+      "suspects_seen": [],
+      "component_named": false,
+      "component_top": false,
+      "fix_attempted": false,
+      "fix_accepted": null,
+      "fix_edit": null
+    },
+    {
+      "id": "break08",
+      "component": "label_definitions.INGREDIENT",
+      "kind": "contradict",
+      "new_text": "Individual parts of a food dish, including herbs and spices, and any finished dish served alongside it.",
+      "caught": false,
+      "n_regressed": 0,
+      "regressed_ids": [],
+      "suspects_seen": [],
+      "component_named": false,
+      "component_top": false,
+      "fix_attempted": false,
+      "fix_accepted": null,
+      "fix_edit": null
+    },
+    {
+      "id": "break09",
+      "component": "label_definitions.EQUIPMENT",
+      "kind": "blur",
+      "new_text": "Any kind of cooking equipment.",
+      "caught": false,
+      "n_regressed": 0,
+      "regressed_ids": [],
+      "suspects_seen": [],
+      "component_named": false,
+      "component_top": false,
+      "fix_attempted": false,
+      "fix_accepted": null,
+      "fix_edit": null
+    },
+    {
+      "id": "break10",
+      "component": "label_definitions.EQUIPMENT",
+      "kind": "contradict",
+      "new_text": "Any kind of cooking equipment. e.g. oven, cooking pot, grill, bowl, plate, cup",
+      "caught": true,
+      "n_regressed": 1,
+      "regressed_ids": [
+        "ner-16"
+      ],
+      "suspects_seen": [
+        "description",
+        "label_definitions.EQUIPMENT"
+      ],
+      "component_named": true,
+      "component_top": true,
+      "fix_attempted": true,
+      "fix_accepted": false,
+      "fix_edit": {
+        "component": "label_definitions.EQUIPMENT",
+        "new_text": "Any kind of cooking equipment excluding generic terms like 'bowl' or 'plate'. e.g. oven, cooking pot, grill",
+        "rationale": "Clarification to avoid the new model recognizing generic terms like 'bowl' as cooking equipment",
+        "old_text": "Any kind of cooking equipment. e.g. oven, cooking pot, grill"
+      },
+      "fix_verdict_counts": {
+        "REGRESSED": 1,
+        "IMPROVED": 0,
+        "CHANGED": 0,
+        "SAME": 19
+      }
+    }
+  ],
+  "false_alarm": {
+    "verdict_counts": {
+      "REGRESSED": 0,
+      "IMPROVED": 0,
+      "CHANGED": 0,
+      "SAME": 20
+    },
+    "false_alarms": 0
+  },
+  "n_breaks": 10,
+  "catch_rate": 0.4,
+  "right_component_rate": 1.0,
+  "top_component_rate": 0.5,
+  "fix_rate": 0.25,
+  "spend_usd": 14.1847
+}

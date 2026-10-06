@@ -1,0 +1,5 @@
+{
+  "label_definitions": {
+    "EQUIPMENT": "Any physical items used in the cooking process, such as oven, cooking pot, grill. Do not include actions or verbs that imply the use of equipment e.g. 'whisking', 'blending'"
+  }
+}

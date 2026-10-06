@@ -1,0 +1,694 @@
+{
+  "task": "textcat",
+  "baseline_file": "textcat__gpt-4__gpt-4.jsonl",
+  "candidate_file": "textcat__shipped__gpt-3.5-turbo.jsonl",
+  "inputs_compared": 20,
+  "verdict_counts": {
+    "REGRESSED": 2,
+    "IMPROVED": 0,
+    "CHANGED": 0,
+    "SAME": 18
+  },
+  "ready_to_merge": false,
+  "baseline": {
+    "model": "gpt-4",
+    "resolved_model": [
+      "gpt-4-0613"
+    ],
+    "outputs": 60,
+    "passed_all": 1.0,
+    "checks": {
+      "valid_label": 1.0,
+      "bare_answer": 1.0,
+      "single_label": 1.0
+    },
+    "accuracy": 1.0,
+    "accuracy_metric": "label accuracy",
+    "unstable_inputs": 0,
+    "latency_p50_s": 0.952,
+    "latency_p95_s": 2.461,
+    "cost_per_1k_calls_usd": 3.62
+  },
+  "candidate": {
+    "model": "gpt-3.5-turbo",
+    "resolved_model": [
+      "gpt-3.5-turbo-0125"
+    ],
+    "outputs": 60,
+    "passed_all": 1.0,
+    "checks": {
+      "valid_label": 1.0,
+      "bare_answer": 1.0,
+      "single_label": 1.0
+    },
+    "accuracy": 0.9,
+    "accuracy_metric": "label accuracy",
+    "unstable_inputs": 0,
+    "latency_p50_s": 0.673,
+    "latency_p95_s": 1.565,
+    "cost_per_1k_calls_usd": 0.06
+  },
+  "instructions_implicated": {},
+  "items": [
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-01",
+      "text": "Thou art a boil, a plague-sore.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-02",
+      "text": "Your presentation was clear, sharp and genuinely useful.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-03",
+      "text": "Thou cream-faced loon!",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-04",
+      "text": "You have a gift for making people feel welcome.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-05",
+      "text": "Wow, you finished on time for once.",
+      "tricky": true,
+      "verdict": "REGRESSED",
+      "regressions": [
+        {
+          "kind": "accuracy",
+          "baseline": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "candidate": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "improvements": [],
+      "baseline": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "errors": [
+          {
+            "type": "wrong_label",
+            "gold": "INSULT",
+            "pred": "COMPLIMENT"
+          }
+        ],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-06",
+      "text": "Thy face is not worth sunburning.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-07",
+      "text": "She is the kind of colleague everyone hopes to work with.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-08",
+      "text": "I've seen better code written by a cat walking on a keyboard.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-09",
+      "text": "O, she doth teach the torches to burn bright!",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-10",
+      "text": "That outfit is certainly... a choice.",
+      "tricky": true,
+      "verdict": "REGRESSED",
+      "regressions": [
+        {
+          "kind": "accuracy",
+          "baseline": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "candidate": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "improvements": [],
+      "baseline": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "errors": [
+          {
+            "type": "wrong_label",
+            "gold": "INSULT",
+            "pred": "COMPLIMENT"
+          }
+        ],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-11",
+      "text": "You're smarter than you give yourself credit for.",
+      "tricky": true,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-12",
+      "text": "Thou art as fat as butter.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-13",
+      "text": "Your cooking reminds me of my grandmother's, and I mean that in the best way.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-14",
+      "text": "Great job breaking the build again.",
+      "tricky": true,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-15",
+      "text": "Her voice was ever soft, gentle, and low, an excellent thing in woman.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-16",
+      "text": "You're not as dumb as you look.",
+      "tricky": true,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-17",
+      "text": "More of your conversation would infect my brain.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "INSULT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-18",
+      "text": "The way you handled that customer was masterful.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-19",
+      "text": "You're annoyingly good at this.",
+      "tricky": true,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "tc-20",
+      "text": "I would not wish any companion in the world but you.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": "COMPLIMENT",
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    }
+  ]
+}
