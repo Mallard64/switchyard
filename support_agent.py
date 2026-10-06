@@ -306,14 +306,15 @@ def cost(model, usage):
     return round(usage.get("prompt_tokens", 0) / 1e6 * p[0] + usage.get("completion_tokens", 0) / 1e6 * p[1], 6)
 
 
-def run_ticket(ticket, plan, reuse=None, call=call_openai):
+def run_ticket(ticket, plan, reuse=None, call=call_openai, prompts=None):
     """Run the pipeline live. plan: {step: {"model", "params"}}.
     reuse: earlier step records (from a cached row) to replay instead of calling, for steps
-    before the first one that differs; the step-finder uses this to hold upstream outputs fixed."""
+    before the first one that differs; the step-finder uses this to hold upstream outputs fixed.
+    prompts: {step: [lines]} overriding PROMPTS (line ablation)."""
     ctx = {"ticket": ticket}
     steps, raws = [], {}
     for i, step in enumerate(STEPS):
-        messages = render(step, ctx)
+        messages = render(step, ctx, (prompts or {}).get(step))
         if reuse and i < len(reuse):
             rec = dict(reuse[i], replayed=True)
         else:
@@ -331,13 +332,13 @@ def run_ticket(ticket, plan, reuse=None, call=call_openai):
             "checks": checks, "passed_all": all(checks.values()), "gold_score": score_row(ctx, ticket)}
 
 
-def record_row(ticket, run, plan, label, reuse=None, **meta):
+def record_row(ticket, run, plan, label, reuse=None, prompts=None, **meta):
     """One cache row for (ticket, run); errors are recorded, not raised, so runs can resume."""
     row = {"task": "agent", "input_id": ticket["id"], "run": run, "config": label, "plan": plan, **meta,
            "ts": datetime.now(timezone.utc).isoformat(), "text": ticket["text"],
            "tricky": ticket.get("tricky", False)}
     try:
-        row.update(run_ticket(ticket, plan, reuse=reuse), error=None)
+        row.update(run_ticket(ticket, plan, reuse=reuse, prompts=prompts), error=None)
     except Exception as e:
         row["error"] = f"{type(e).__name__}: {e}"[:1000]
     return row

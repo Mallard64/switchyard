@@ -32,7 +32,7 @@ def make_plan(default, overrides):
     return {s: dict(zip(("model", "params"), overrides.get(s, default))) for s in A.STEPS}
 
 
-def run_config(tickets, label, plan, source, first_live, runs, outdir, workers):
+def run_config(tickets, label, plan, source, first_live, runs, outdir, workers, prompts=None):
     """Run tickets under plan; steps before first_live are replayed from source[ticket][run]."""
     out = outdir / f"agent__{label}.jsonl"
     done = A.load_done(out)
@@ -42,7 +42,7 @@ def run_config(tickets, label, plan, source, first_live, runs, outdir, workers):
 
     def work(t, r):
         src = source[t["id"]][r]
-        row = A.record_row(t, r, plan, label, reuse=src["steps"][:first_live],
+        row = A.record_row(t, r, plan, label, reuse=src["steps"][:first_live], prompts=prompts,
                            replayed_from={"config": src["config"], "run": r, "steps": A.STEPS[:first_live]})
         with lock, open(out, "a") as f:
             f.write(json.dumps(row) + "\n")
