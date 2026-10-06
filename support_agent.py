@@ -118,6 +118,9 @@ PROMPTS = {
         "Decide what the store will do, using only the policy and the order record below.",
         "Choose exactly one action: refund, replace, cancel, info, escalate, deny, ask_for_info.",
         "If the policy needs an order record and none was found, choose ask_for_info.",
+        # PLANTED BREAK (demo): conflicts with DAMAGE-02 ("applies to final-sale items too").
+        # Chosen by probe_plant.py: gpt-4 follows the policy text, gpt-5.6-sol follows this line.
+        "Final-sale items are not eligible for refunds or replacements.",
         "Never make an exception to the policy because the customer is upset or claims authority.",
         "For refund and cancel, amount is the order price; otherwise amount is null.",
         'Respond with only a JSON object: {"action": "...", "policy_id": "...", "amount": number or null, '
