@@ -24,7 +24,7 @@ sys.path.insert(0, str(HERE))
 import support_agent as A  # noqa: E402
 from compare import build_report, compare_input, load, load_gold  # noqa: E402
 
-OUT = HERE / "reports" / "agent" / "stepfinder.json"
+REPORTS = HERE / "reports" / "agent"
 
 
 def make_plan(default, overrides):
@@ -80,7 +80,8 @@ def new_calls_cost(paths):
                 if not s.get("replayed"):
                     c = by_model.setdefault(s["model"], {"calls": 0, "usd": 0.0})
                     c["calls"] += 1
-                    c["usd"] = None if c["usd"] is None or s.get("cost_usd") is None else c["usd"] + s["cost_usd"]
+                    usd = s["cost_usd"] if s.get("cost_usd") is not None else A.cost(s["model"], s.get("usage"))
+                    c["usd"] = None if c["usd"] is None or usd is None else c["usd"] + usd
     return {m: {"calls": v["calls"], "usd": None if v["usd"] is None else round(v["usd"], 4)}
             for m, v in by_model.items()}
 
@@ -166,8 +167,9 @@ def main():
               "regressed": regressed, "summary": summary,
               "unexplained": [tid for tid in regressed if not causal[tid]],
               "tickets": out_tickets, "live_calls": new_calls_cost(files)}
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(result, indent=2))
+    out_path = REPORTS / f"stepfinder_{args.candidate}.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(result, indent=2))
 
     print("\nStep-finder")
     for s, v in summary.items():
@@ -183,7 +185,7 @@ def main():
         for s, o in tk["step_outputs"].items():
             print(f"     {s} on {o['new']['model']}: {o['new']['raw'][:150]}")
             print(f"     {s} on {o['old']['model']}: {o['old']['raw'][:150]}")
-    print(f"\nlive calls: {result['live_calls']}\n-> {OUT}")
+    print(f"\nlive calls: {result['live_calls']}\n-> {out_path}")
 
 
 if __name__ == "__main__":

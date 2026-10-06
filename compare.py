@@ -24,6 +24,7 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 from checks import NER_CHECKS, TEXTCAT_CHECKS, check_ner, check_textcat  # noqa: E402
 
+from record_baseline import cost  # noqa: E402
 from support_agent import AGENT_CHECKS  # noqa: E402
 
 INSTRUCTION = {**NER_CHECKS, **TEXTCAT_CHECKS, **{k: v[1] for k, v in AGENT_CHECKS.items()}}
@@ -38,14 +39,19 @@ def load(path):
             continue
         if not r.get("error"):
             # Recompute checks from the saved raw output so older files get current checks.
+            # Likewise fill in costs recorded before a model's price was known in PRICES.
             if r["task"] == "ner":
                 r["checks"] = check_ner(r["text"], r["raw_output"], r["output"])
             elif r["task"] == "textcat":
                 r["checks"] = check_textcat(r["raw_output"], r["output"])
+            if r["task"] in ("ner", "textcat"):
+                if r.get("cost_usd") is None:
+                    r["cost_usd"] = cost(r.get("model"), r.get("usage"))
             else:  # agent: checks span all steps; flatten per-step fields to the row
                 r["raw_output"] = r["final_reply"]
                 r["latency_s"] = round(sum(s.get("latency_s") or 0 for s in r["steps"]), 3)
-                costs = [s.get("cost_usd") for s in r["steps"]]
+                costs = [s["cost_usd"] if s.get("cost_usd") is not None else cost(s["model"], s.get("usage"))
+                         for s in r["steps"]]
                 r["cost_usd"] = None if None in costs else round(sum(costs), 6)
                 r["resolved_model"] = "+".join(sorted({s.get("resolved_model") or "?" for s in r["steps"]}))
                 r["model"] = r["config"]
@@ -264,7 +270,8 @@ def print_report(rep):
     print(fmt.format("unstable inputs", b["unstable_inputs"], c["unstable_inputs"]))
     print(fmt.format("latency p50", f"{b['latency_p50_s']:.2f}s", f"{c['latency_p50_s']:.2f}s"))
     if b["cost_per_1k_calls_usd"] is not None and c["cost_per_1k_calls_usd"] is not None:
-        print(fmt.format("cost / 1k calls", f"${b['cost_per_1k_calls_usd']:.2f}", f"${c['cost_per_1k_calls_usd']:.2f}"))
+        unit = "tickets" if rep["task"] == "agent" else "calls"  # an agent row is a whole 4-step run
+        print(fmt.format(f"cost / 1k {unit}", f"${b['cost_per_1k_calls_usd']:.2f}", f"${c['cost_per_1k_calls_usd']:.2f}"))
     for verdict in ["REGRESSED", "IMPROVED", "CHANGED"]:
         its = [it for it in rep["items"] if it["verdict"] == verdict]
         if not its:

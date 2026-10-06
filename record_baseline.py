@@ -42,7 +42,8 @@ TASKS = {
 VARIANTS = ["shipped", "gpt-4"]
 # USD per 1M tokens (input, output). Verify on OpenAI's pricing page before quoting numbers.
 PRICES = {"gpt-4": (30.0, 60.0), "gpt-4-0613": (30.0, 60.0),
-          "gpt-3.5-turbo": (0.5, 1.5), "gpt-3.5-turbo-0125": (0.5, 1.5)}
+          "gpt-3.5-turbo": (0.5, 1.5), "gpt-3.5-turbo-0125": (0.5, 1.5),
+          "gpt-5.6-sol": (5.0, 30.0), "gpt-5.6-terra": (2.5, 15.0)}  # rates from the user, Oct 6
 OPENAI_BASE = "https://api.openai.com/v1"
 
 # ---------------------------------------------------------------------------------------

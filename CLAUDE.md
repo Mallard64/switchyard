@@ -82,7 +82,7 @@ Setup: `source .venv/bin/activate`. `OPENAI_API_KEY` must be set in the shell. I
 - Ask the user before any run likely to cost more than about $5. For scale, the full baseline cost $1.18, and one fix attempt is 60 calls.
 - Never edit or delete `results/*__gpt-4__gpt-4.jsonl`, `results/*__shipped__gpt-3.5-turbo.jsonl` or `results/agent__gpt-4.jsonl`.
 - Don't open PRs or issues on public repos, or post anywhere, without the user's explicit OK.
-- Don't make up prices. `cost_per_1k_calls_usd` is null for gpt-5.6 models until the user supplies rates for `PRICES` in `record_baseline.py`.
+- Don't make up prices. `PRICES` in `record_baseline.py` holds rates the user supplied (gpt-5.6-sol $5/$30, gpt-5.6-terra $2.50/$15 per 1M, Oct 6). For agent reports, `cost_per_1k_calls_usd` is per 1k 4-step ticket runs.
 - Report real numbers only. If a result is weak, say so. Don't tune the inputs to make the demo look better.
 
 ## Next tasks, in priority order
