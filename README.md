@@ -1,70 +1,72 @@
-# Switchyard dashboard
+# Switchyard
 
-A local, dependency-free dashboard for replaying model migration reports. Built with HTML, CSS and JavaScript. It makes no live model calls and creates no real PRs.
+A frontend dashboard for reviewing AI model migrations: compare quality, cost and latency, inspect a prompt repair, and review the resulting code change.
 
-## Run
+The current edition combines a cinematic dashboard with a matching full report in black, warm silver and champagne. Built with plain HTML, CSS and JavaScript, with no external packages or build step.
 
-Install Node.js if needed, open this folder in a terminal, and run:
+## Quick start
+
+Install Node.js (a current LTS release is recommended), then run from this folder:
 
 ```sh
 npm start
 ```
 
-Open http://localhost:4173. No npm install is needed. An alternative is `python3 -m http.server 4173` from this folder. Do not open index.html directly: browsers may block JSON loading on file URLs.
+Open **http://localhost:4173/**. No `npm install` is needed. Keep the terminal running while viewing the app; press Ctrl+C to stop it.
 
-## Demo
+Do not open `index.html` directly: browsers may block loading the report JSON from a file URL. If port 4173 is occupied, use `PORT=4174 npm start` on macOS/Linux.
 
-The dashboard opens in a single-page visual overview: model quality bars on a 0–100% scale, before/after verdict distribution, one repair example, and clickable final input results. Click a candidate bar for its initial regression count and latency. Prompt changes expand inline; the proposed code change opens in a dialog. Full report retains all underlying metrics and replay controls.
+## What you can explore
 
-Full report:
+- **Dashboard:** scroll-driven model cards, a comparison table with inline bars, a Detect → Repair → Verify story, and clickable evaluation results.
+- **Model comparison:** quality/F1, cost per 1,000 calls, median latency, p95 latency and regressions. Missing values keep their position and display as unavailable.
+- **Full report:** candidate details, prompt changes, evaluation replay controls and individual test evidence.
+- **Code review:** inspect the proposed repository change in a dialog.
+- **Accessibility:** reduced-motion preferences disable scroll effects and expose repair stages in normal document flow.
 
-1. Review the initial candidate rankings and the recorded diagnosis / prompt repair.
-2. Click Run comparison to replay the final, post-repair evaluation (about 15 seconds).
-3. Click a result tile to inspect entities, per-run scores and errors.
-4. Expand View proposed diff to inspect the recorded PR proposal. No PR is created.
-5. Reset clears replay state.
+## Data and behavior
 
-## Replace data
+The app loads `results.json` when the page opens. Replace that file with a compatible report and reload to display another run.
 
-The active results.json uses migration.json. Replace it with another report and reload.
+| File | Purpose |
+| --- | --- |
+| `results.json` | Active report, currently the supplied migration report |
+| `results.migration.json` | Preserved full migration fixture |
+| `results.ner.json` | Flat named-entity-recognition comparison fixture |
+| `results.sample.json` | Earlier dashboard-schema fixture |
 
-Supported formats:
-- Full migration report: candidates, chosen, causes, fix_attempts, final, pr, and comparison. Initial model summaries are separate from the embedded final per-input comparison. Missing candidate report files are not fabricated. Null costs display as unavailable. PR diffs are previews, with links only when a URL is supplied.
-- Flat NER comparison (ner_sol.json): baseline, candidate, items and verdict_counts.
-- Original dashboard schema: model grids and simulated cause-level fixes.
+The frontend supports the full migration schema, flat NER comparison schema, and original dashboard schema. See [the handoff guide](docs/HANDOFF.md) for data mapping and integration notes.
 
-All assets are local. The dashboard makes no model calls and works offline while served locally.
+**This version displays recorded results.** Replay controls animate those results; they do not call models, run evaluations, apply real code changes, or create GitHub pull requests. Model names, dates, scores and recommendations come from the supplied fixtures, not live provider information.
 
-## Implementation decisions to confirm with Felix
+Initial candidate results and final post-repair results are distinct. Unknown costs are not treated as zero, and a report with no regressions can still contain changed or unstable outputs.
 
-- The Oct 4 mockup was not provided. This first version uses an original desktop layout.
-- A Fix applies to all regressed results across candidates sharing its cause_id, because causes are global in the supplied schema.
-- Retirement days are calculated relative to run_id, making a recorded replay stable. The UI labels this explicitly.
-- Summary cards initially show recorded totals, while tiles replay. After each fix, pass counts increase only for results associated with that applied fix.
-- Missing after_fix_output is shown as unavailable; it is never fabricated. Cause-level retest totals are not presented as individual input runs.
-- Some sample results contain placeholder output strings or values that do not agree semantically with status. The dashboard honors supplied status and does not rescore outputs.
-- The sample's retirement date, model results and recommendation are fictional. They are not verified provider facts.
-- PR link is hidden when null; external links accept only HTTP(S).
+## Project structure
 
-## Files
+```text
+switchyard-dashboard/
+├── index.html              Page shell
+├── styles.css              Dashboard and full-report styles
+├── app.js                  Data normalization, rendering and interactions
+├── server.mjs              Local development server
+├── package.json            Start and syntax-check commands
+├── results*.json           Active report and reference fixtures
+├── docs/HANDOFF.md         Frontend/backend handoff notes
+└── versions/graphite/      Previous visual edition (reference only)
+```
 
-- index.html — page shell
-- styles.css — layout and visual styling
-- app.js — JSON rendering, replay state, details and fixes
-- results.json — active full migration report
-- results.migration.json — copy of supplied migration report
-- results.ner.json — copy of supplied NER report
-- results.sample.json — original dashboard-schema sample
-- server.mjs — local development server
+The current version lives at the project root. The graphite snapshot is not served by the local server.
 
-## Handoff
+## Checks
 
-Share this source folder or add it to the team repository. Include results.json and this README. No dependencies or node_modules folder are required. Felix can retain this static frontend or port the components into the team's preferred framework.
+```sh
+npm run check
+```
 
-## Scroll interactions
+This checks JavaScript syntax. For a manual check, open the dashboard, inspect the comparison table, scroll through the repair story, open a result and the code diff, then switch to Full report and back. Check that missing metrics show as unavailable and that narrow screens remain usable.
 
-Comparison bars animate once when visible; exact values remain static. A sticky repair panel follows scroll position through Detect, Repair, and Verify, with clickable stage shortcuts. Final input tiles appear in a short stagger, and the code-review banner fades in. All states represent supplied recorded results, not live model execution. Reduced-motion preference shows all repair stages in normal document flow and disables entrance motion.
+## Sharing and scope
 
-## Cinematic visual edition
+Clone this repository and follow Quick start to run the same version. The local server binds to this computer only; it is a development preview, not production hosting.
 
-The overview now has an original model-card hero inspired by Apple's product-page presentation: oversized typography, metallic CSS surfaces, black backgrounds and scroll-linked perspective. Explore the results skips directly to the comparison table. No Apple graphics or remote assets are required. The prior graphite HTML/CSS/JS are retained under versions/graphite for reference (the active results.json remains at project root).
+No API keys are needed for this frontend. Keep any future provider credentials on the backend. `.env` files, dependency folders and logs are excluded by `.gitignore`.
