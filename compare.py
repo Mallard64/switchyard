@@ -24,7 +24,9 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 from checks import NER_CHECKS, TEXTCAT_CHECKS, check_ner, check_textcat  # noqa: E402
 
-INSTRUCTION = {**NER_CHECKS, **TEXTCAT_CHECKS}
+from support_agent import AGENT_CHECKS  # noqa: E402
+
+INSTRUCTION = {**NER_CHECKS, **TEXTCAT_CHECKS, **{k: v[1] for k, v in AGENT_CHECKS.items()}}
 
 
 def load(path):
@@ -38,8 +40,15 @@ def load(path):
             # Recompute checks from the saved raw output so older files get current checks.
             if r["task"] == "ner":
                 r["checks"] = check_ner(r["text"], r["raw_output"], r["output"])
-            else:
+            elif r["task"] == "textcat":
                 r["checks"] = check_textcat(r["raw_output"], r["output"])
+            else:  # agent: checks span all steps; flatten per-step fields to the row
+                r["raw_output"] = r["final_reply"]
+                r["latency_s"] = round(sum(s.get("latency_s") or 0 for s in r["steps"]), 3)
+                costs = [s.get("cost_usd") for s in r["steps"]]
+                r["cost_usd"] = None if None in costs else round(sum(costs), 6)
+                r["resolved_model"] = "+".join(sorted({s.get("resolved_model") or "?" for s in r["steps"]}))
+                r["model"] = r["config"]
             r["passed_all"] = all(r["checks"].values())
             rows[(r["input_id"], r["run"])] = r
     by_input = defaultdict(list)
@@ -100,6 +109,14 @@ def ner_scores(ents, gold):
 
 
 def view(task, r, gold):
+    if task == "agent":
+        # Compare decisions, not reply wording (replies vary run to run without temperature 0).
+        g = r["gold_score"]
+        dec = (r["category"], (r["order_id"] or "").upper() or None, (r["decision"] or {}).get("action"))
+        return {"key": dec, "score": g["score"], "strict": None,
+                "errors": [{"type": f"wrong_{k}"} for k in ("category", "order_id", "action", "reply_content")
+                           if not g[k]],
+                "shown": f"{dec[0]}/{dec[2]}"}
     if task == "ner":
         s = ner_scores(r["output"], gold["gold"])
         return {"key": ner_key(r), "score": s["f1_lenient"], "strict": s["f1"], "errors": s["errors"],
@@ -182,7 +199,7 @@ def side_summary(by_input, task, gold):
         "model": rows[0].get("model"), "resolved_model": sorted({r.get("resolved_model") or "?" for r in rows}),
         "outputs": n, "passed_all": round(sum(r["passed_all"] for r in rows) / n, 4), "checks": checks,
         "accuracy": round(sum(scores) / n, 4),
-        "accuracy_metric": "lenient entity F1" if task == "ner" else "label accuracy",
+        "accuracy_metric": {"ner": "lenient entity F1", "agent": "gold score"}.get(task, "label accuracy"),
         "unstable_inputs": sum(len({json.dumps(view(task, r, gold[r['input_id']])['key']) for r in rs}) > 1
                                for rs in by_input.values()),
         "latency_p50_s": lat[n // 2], "latency_p95_s": lat[min(n - 1, int(n * .95))],
