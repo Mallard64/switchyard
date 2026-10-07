@@ -149,7 +149,8 @@ def main():
         for r in it["lines"]:
             if r["status"] == "confirmed" and (it["step"], r["line_index"]) not in [p[:2] for p in proven]:
                 proven.append((it["step"], r["line_index"], r["line"]))
-    for n, (step, i, line) in ([] if args.apply_edit else enumerate(proven, 1)):
+    engineer_edited = any(f.get("source", "").startswith("engineer") for f in fixes.values())
+    for n, (step, i, line) in ([] if args.apply_edit or engineer_edited else enumerate(proven, 1)):
         fid = f"fix{n}"
         if fixes.get(fid, {}).get("source", "").startswith("engineer"):
             continue  # an engineer edit replaced this fix; keep it

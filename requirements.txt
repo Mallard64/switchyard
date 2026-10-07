@@ -1,4 +1,5 @@
 spacy-llm==0.7.4
+spacy==3.8.16
 # POS tagger for cause ranking (optional; without it the old weights are used)
 en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
 # LLM judge for CHANGED items (optional; skipped without Anthropic credentials)

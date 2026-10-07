@@ -39,8 +39,8 @@ The frontend supports the full migration schema, flat NER comparison schema, and
 
 ### Live backend (samegrade)
 
-When the `samegrade` repo sits next to this folder (or `SAMEGRADE_DIR=/path/to/samegrade npm start`), the server also
-reads the migration backend. Nothing is written to it.
+This folder lives at `dashboard/` inside the samegrade repo, and the server reads the migration backend from the parent
+folder (override with `SAMEGRADE_DIR=/path/to/samegrade npm start`). Nothing is written to it.
 
 | Endpoint | What it returns |
 | --- | --- |
@@ -65,7 +65,7 @@ Initial candidate results and final post-repair results are distinct. Unknown co
 ## Project structure
 
 ```text
-switchyard-dashboard/
+dashboard/
 ├── index.html              Page shell
 ├── styles.css              Dashboard and full-report styles
 ├── app.js                  Data normalization, rendering and interactions

@@ -24,12 +24,40 @@ There are two variants per task:
 
 The inputs in `inputs/` are 20 texts per task, each with gold labels. About a third are flagged `tricky`: sarcasm, backhanded compliments, flavor vs. ingredient, a verb that looks like equipment ("Microwave the curry"). Those are where models tend to diverge.
 
-## Run it (on your machine; about $1.50–2.50 total, a few minutes)
+## Setup (any machine)
+
+Requirements: Python 3.11+ (tested on 3.11 and 3.14) and Node.js 18+ for the dashboard. No npm install is needed.
 
 ```bash
-cd spacy-llm-baseline
+git clone <this repo> samegrade && cd samegrade
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env
+```
+
+Fill in `.env` only if you will make new model calls.
+
+Everything in `results/` is a cache of real model calls, so the commands below replay **with no API key and no cost**:
+
+| Command | What it replays |
+|---|---|
+| `python demo_e2e.py --break u3` | Step-finder → line-finder → fix → PR on one planted break |
+| `python migrate_agent.py --candidate gpt-5.6-sol --candidate-config '{}'` | Real 4-step agent migration, gpt-4 → gpt-5.6-sol |
+| `python migrate_agent.py --candidate gpt-5.6-sol --candidate-config '{}' --tag hard` | The same on the 12 harder tickets |
+| `python export_bench.py` | Dashboard reports for every planted break |
+| `cd dashboard && npm start` | Dashboard at http://localhost:4173, reading `reports/` and `results/` |
+
+The NER migration (`migrate.py`) checks for a key even when fully cached. To replay it offline, give it a placeholder key and an unreachable API base so nothing can be billed:
+
+```bash
+OPENAI_API_KEY=offline python migrate.py --task ner --candidates gpt-5.6-sol gpt-5.6-terra --model-config '{}' --api-base http://127.0.0.1:9/v1
+```
+
+It prints a "Could not build the pipeline" connection error for the fix re-run, then reads the cached rows. For new runs, load your keys with `set -a; source .env; set +a` (plain `source` doesn't export them to subprocesses).
+
+## Record a baseline (about $1.50–2.50 total, a few minutes)
+
+```bash
 export OPENAI_API_KEY=sk-...
 
 python record_baseline.py --dry-run                                  # shows the exact prompts; no API calls

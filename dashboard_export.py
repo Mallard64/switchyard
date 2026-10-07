@@ -1,6 +1,6 @@
 """Export an agent migration report in the shape the Switchyard dashboard reads.
 
-The dashboard (../switchyard-dashboard) renders the full-migration fixture shape that migrate.py
+The dashboard (dashboard/) renders the full-migration fixture shape that migrate.py
 already writes for NER. Agent reports (migrate_agent.py, demo_e2e.py) use a different dict, so
 this writes reports/<dir>/dashboard.json in the fixture shape: baseline, candidates, chosen,
 causes, fix_attempts, final, pr, comparison. Agent outputs become lists ("category: x",

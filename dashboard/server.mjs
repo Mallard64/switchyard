@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { open, readFile, readdir, stat } from 'node:fs/promises';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-// The migration backend (samegrade). Reports and live run results are read from it; nothing is written.
-const SAMEGRADE = path.resolve(process.env.SAMEGRADE_DIR || path.join(here, '..', 'samegrade'));
+// The migration backend (samegrade, this folder's parent repo). Reports and live run results are read from it; nothing is written.
+const SAMEGRADE = path.resolve(process.env.SAMEGRADE_DIR || path.join(here, '..'));
 const files = {'/':'index.html','/index.html':'index.html','/app.js':'app.js','/styles.css':'styles.css','/results.json':'results.json'};
 const types = {html:'text/html; charset=utf-8',js:'text/javascript; charset=utf-8',css:'text/css; charset=utf-8',json:'application/json'};
 const port = Number(process.env.PORT || 4173);
