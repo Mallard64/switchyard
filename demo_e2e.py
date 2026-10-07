@@ -38,12 +38,13 @@ def main():
     ap.add_argument("--runs", type=int, default=1)
     ap.add_argument("--max-tickets", type=int, default=3, help="tickets to localize and ablate on")
     ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--tag", help="fresh run: new cache files and reports/demo_e2e_<break>_live (dashboard Run button)")
     args = ap.parse_args()
     b = next(x for s in BREAK_SETS.values() for x in s if x["id"] == args.brk)
-    out = HERE / "reports" / f"demo_e2e_{args.brk}"
+    out = HERE / "reports" / f"demo_e2e_{args.brk}{'_live' if args.tag else ''}"
     out.mkdir(parents=True, exist_ok=True)
     old = spec(args.model, {})
-    new = spec(args.model, {}, b["prompts"], f"{args.model}+{args.brk}")
+    new = spec(args.model, {}, b["prompts"], f"{args.model}+{args.brk}" + (f"-{args.tag}" if args.tag else ""))
     tickets = list(A.load_tickets())
     base_path = RESULTS / f"agent__{args.model}.jsonl"
     clean_src = {tid: {r["run"]: r for r in rs} for tid, rs in load(base_path).items()}
