@@ -365,9 +365,12 @@ def main():
         sys.exit("Set OPENAI_API_KEY first.")
     out = Path(args.out or HERE / "reports" / f"migration_{args.task}")
     out.mkdir(parents=True, exist_ok=True)
-    base_path = Path(args.baseline or results_path(args.results, args.task, args.variant, "gpt-4"))
-    if not n_ok_rows(base_path):
-        sys.exit(f"No baseline results at {base_path}. Run record_baseline.py first.")
+    base_main = Path(args.baseline or results_path(args.results, args.task, args.variant, "gpt-4"))
+    if not n_ok_rows(base_main):
+        sys.exit(f"No baseline results at {base_main}. Run record_baseline.py first.")
+    # Inputs added after the protected baseline was recorded live in a separate __ext file.
+    base_ext = results_path(args.results, args.task, args.variant, "gpt-4", "ext")
+    base_path = [base_main, base_ext] if not args.baseline and n_ok_rows(base_ext) else base_main
     components = editable_components(args.task)
     started = datetime.now(timezone.utc).isoformat()
 
@@ -575,7 +578,7 @@ def main():
 
     summary = {
         "task": args.task, "started": started, "finished": datetime.now(timezone.utc).isoformat(),
-        "baseline": {"file": base_path.name, **cand_rep["baseline"]},
+        "baseline": {"file": cand_rep["baseline_file"], **cand_rep["baseline"]},
         "candidates": sorted(candidates, key=lambda c: c.get("rank", 99)),
         "chosen": chosen, "model_config": args.model_config,
         "editable_components": components,

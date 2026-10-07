@@ -45,7 +45,8 @@ PRICES = {"gpt-4": (30.0, 60.0), "gpt-4-0613": (30.0, 60.0),
           "gpt-3.5-turbo": (0.5, 1.5), "gpt-3.5-turbo-0125": (0.5, 1.5),
           "gpt-5.6-sol": (5.0, 30.0), "gpt-5.6-terra": (2.5, 15.0)}  # rates from the user, Oct 6
 OPENAI_BASE = "https://api.openai.com/v1"
-PROTECTED = {f"{t}__{v}.jsonl" for t in ("ner", "textcat") for v in ("gpt-4__gpt-4", "shipped__gpt-3.5-turbo")}
+PROTECTED = {f"{t}__{v}.jsonl" for t in ("ner", "textcat")
+             for v in ("gpt-4__gpt-4", "shipped__gpt-3.5-turbo", "gpt-4__gpt-4__ext")}
 
 # ---------------------------------------------------------------------------------------
 # Capture layer: wrap requests.get/post (spacy-llm looks these up at call time).
