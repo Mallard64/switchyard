@@ -41,6 +41,13 @@ function normalizeNER(raw) {
 // ---- Agent report page: 1 initial migration · 2 problematic step · 3 fix(es) · 4 final result ----------------
 const decisionPart=v=>String(v??'').split(' — ')[0];
 const VERDICT={REGRESSED:['bad','broken'],CHANGED:['chg','changed'],IMPROVED:['ok','improved'],SAME:['ok','as before']};
+function stepOutputView(step,raw,fallback='—'){
+ if(!raw||!['classify','decide','tone'].includes(step))return `<p class="plain-output">${esc(fallback)}</p>`;
+ let value;try{value=JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1));}catch{return `<p class="plain-output">${esc(fallback)}</p>`;}
+ if(step==='classify')return `<dl class="json-view"><div><dt>category</dt><dd>${esc(value.category)}</dd></div><div><dt>order</dt><dd>${esc(value.order_id??'none')}</dd></div></dl>`;
+ if(step==='decide')return `<dl class="json-view"><div><dt>action</dt><dd>${esc(value.action)}</dd></div><div><dt>amount</dt><dd>${value.amount==null?'—':esc(`$${Number(value.amount).toFixed(2)}`)}</dd></div>${value.reason?`<div class="json-wide"><dt>reason</dt><dd>${esc(value.reason)}</dd></div>`:''}</dl>`;
+ return `<dl class="json-view"><div><dt>verdict</dt><dd>${esc(value.verdict)}</dd></div>${value.issues?.[0]?`<div class="json-wide"><dt>issue</dt><dd>${esc(value.issues[0])}</dd></div>`:''}${value.final_reply?`<div class="json-wide"><dt>rewritten reply</dt><dd>${esc(value.final_reply)}</dd></div>`:''}</dl>`;
+}
 function ticketMap(p,ti,key){
  return p.tickets.map((x,i)=>{const v=key==='fixed'?(x.fixed_verdict||x.verdict):x.verdict,[cls]=VERDICT[v]||['ok'];
   const healed=key==='fixed'&&x.verdict==='REGRESSED'&&x.fixed_verdict&&x.fixed_verdict!=='REGRESSED';
@@ -56,16 +63,13 @@ function stepSection(p,ti){
  const flow=steps.map((s,i)=>node(s,i)+(i<steps.length-1?'<span class="pipe-arrow" aria-hidden="true">→</span>':'')).join('');
  const differs=(s,row)=>['classify','decide'].includes(s)&&row[s]!=null&&t.old[s]!=null&&decisionPart(row[s])!==decisionPart(t.old[s]);
  const promptMark=(row,s)=>{const c=t.cells?.[row]?.[s];return c&&(c.added.length||c.removed.length)?'<span class="cell-mark" title="prompt differs from the old pipeline">prompt ±</span>':'';};
- const structured=(kind,step,fallback)=>{const raw=t.cells?.[kind]?.[step]?.output;if(!raw||!['classify','decide','tone'].includes(step))return esc(fallback??'—');let value;try{value=JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1));}catch{return esc(fallback??'—');}
-  if(step==='classify')return `<dl class="json-view"><div><dt>category</dt><dd>${esc(value.category)}</dd></div><div><dt>order</dt><dd>${esc(value.order_id??'none')}</dd></div></dl>`;
-  if(step==='decide')return `<dl class="json-view"><div><dt>action</dt><dd>${esc(value.action)}</dd></div><div><dt>amount</dt><dd>${value.amount==null?'—':esc(`$${Number(value.amount).toFixed(2)}`)}</dd></div>${value.reason?`<div class="json-wide"><dt>reason</dt><dd>${esc(value.reason)}</dd></div>`:''}</dl>`;
-  return `<dl class="json-view"><div><dt>verdict</dt><dd>${esc(value.verdict)}</dd></div>${value.issues?.[0]?`<div class="json-wide"><dt>issue</dt><dd>${esc(value.issues[0])}</dd></div>`:''}</dl>`;};
- const traceRow=(label,sub,row,out,ok,kind)=>row?`<div class="trace-row ${kind}"><div class="trace-label"><strong>${esc(label)}</strong><small>${esc(sub)}</small></div>${steps.map(s=>`<div class="trace-cell ${cause.has(s)?'cause-col':''} ${kind!=='old'&&differs(s,row)?'changed-cell':''}" tabindex="0" data-row="${kind}" data-step="${esc(s)}" aria-label="${esc(s)}, ${esc(label)}: show prompt, expected and actual answer">${promptMark(kind,s)}${structured(kind,s,row[s])}</div>`).join('')}<div class="trace-out ${ok?'ok':'bad'}"><span>${ok?'✓':'✗'} ${esc((out||[]).join?out.join(' · '):out)}</span>${!ok&&kind==='new'?failureNote:''}</div></div>`:'';
+ const traceRow=(label,sub,row,out,ok,kind)=>row?`<div class="trace-row ${kind}"><div class="trace-label"><strong>${esc(label)}</strong><small>${esc(sub)}</small></div>${steps.map(s=>`<div class="trace-cell ${cause.has(s)?'cause-col':''} ${kind!=='old'&&differs(s,row)?'changed-cell':''}" tabindex="0" data-row="${kind}" data-step="${esc(s)}" aria-label="${esc(s)}, ${esc(label)}: show prompt, expected and actual answer">${promptMark(kind,s)}${stepOutputView(s,t.cells?.[kind]?.[s]?.output,row[s])}</div>`).join('')}<div class="trace-out ${ok?'ok':'bad'}"><span>${ok?'✓':'✗'} ${esc((out||[]).join?out.join(' · '):out)}</span>${!ok&&kind==='new'?failureNote:''}</div></div>`:'';
  const head=`<div class="trace-row trace-head"><div></div>${steps.map(s=>`<div class="${cause.has(s)?'cause-col':''}">${esc(s)}</div>`).join('')}<div>final result</div></div>`;
  const verdict=r=>r.kind==='reference'?(r.ok?'✓ correct':'✗ wrong'):r.kind==='swap_back'?(r.ok?'✓ fixed':'✗ still wrong'):(r.ok?'✓ not reproduced':'✗ breaks again');
  const decisive=r=>(r.kind==='swap_back'&&r.ok)||(r.kind==='only_new'&&!r.ok);
  const exps=t.experiments||[];
- const proof=exps.length?`<div class="proof-row proof-head"><span></span><span class="proof-dots">${steps.map(s=>`<b class="${cause.has(s)?'cause':''}">${esc(s)}</b>`).join('')}</span><span></span></div>`+exps.map(r=>`<div class="proof-row ${r.kind} ${decisive(r)?'decisive':''}"><span class="proof-label">${esc(r.label)}</span><span class="proof-dots">${steps.map(s=>`<i class="${r.models[s]}" title="${esc(s)}: ${esc(r.models[s])}"></i>`).join('')}</span><span class="proof-result ${r.ok?'ok':'bad'}">${verdict(r)} <small>${esc(r.output)}</small></span></div>`).join(''):'';
+ const proofMeaning=r=>r.kind==='reference'?(r.ok?'Reference behavior passes all requirements':friendlyFailure||'New pipeline fails the expected behavior'):r.kind==='swap_back'?(r.ok?`Required behavior returns — ${[...cause].join(' + ')} is necessary`:'Failure remains — this swap does not repair it'):(r.ok?'Did not reproduce consistently with this step alone':`Failure returns — ${[...cause].join(' + ')} is sufficient`);
+ const proof=exps.length?`<div class="proof-row proof-head"><span></span><span class="proof-dots">${steps.map(s=>`<b class="${cause.has(s)?'cause':''}">${esc(s)}</b>`).join('')}</span><span></span></div>`+exps.map(r=>`<div class="proof-row ${r.kind} ${decisive(r)?'decisive':''}"><span class="proof-label">${esc(r.label)}</span><span class="proof-dots">${steps.map(s=>`<i class="${r.models[s]}" title="${esc(s)}: ${esc(r.models[s])}"></i>`).join('')}</span><span class="proof-result ${r.ok?'ok':'bad'}">${verdict(r)} <small>${esc(proofMeaning(r))}</small></span></div>`).join(''):'';
  const lines=(p.lines||[]).map(l=>`<li class="${l.proven?'proven':''}"><span>${esc(l.text)}</span><b>${l.proven?`removing it fixes ${esc(l.repaired)}`:`${esc(l.repaired)}`}</b></li>`).join('');
  const headline=cause.size?`The <span class="pipe-hl">${esc([...cause].join(' + '))}</span> step${cause.size>1?'s':''} broke.`:p.tickets.some(x=>x.verdict==='REGRESSED')?'Not yet localized.':'No step broke.';
  const plantedNote=planted.size?`<p class="pipe-planted">Planted in <b>${esc([...planted].join(' + '))}</b> · step-finder found <b>${esc([...cause].join(' + ')||'nothing')}</b>${[...planted].every(s=>cause.has(s))&&[...cause].every(s=>planted.has(s))?' <span class="ok-text">✓ match</span>':''}</p>`:'';
@@ -78,8 +82,8 @@ function stepSection(p,ti){
  <div class="trace">${head}${traceRow('Old pipeline',p.old_label,t.old,t.outputs.old,true,'old')}${traceRow('New pipeline',p.new_label,t.new,t.outputs.new,t.verdict!=='REGRESSED','new')}</div>
  ${t.verdict==='REGRESSED'&&failedInstruction?`<p class="trace-explanation"><b>The decision is still ${esc(t.outputs.new)}.</b> The regression is in the customer-facing reply: the new pipeline violated “${esc(failedInstruction)}”${cause.size?` after the <b>${esc([...cause].join(' + '))}</b> step rewrote it`:''}.</p>`:''}
  <p class="pipe-caption">Red cells: decisions that differ from the old pipeline. <span class="cell-mark">prompt ±</span>: that step’s prompt differs. ${t.first_divergence&&cause.size&&!cause.has(t.first_divergence)?`The first difference shows up in <b>${esc(t.first_divergence)}</b>, but the cause is <b>${esc([...cause].join(' + '))}</b>: the error travels downstream.`:''}</p>
- ${proof?`<h3 class="pipe-h">The proof: swap one step at a time</h3><div class="proof-legend"><span><i class="old"></i>old</span><span><i class="new"></i>new</span></div><div class="proof">${proof}</div>
- <p class="pipe-caption">A step is the cause when putting <b>only that step</b> back on the old version fixes the ticket, and running <b>only that step</b> on the new version breaks it again.</p>`:noProof}
+ ${proof?`<h3 class="pipe-h">The proof: swap one step at a time</h3>${cause.size?`<p class="proof-conclusion"><b>Conclusion:</b> swapping <b>${esc([...cause].join(' + '))}</b> back is the change that restores the required behavior. Swapping the other steps does not.</p>`:''}<div class="proof-legend"><span><i class="old"></i>old model at this step</span><span><i class="new"></i>new model at this step</span></div><div class="proof">${proof}</div>
+ <p class="pipe-caption">“Fixed” means this hybrid pipeline passes the full ticket requirement—not merely that its category and action match.</p>`:noProof}
  ${lines?`<h3 class="pipe-h">The line in the ${esc(lineStep)} prompt</h3><ol class="pipe-lines">${lines}</ol><p class="pipe-caption">Each line was removed on its own and the broken tickets re-run.</p>`:''}
  </section>`;
 }
@@ -100,8 +104,11 @@ function finalSection(m,ti){
  const bar=(n,cls)=>`<div class="fix-bar ${cls}"><i style="width:${f.total&&n?Math.max(2,100*n/f.total):0}%"></i></div>`;
  if(!chosen||f.after==null)return `<section class="viz-card pipe-card" id="pp-final" aria-label="Final result"><div class="viz-title"><div><p class="eyebrow">4 · FINAL RESULT</p><h2>${f.before?`${f.before} of ${f.total} tickets still broken`:'Nothing broke'}</h2></div></div><p class="pipe-caption">${f.before?'No verified fix to apply yet.':'The new pipeline matches the old one on every ticket.'}</p></section>`;
  const status=['accepted','edited'].includes(chosen.decision)?`Fix ${esc(chosen.id)} ${chosen.decision==='edited'?'accepted with edits':'accepted'}.`:`With ${esc(chosen.id)} applied (still awaiting an engineer’s review).`;
+ const broken=p.tickets.filter(t=>t.verdict==='REGRESSED'),timeline=broken.filter(t=>t.failures?.some(x=>x.check==='draft.states_timeline')).length,decision=broken.filter(t=>t.failures?.some(x=>x.kind==='accuracy')).length;
+ const repairs=[timeline&&`<div><strong>${timeline}</strong><span>customer replies now keep the payment method and 5–7 business-day timeline</span></div>`,decision&&`<div><strong>${decision}</strong><span>wrong final decision corrected</span></div>`].filter(Boolean).join('');
  return `<section class="viz-card pipe-card" id="pp-final" aria-label="Final result"><div class="viz-title"><div><p class="eyebrow">4 · FINAL RESULT</p><h2>${f.after===0?'Every ticket comes out as before.':`${f.after} of ${f.total} tickets still broken.`}</h2></div><span class="pill">${status}</span></div>
  <div class="pipe-fix"><div><span>New model, before the fix</span>${bar(f.before,'before')}<b>${esc(f.before)} of ${esc(f.total)} broken</b></div><div><span>New model + ${esc(chosen.id)}</span>${bar(f.after,'after')}<b>${esc(f.after)} of ${esc(f.total)} broken</b></div></div>
+ ${repairs?`<div class="repair-breakdown">${repairs}</div>`:''}
  <h3 class="pipe-h">Every ticket, after the fix <small>· click one</small></h3><div class="pipe-map">${ticketMap(p,ti,'fixed')}</div>
  <p class="pipe-legend"><span class="pipe-tile ok">t01</span> as before <span class="pipe-tile chg">t02</span> changed, not worse <span class="pipe-tile bad">t07</span> broken <span class="pipe-tile ok healed">t07<i>fixed</i></span> repaired by the fix</p></section>`;
 }
@@ -137,8 +144,8 @@ function showCellPop(el,p,ti){
  ${c.removed.length?`<ul class="pop-removed">${c.removed.map(l=>`<li><s>${esc(l)}</s> <small>removed</small></li>`).join('')}</ul>`:''}
  <details><summary>Input this step received</summary><pre>${esc(c.user)}</pre></details></section>
  <section><h4>Expected</h4><p class="pop-expected">${esc(exp)}</p>
- ${row!=='old'&&old?`<h4>Old pipeline answered</h4><pre>${esc(old.output)}</pre>`:''}
- <h4>Actual</h4><pre class="${ok===false?'bad':ok?'ok':''}">${esc(c.output)}</pre></section></div>
+ ${row!=='old'&&old?`<h4>Old pipeline answered</h4><div class="pop-output">${stepOutputView(step,old.output,old.output)}</div>`:''}
+ <h4>Actual</h4><div class="pop-output ${ok===false?'bad':ok?'ok':''}">${stepOutputView(step,c.output,c.output)}</div></section></div>
  <p class="pop-hint">${popPinned?'Pinned · Esc or click outside to close':'Click the cell to pin'}</p>`;
  cellPop.classList.add('open');
  const r=el.getBoundingClientRect(),w=Math.min(800,innerWidth-24),h=cellPop.offsetHeight;
