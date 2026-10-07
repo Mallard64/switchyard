@@ -106,7 +106,8 @@ async function reportRuns(id) {
   for (const name of await readdir(dir)) {
     if (!/^compare_.*\.json$/.test(name)) continue;
     let rep; try { rep = JSON.parse(await readFile(path.join(dir, name), 'utf8')); } catch { continue; }
-    const roles = [[rep.candidate_file, name.includes('fix') ? `fix re-run (${name.replace(/^compare_|\.json$/g, '')})` : 'candidate run']];
+    const repaired = name.includes('fix') || name.includes('edit');
+    const roles = [[rep.candidate_file, repaired ? `fix re-run (${name.replace(/^compare_|\.json$/g, '')})` : 'candidate run']];
     for (const f of String(rep.baseline_file || '').split(' + ')) roles.push([f.trim(), 'baseline run']);
     for (const [file, role] of roles) if (file && !seen.has(file)) seen.set(file, role);
   }

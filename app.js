@@ -48,12 +48,14 @@ function ticketMap(p,ti,key){
 }
 function stepSection(p,ti){
  const t=p.tickets[ti]||p.tickets[0];if(!t)return'';
+ const failed=t.failures?.[0],failedInstruction=String(failed?.instruction||'').replace(/^\.\.\.\s*/,'');
+ const failureNote=failedInstruction?`<small class="trace-reason">Failed requirement: ${esc(failedInstruction)}</small>`:'';
  const steps=p.steps,cause=new Set(p.causal_steps),planted=new Set(p.planted_steps||[]),lineStep=p.lines?.[0]?.step;
  const node=(s,i)=>`<div class="pipe-node ${cause.has(s)?'cause':''}"><span class="pipe-num">${i+1}</span><strong>${esc(s)}</strong><small>${esc(p.info[s])}</small><span class="pipe-tags">${planted.has(s)?'<em class="planted">planted here</em>':''}${cause.has(s)?'<em>found here</em>':''}</span></div>`;
  const flow=steps.map((s,i)=>node(s,i)+(i<steps.length-1?'<span class="pipe-arrow" aria-hidden="true">→</span>':'')).join('');
  const differs=(s,row)=>['classify','decide'].includes(s)&&row[s]!=null&&t.old[s]!=null&&decisionPart(row[s])!==decisionPart(t.old[s]);
  const promptMark=(row,s)=>{const c=t.cells?.[row]?.[s];return c&&(c.added.length||c.removed.length)?'<span class="cell-mark" title="prompt differs from the old pipeline">prompt ±</span>':'';};
- const traceRow=(label,sub,row,out,ok,kind)=>row?`<div class="trace-row ${kind}"><div class="trace-label"><strong>${esc(label)}</strong><small>${esc(sub)}</small></div>${steps.map(s=>`<div class="trace-cell ${cause.has(s)?'cause-col':''} ${kind!=='old'&&differs(s,row)?'changed-cell':''}" tabindex="0" data-row="${kind}" data-step="${esc(s)}" aria-label="${esc(s)}, ${esc(label)}: show prompt, expected and actual answer">${promptMark(kind,s)}${esc(row[s]??'—')}</div>`).join('')}<div class="trace-out ${ok?'ok':'bad'}">${ok?'✓':'✗'} ${esc((out||[]).join?out.join(' · '):out)}</div></div>`:'';
+ const traceRow=(label,sub,row,out,ok,kind)=>row?`<div class="trace-row ${kind}"><div class="trace-label"><strong>${esc(label)}</strong><small>${esc(sub)}</small></div>${steps.map(s=>`<div class="trace-cell ${cause.has(s)?'cause-col':''} ${kind!=='old'&&differs(s,row)?'changed-cell':''}" tabindex="0" data-row="${kind}" data-step="${esc(s)}" aria-label="${esc(s)}, ${esc(label)}: show prompt, expected and actual answer">${promptMark(kind,s)}${esc(row[s]??'—')}</div>`).join('')}<div class="trace-out ${ok?'ok':'bad'}">${ok?'✓':'✗'} ${esc((out||[]).join?out.join(' · '):out)}${!ok&&kind==='new'?failureNote:''}</div></div>`:'';
  const head=`<div class="trace-row trace-head"><div></div>${steps.map(s=>`<div class="${cause.has(s)?'cause-col':''}">${esc(s)}</div>`).join('')}<div>final result</div></div>`;
  const verdict=r=>r.kind==='reference'?(r.ok?'✓ correct':'✗ wrong'):r.kind==='swap_back'?(r.ok?'✓ fixed':'✗ still wrong'):(r.ok?'✓ not reproduced':'✗ breaks again');
  const decisive=r=>(r.kind==='swap_back'&&r.ok)||(r.kind==='only_new'&&!r.ok);
@@ -69,6 +71,7 @@ function stepSection(p,ti){
  <p class="pipe-input"><b>${esc(t.id)}</b> “${esc(t.text)}”</p>
  <h3 class="pipe-h">Step by step <small>· hover a cell for its prompt, expected and actual answer</small></h3>
  <div class="trace">${head}${traceRow('Old pipeline',p.old_label,t.old,t.outputs.old,true,'old')}${traceRow('New pipeline',p.new_label,t.new,t.outputs.new,t.verdict!=='REGRESSED','new')}</div>
+ ${t.verdict==='REGRESSED'&&failedInstruction?`<p class="trace-explanation"><b>The decision is still ${esc(t.outputs.new)}.</b> The regression is in the customer-facing reply: the new pipeline violated “${esc(failedInstruction)}”${cause.size?` after the <b>${esc([...cause].join(' + '))}</b> step rewrote it`:''}.</p>`:''}
  <p class="pipe-caption">Red cells: decisions that differ from the old pipeline. <span class="cell-mark">prompt ±</span>: that step’s prompt differs. ${t.first_divergence&&cause.size&&!cause.has(t.first_divergence)?`The first difference shows up in <b>${esc(t.first_divergence)}</b>, but the cause is <b>${esc([...cause].join(' + '))}</b>: the error travels downstream.`:''}</p>
  ${proof?`<h3 class="pipe-h">The proof: swap one step at a time</h3><div class="proof-legend"><span><i class="old"></i>old</span><span><i class="new"></i>new</span></div><div class="proof">${proof}</div>
  <p class="pipe-caption">A step is the cause when putting <b>only that step</b> back on the old version fixes the ticket, and running <b>only that step</b> on the new version breaks it again.</p>`:noProof}
