@@ -291,6 +291,24 @@ def patched_config_text(task, model, model_config, edits):
     return "\n".join(out).rstrip() + "\n"
 
 
+def run_judge(args, cand_rep, base_path, out, chosen):
+    """Judge CHANGED items on the chosen candidate (Anthropic; skipped without credentials). In place."""
+    import judge
+    n = sum(it["verdict"] == "CHANGED" for it in cand_rep["items"])
+    if args.no_judge or not n:
+        return {"skipped": "--no-judge" if args.no_judge else "no CHANGED items"}
+    if not judge.has_credentials():
+        print(f"      judge: skipped ({n} CHANGED items; no Anthropic credentials)")
+        return {"skipped": "no Anthropic credentials", "changed_items": n}
+    j = judge.Judge(args.judge_model or judge.DEFAULT_MODEL, cache_dir=args.results)
+    judge.judge_report(cand_rep, j, *judge.load_rows(cand_rep, args.results))
+    (out / f"compare_{chosen}.json").write_text(json.dumps(cand_rep, indent=2, default=list))
+    s = cand_rep["judge_summary"]
+    print(f"      judge ({s['model']}): {s['verdicts']}; noise floor {s['noise_floor']['verdicts']}; {j.calls} new calls")
+    return {k: v for k, v in s.items() if k != "noise_floor"} | {"noise_floor": {
+        k: v for k, v in s["noise_floor"].items() if k != "items"}}
+
+
 EDIT_FORMAT = {"fix": "fix id this edit replaces (optional)",
                "component": "description | label_definitions.<LABEL>", "new_text": "full new text of that component"}
 
@@ -321,8 +339,17 @@ def migration_view(task, chosen, cand_rep, shown_rep, causes, fixes, candidates,
         item = next((x for x in shown_rep["items"] if x["input_id"] == cs["input_id"]), None) if shown_rep else None
         cs["fixed_output"] = item["candidate"]["output"] if item else None
         cs["lines_tested"] = len(cs.get("lines", []))
+    judged = {"old_better": "judge: old output better (both orders)", "new_better": "judge: new output better (both orders)",
+              "tie": "judge: equivalent", "inconsistent": "judge: no consistent preference"}
     other = [f"{it['verdict'].lower()}: \"{it['text']}\": `gpt-4` {it['baseline']['output']} → `{chosen}` "
-             f"{it['candidate']['output']}" for it in cand_rep["items"] if it["verdict"] in ("CHANGED", "IMPROVED")]
+             f"{it['candidate']['output']}" + (f" ({judged[it['judge']['verdict']]})" if it.get("judge") else "")
+             for it in cand_rep["items"] if it["verdict"] in ("CHANGED", "IMPROVED")]
+    js = cand_rep.get("judge_summary") or {}
+    if js.get("noise_floor"):
+        nf = js["noise_floor"]
+        other.append(f"Judge `{js['model']}` (Anthropic, a different provider from the candidates) compared each CHANGED "
+                     f"output with the old one in both orders. On {nf['pairs']} pairs of the old model's own outputs it "
+                     f"preferred one side {nf['false_preference_rate']:.0%} of the time (its noise floor).")
     other += [f"Other candidate `{cd['model']}`: {cd['regressed']} regressed, {cd['accuracy_metric']} {cd['accuracy']:.2f}"
               for cd in candidates if cd.get("model") != chosen and "regressed" in cd]
     cfg = json.dumps(args.model_config if args.model_config is not None else {"temperature": 0.0})
@@ -368,6 +395,8 @@ def main():
     ap.add_argument("--out", default=None, help="default reports/migration_<task>")
     ap.add_argument("--api-base", help="send OpenAI calls here instead (testing/proxy)")
     ap.add_argument("--no-ablate", action="store_true", help="skip line-level ablation (heuristic causes only)")
+    ap.add_argument("--no-judge", action="store_true", help="skip the LLM judge for CHANGED items")
+    ap.add_argument("--judge-model", default=None, help="Claude model for the judge (default: judge.DEFAULT_MODEL)")
     ap.add_argument("--accept", action="append", default=[], help="engineer accepts this fix id (no re-run)")
     ap.add_argument("--reject", action="append", default=[], help="engineer rejects this fix id (no re-run)")
     ap.add_argument("--apply-edit", help="JSON {fix?, component, new_text}: re-run the full suite with the "
@@ -413,6 +442,7 @@ def main():
     print(f"[2/5] Ranked: " + ", ".join(f"{m} ({reports[m]['verdict_counts']['REGRESSED']} regressed, "
                                         f"acc {reports[m]['candidate']['accuracy']:.2f})" for m in ranked))
     print(f"      chosen: {chosen}")
+    judge_summary = run_judge(args, cand_rep, base_path, out, chosen)
 
     # 3. cause ------------------------------------------------------------------------------
     causes = find_causes(cand_rep, components)
@@ -595,6 +625,7 @@ def main():
         "chosen": chosen, "model_config": args.model_config,
         "editable_components": components,
         "causes": causes, "fix_attempts": attempts, "fixes": fix_list, "edit_format": EDIT_FORMAT,
+        "judge": judge_summary,
         "pr_view": {k: view[k] for k in ("title", "why", "model_change", "evidence", "other_differences", "limits")},
         "final": {"ready_to_merge": ready, "model": chosen, "prompt_edits": edits,
                   "prompt_edit": edits[0] if edits else None,

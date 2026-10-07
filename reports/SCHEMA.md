@@ -19,6 +19,7 @@ candidates `gpt-5.6-sol` / `gpt-5.6-terra`, chosen `gpt-5.6-sol`).
 | `fix_attempts` | array | one entry per fixer attempt, in order (including failed ones) |
 | `fixes` | array | **the review list**: one entry per fix that passed full-suite verification, plus engineer edits; each with its own decision. See `fixes[]` |
 | `edit_format` | object | the JSON shape `--apply-edit` expects |
+| `judge` | object | LLM-judge summary for CHANGED items (see **`judge`**), or `{"skipped": reason}` |
 | `pr_view` | object | the PR's prose pieces (`title`, `why`, `model_change`, `evidence.table`, `evidence.noise_floor`, `other_differences`, `limits`), for rendering the report page in PR order |
 | `final` | object | the state proposed for merge: the model swap plus every *accepted or edited* fix |
 | `pr` | object | the generated PR draft (always written; the diff contains the model swap plus accepted fixes only) |
@@ -88,6 +89,23 @@ decision applies it.**
 Commands (no re-run for accept/reject):
 `migrate.py ... --accept fix1` · `--reject fix1` · `--apply-edit edit.json` (full re-run, re-verify, new PR).
 An edit that still regresses stays `"pending"` with its failing `verification` shown.
+
+## `judge`
+
+A second opinion on CHANGED items (output differs from the old model but no check or gold label says it's
+worse), from Claude (Anthropic): a different provider than the OpenAI candidates. Written by `judge.py`.
+
+| Field | Meaning |
+|---|---|
+| `skipped` | present instead of everything below when the judge didn't run: `"no Anthropic credentials"`, `"no CHANGED items"` or `"--no-judge"` |
+| `model`, `provider` | judge model, e.g. `claude-opus-5-5`, `"anthropic"` |
+| `changed_items` | how many CHANGED items were judged |
+| `verdicts` | counts of `old_better` / `new_better` / `tie` / `inconsistent`. Each item is judged in **both orders**; a preference counts only if it survives the swap, otherwise `inconsistent` (position bias) |
+| `noise_floor` | `{pairs, verdicts, false_preference_rate}` from judging the **old model against itself** (two of its own runs; identical outputs when its runs never differ). Show this next to `verdicts`: a judge that "prefers" one side of an old-vs-old pair 20% of the time can't make a 1-in-5 difference meaningful |
+
+Each judged item in `comparison.items[]` (and in `compare_<model>.json`) also gets
+`judge: {model, verdict, order_old_first, order_new_first, reasons}`. The PR's "Other differences"
+shows the verdict per item. **A judge verdict never turns an item into REGRESSED**; it is advisory.
 
 ## `fix_attempts[]`
 
