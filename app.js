@@ -38,16 +38,19 @@ function normalizeNER(raw) {
  };
  return normalized;
 }
-// ---- Inside the pipeline: the 4 steps, every tested ticket, one ticket's journey, the proof, the line, the fix ----
+// ---- Agent report page: 1 initial migration · 2 problematic step · 3 fix(es) · 4 final result ----------------
 const decisionPart=v=>String(v??'').split(' — ')[0];
 const VERDICT={REGRESSED:['bad','broken'],CHANGED:['chg','changed'],IMPROVED:['ok','improved'],SAME:['ok','as before']};
-function pipelineSection(p,ti){
+function ticketMap(p,ti,key){
+ return p.tickets.map((x,i)=>{const v=key==='fixed'?(x.fixed_verdict||x.verdict):x.verdict,[cls]=VERDICT[v]||['ok'];
+  const healed=key==='fixed'&&x.verdict==='REGRESSED'&&x.fixed_verdict&&x.fixed_verdict!=='REGRESSED';
+  return `<button class="pipe-tile ${cls} ${healed?'healed':''} ${i===ti?'on':''}" data-ti="${i}" title="${esc(x.id)}: ${esc(VERDICT[v]?.[1]||v)}">${esc(x.id)}${healed?'<i>fixed</i>':''}</button>`;}).join('');
+}
+function stepSection(p,ti){
  const t=p.tickets[ti]||p.tickets[0];if(!t)return'';
  const steps=p.steps,cause=new Set(p.causal_steps),planted=new Set(p.planted_steps||[]),lineStep=p.lines?.[0]?.step;
- const broken=p.tickets.filter(x=>x.verdict==='REGRESSED').length;
  const node=(s,i)=>`<div class="pipe-node ${cause.has(s)?'cause':''}"><span class="pipe-num">${i+1}</span><strong>${esc(s)}</strong><small>${esc(p.info[s])}</small><span class="pipe-tags">${planted.has(s)?'<em class="planted">planted here</em>':''}${cause.has(s)?'<em>found here</em>':''}</span></div>`;
  const flow=steps.map((s,i)=>node(s,i)+(i<steps.length-1?'<span class="pipe-arrow" aria-hidden="true">→</span>':'')).join('');
- const map=p.tickets.map((x,i)=>{const [cls]=VERDICT[x.verdict]||['ok'];return `<button class="pipe-tile ${cls} ${i===ti?'on':''}" data-ti="${i}" title="${esc(x.id)}: ${esc(VERDICT[x.verdict]?.[1]||x.verdict)}${x.fixed_verdict?` · with fix: ${esc(VERDICT[x.fixed_verdict]?.[1]||x.fixed_verdict)}`:''}">${esc(x.id)}${x.verdict==='REGRESSED'&&x.fixed_verdict&&x.fixed_verdict!=='REGRESSED'?'<i>fixed</i>':''}</button>`;}).join('');
  const differs=(s,row)=>['classify','decide'].includes(s)&&row[s]!=null&&t.old[s]!=null&&decisionPart(row[s])!==decisionPart(t.old[s]);
  const promptMark=(row,s)=>{const c=t.cells?.[row]?.[s];return c&&(c.added.length||c.removed.length)?'<span class="cell-mark" title="prompt differs from the old pipeline">prompt ±</span>':'';};
  const traceRow=(label,sub,row,out,ok,kind)=>row?`<div class="trace-row ${kind}"><div class="trace-label"><strong>${esc(label)}</strong><small>${esc(sub)}</small></div>${steps.map(s=>`<div class="trace-cell ${cause.has(s)?'cause-col':''} ${kind!=='old'&&differs(s,row)?'changed-cell':''}" tabindex="0" data-row="${kind}" data-step="${esc(s)}" aria-label="${esc(s)}, ${esc(label)}: show prompt, expected and actual answer">${promptMark(kind,s)}${esc(row[s]??'—')}</div>`).join('')}<div class="trace-out ${ok?'ok':'bad'}">${ok?'✓':'✗'} ${esc((out||[]).join?out.join(' · '):out)}</div></div>`:'';
@@ -55,30 +58,53 @@ function pipelineSection(p,ti){
  const verdict=r=>r.kind==='reference'?(r.ok?'✓ correct':'✗ wrong'):r.kind==='swap_back'?(r.ok?'✓ fixed':'✗ still wrong'):(r.ok?'✓ not reproduced':'✗ breaks again');
  const decisive=r=>(r.kind==='swap_back'&&r.ok)||(r.kind==='only_new'&&!r.ok);
  const exps=t.experiments||[];
- const proofHead=`<div class="proof-row proof-head"><span></span><span class="proof-dots">${steps.map(s=>`<b class="${cause.has(s)?'cause':''}">${esc(s)}</b>`).join('')}</span><span></span></div>`;
- const proof=exps.length?proofHead+exps.map(r=>`<div class="proof-row ${r.kind} ${decisive(r)?'decisive':''}"><span class="proof-label">${esc(r.label)}</span><span class="proof-dots">${steps.map(s=>`<i class="${r.models[s]}" title="${esc(s)}: ${esc(r.models[s])}"></i>`).join('')}</span><span class="proof-result ${r.ok?'ok':'bad'}">${verdict(r)} <small>${esc(r.output)}</small></span></div>`).join(''):'';
+ const proof=exps.length?`<div class="proof-row proof-head"><span></span><span class="proof-dots">${steps.map(s=>`<b class="${cause.has(s)?'cause':''}">${esc(s)}</b>`).join('')}</span><span></span></div>`+exps.map(r=>`<div class="proof-row ${r.kind} ${decisive(r)?'decisive':''}"><span class="proof-label">${esc(r.label)}</span><span class="proof-dots">${steps.map(s=>`<i class="${r.models[s]}" title="${esc(s)}: ${esc(r.models[s])}"></i>`).join('')}</span><span class="proof-result ${r.ok?'ok':'bad'}">${verdict(r)} <small>${esc(r.output)}</small></span></div>`).join(''):'';
  const lines=(p.lines||[]).map(l=>`<li class="${l.proven?'proven':''}"><span>${esc(l.text)}</span><b>${l.proven?`removing it fixes ${esc(l.repaired)}`:`${esc(l.repaired)}`}</b></li>`).join('');
- const f=p.fix,bar=(n,cls)=>`<div class="fix-bar ${cls}"><i style="width:${f.total&&n?Math.max(2,100*n/f.total):0}%"></i></div>`;
- const headline=broken?(cause.size?`The new pipeline broke the <span class="pipe-hl">${esc([...cause].join(' + '))}</span> step${cause.size>1?'s':''}.`:`${broken} ticket${broken===1?'':'s'} broke; not yet localized.`):'Nothing broke: every ticket came out as before.';
+ const headline=cause.size?`The <span class="pipe-hl">${esc([...cause].join(' + '))}</span> step${cause.size>1?'s':''} broke.`:p.tickets.some(x=>x.verdict==='REGRESSED')?'Not yet localized.':'No step broke.';
  const plantedNote=planted.size?`<p class="pipe-planted">Planted in <b>${esc([...planted].join(' + '))}</b> · step-finder found <b>${esc([...cause].join(' + ')||'nothing')}</b>${[...planted].every(s=>cause.has(s))&&[...cause].every(s=>planted.has(s))?' <span class="ok-text">✓ match</span>':''}</p>`:'';
- const noProof=t.verdict==='REGRESSED'?'<p class="pipe-caption">This broken ticket wasn’t among the ones localized (a sample per break), so there are no swap experiments for it.</p>':`<p class="pipe-caption">This ticket ${t.verdict==='SAME'?'came out the same on both pipelines':`is ${esc(VERDICT[t.verdict]?.[1]||t.verdict)}`}, so there was nothing to localize. Hover any cell to see what each step got and said.</p>`;
- return `<section class="viz-card pipe-card" id="pipeline-card" aria-label="Inside the pipeline">
- <div class="viz-title"><div><p class="eyebrow">INSIDE THE PIPELINE</p><h2>${headline}</h2></div><span class="pill">${broken} of ${p.tickets.length} tickets broken</span></div>
- ${plantedNote}
+ const noProof=t.verdict==='REGRESSED'?'<p class="pipe-caption">This broken ticket wasn’t among the ones localized, so there are no swap experiments for it.</p>':`<p class="pipe-caption">${esc(t.id)} ${t.verdict==='SAME'?'came out the same on both pipelines':`is ${esc(VERDICT[t.verdict]?.[1]||t.verdict)}`}: nothing to localize. Pick a red ticket above to see the proof.</p>`;
+ return `<section class="viz-card pipe-card" id="pp-step" aria-label="Problematic step">
+ <div class="viz-title"><div><p class="eyebrow">2 · THE PROBLEMATIC STEP</p><h2>${headline}</h2></div></div>${plantedNote}
  <div class="pipe-flow">${flow}</div>
- <h3 class="pipe-h">Every ticket tested <small>· click one</small></h3>
- <div class="pipe-map" role="tablist" aria-label="Tickets">${map}</div>
- <p class="pipe-legend"><span class="pipe-tile ok">t01</span> as before <span class="pipe-tile chg">t02</span> changed, not worse <span class="pipe-tile bad">t07</span> broken${p.fix.after!=null?' · <i class="fixed-key">fixed</i> = repaired by the proposed fix':''}</p>
  <p class="pipe-input"><b>${esc(t.id)}</b> “${esc(t.text)}”</p>
- <h3 class="pipe-h">One ticket, step by step <small>· hover a cell for its prompt, expected and actual answer</small></h3>
- <div class="trace">${head}${traceRow('Old pipeline',p.old_label,t.old,t.outputs.old,true,'old')}${traceRow('New pipeline',p.new_label,t.new,t.outputs.new,t.verdict!=='REGRESSED','new')}${t.fixed?traceRow('New + fix',f.change||'',t.fixed,t.outputs.fixed||[],t.fixed_verdict!=='REGRESSED','fixed'):''}</div>
- <p class="pipe-caption">Red cells: decisions that differ from the old pipeline. <span class="cell-mark">prompt ±</span>: that step’s prompt differs from the old pipeline’s. ${t.first_divergence&&cause.size&&!cause.has(t.first_divergence)?`The first difference shows up in <b>${esc(t.first_divergence)}</b>, but the cause is <b>${esc([...cause].join(' + '))}</b>: the error travels downstream.`:''}</p>
+ <h3 class="pipe-h">Step by step <small>· hover a cell for its prompt, expected and actual answer</small></h3>
+ <div class="trace">${head}${traceRow('Old pipeline',p.old_label,t.old,t.outputs.old,true,'old')}${traceRow('New pipeline',p.new_label,t.new,t.outputs.new,t.verdict!=='REGRESSED','new')}</div>
+ <p class="pipe-caption">Red cells: decisions that differ from the old pipeline. <span class="cell-mark">prompt ±</span>: that step’s prompt differs. ${t.first_divergence&&cause.size&&!cause.has(t.first_divergence)?`The first difference shows up in <b>${esc(t.first_divergence)}</b>, but the cause is <b>${esc([...cause].join(' + '))}</b>: the error travels downstream.`:''}</p>
  ${proof?`<h3 class="pipe-h">The proof: swap one step at a time</h3><div class="proof-legend"><span><i class="old"></i>old</span><span><i class="new"></i>new</span></div><div class="proof">${proof}</div>
  <p class="pipe-caption">A step is the cause when putting <b>only that step</b> back on the old version fixes the ticket, and running <b>only that step</b> on the new version breaks it again.</p>`:noProof}
- ${lines?`<h3 class="pipe-h">The line: ${esc(lineStep)} prompt</h3><ol class="pipe-lines">${lines}</ol><p class="pipe-caption">Each line was removed on its own and the broken tickets re-run.</p>`:''}
- ${f.after!=null?`<h3 class="pipe-h">The fix</h3><div class="pipe-fix"><div><span>Before</span>${bar(f.before,'before')}<b>${esc(f.before)} of ${esc(f.total)} broken</b></div><div><span>After: ${esc(f.change)}</span>${bar(f.after,'after')}<b>${esc(f.after)} of ${esc(f.total)} broken</b></div><p>${f.decision==='pending'?'Proposed fix, awaiting an engineer’s review.':`Fix ${esc(f.decision)}.`}</p></div>`:''}
+ ${lines?`<h3 class="pipe-h">The line in the ${esc(lineStep)} prompt</h3><ol class="pipe-lines">${lines}</ol><p class="pipe-caption">Each line was removed on its own and the broken tickets re-run.</p>`:''}
  </section>`;
 }
+function fixSection(m){
+ const fixes=m.fixes||[];
+ const badge=d=>({pending:'awaiting review',accepted:'accepted',edited:'accepted with edits',rejected:'rejected'}[d]||d);
+ const body=fixes.length?fixes.map(f=>{const v=f.verification,old=String(f.old_text||'').split('\n'),neu=f.new_text?String(f.new_text).split('\n'):[];
+  return `<div class="fix-card ${esc(f.decision)}"><div class="fix-head"><strong>${esc(f.id)}</strong><span>${esc(f.summary)}</span><em class="fix-status ${esc(f.decision)}">${esc(badge(f.decision))}</em></div>
+  <div class="diff">${old.map(l=>`<div class="removed">- ${esc(l)}</div>`).join('')}${neu.map(l=>`<div class="added">+ ${esc(l)}</div>`).join('')}</div>
+  <p class="fix-verify">Re-ran all ${esc(v.inputs)} tickets with this change: <b>${esc(v.verdict_counts.REGRESSED)} broken</b>${v.newly_regressed?.length?` · newly broken: ${esc(v.newly_regressed.join(', '))}`:''} ${v.passes?'<span class="ok-text">✓ verified</span>':'<span class="bad-text">✗ not verified</span>'}</p>
+  ${f.caution?`<p class="pipe-caption">${esc(f.caution)}</p>`:''}</div>`;}).join('')
+  :`<p class="pipe-caption">${m.pipeline.planted_steps?'This report comes from the step-finder benchmark, which measures localization only, so no fix was generated.':'No fix proposed.'}</p>`;
+ return `<section class="viz-card pipe-card" id="pp-fix" aria-label="Fixes"><div class="viz-title"><div><p class="eyebrow">3 · FIX${fixes.length===1?'':'ES'}</p><h2>${fixes.length?`${fixes.length} proposed change${fixes.length===1?'':'s'}, each verified on every ticket`:'No fix yet'}</h2></div></div>${body}</section>`;
+}
+function finalSection(m,ti){
+ const p=m.pipeline,f=p.fix,fixes=m.fixes||[];
+ const chosen=fixes.find(x=>['accepted','edited'].includes(x.decision))||fixes.find(x=>x.verification?.passes)||fixes[0];
+ const bar=(n,cls)=>`<div class="fix-bar ${cls}"><i style="width:${f.total&&n?Math.max(2,100*n/f.total):0}%"></i></div>`;
+ if(!chosen||f.after==null)return `<section class="viz-card pipe-card" id="pp-final" aria-label="Final result"><div class="viz-title"><div><p class="eyebrow">4 · FINAL RESULT</p><h2>${f.before?`${f.before} of ${f.total} tickets still broken`:'Nothing broke'}</h2></div></div><p class="pipe-caption">${f.before?'No verified fix to apply yet.':'The new pipeline matches the old one on every ticket.'}</p></section>`;
+ const status=['accepted','edited'].includes(chosen.decision)?`Fix ${esc(chosen.id)} ${chosen.decision==='edited'?'accepted with edits':'accepted'}.`:`With ${esc(chosen.id)} applied (still awaiting an engineer’s review).`;
+ return `<section class="viz-card pipe-card" id="pp-final" aria-label="Final result"><div class="viz-title"><div><p class="eyebrow">4 · FINAL RESULT</p><h2>${f.after===0?'Every ticket comes out as before.':`${f.after} of ${f.total} tickets still broken.`}</h2></div><span class="pill">${status}</span></div>
+ <div class="pipe-fix"><div><span>New model, before the fix</span>${bar(f.before,'before')}<b>${esc(f.before)} of ${esc(f.total)} broken</b></div><div><span>New model + ${esc(chosen.id)}</span>${bar(f.after,'after')}<b>${esc(f.after)} of ${esc(f.total)} broken</b></div></div>
+ <h3 class="pipe-h">Every ticket, after the fix <small>· click one</small></h3><div class="pipe-map">${ticketMap(p,ti,'fixed')}</div>
+ <p class="pipe-legend"><span class="pipe-tile ok">t01</span> as before <span class="pipe-tile chg">t02</span> changed, not worse <span class="pipe-tile bad">t07</span> broken <span class="pipe-tile ok healed">t07<i>fixed</i></span> repaired by the fix</p></section>`;
+}
+function initialSection(m,ti){
+ const p=m.pipeline,n=p.tickets.filter(x=>x.verdict==='REGRESSED').length;
+ return `<section class="viz-card pipe-card" id="pp-initial" aria-label="Initial migration"><div class="viz-title"><div><p class="eyebrow">1 · INITIAL MIGRATION</p><h2>${esc(p.old_label)} → ${esc(p.new_label)}: ${n?`${n} of ${p.tickets.length} tickets broke`:'nothing broke'}</h2></div></div>
+ <div class="pp-slot"></div>
+ <h3 class="pipe-h">Every ticket on the new model, before any fix <small>· click one to inspect it below</small></h3><div class="pipe-map">${ticketMap(p,ti,'new')}</div>
+ <p class="pipe-legend"><span class="pipe-tile ok">t01</span> as before <span class="pipe-tile chg">t02</span> changed, not worse <span class="pipe-tile bad">t07</span> broken</p></section>`;
+}
+function pipelinePage(m,ti){return initialSection(m,ti)+stepSection(m.pipeline,ti)+fixSection(m)+finalSection(m,ti);}
 // Hover / focus a trace cell: the prompt that step got, what it should have answered, what it answered.
 const cellPop=Object.assign(document.createElement('div'),{id:'cell-pop',role:'dialog'});cellPop.setAttribute('aria-label','Step detail');
 document.body.append(cellPop);
@@ -118,17 +144,21 @@ cellPop.addEventListener('mouseleave',hideCellPop);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){popPinned=false;cellPop.classList.remove('open');}});
 document.addEventListener('click',e=>{if(popPinned&&!cellPop.contains(e.target)&&!e.target.closest('.trace-cell')){popPinned=false;cellPop.classList.remove('open');}});
 addEventListener('scroll',()=>{if(!popPinned)cellPop.classList.remove('open');},{passive:true});
-function installPipeline(p){
- const card=document.querySelector('#pipeline-card');if(!card)return;
- const ti=Number(card.querySelector('.pipe-tile.on')?.dataset.ti||0);
- card.querySelectorAll('.trace-cell[data-row]').forEach(el=>{
+function installPipeline(m){
+ const p=m.pipeline,step=document.querySelector('#pp-step');if(!step)return;
+ const ti=Number(document.querySelector('#pp-initial .pipe-tile.on')?.dataset.ti||0);
+ step.querySelectorAll('.trace-cell[data-row]').forEach(el=>{
   el.addEventListener('mouseenter',()=>showCellPop(el,p,ti));el.addEventListener('mouseleave',hideCellPop);
   el.addEventListener('focus',()=>showCellPop(el,p,ti));el.addEventListener('blur',hideCellPop);
   el.addEventListener('click',()=>{popPinned=!popPinned;showCellPop(el,p,ti);});
  });
- card.addEventListener('click',e=>{const b=e.target.closest('.pipe-tile[data-ti]');if(!b)return;popPinned=false;cellPop.classList.remove('open');
-  const fresh=document.createElement('div');fresh.innerHTML=pipelineSection(p,Number(b.dataset.ti));
-  const next=fresh.firstElementChild;card.replaceWith(next);installPipeline(p);next.querySelector('.pipe-tile.on')?.focus({preventScroll:true});});
+}
+function selectTicket(m,ti){
+ popPinned=false;cellPop.classList.remove('open');
+ const holder=document.createElement('div');holder.innerHTML=stepSection(m.pipeline,ti);
+ document.querySelector('#pp-step').replaceWith(holder.firstElementChild);
+ document.querySelectorAll('#pp-initial .pipe-tile,#pp-final .pipe-tile').forEach(b=>b.classList.toggle('on',Number(b.dataset.ti)===ti));
+ installPipeline(m);
 }
 function renderVisualDashboard() {
  motionCleanup();
@@ -143,7 +173,7 @@ function renderVisualDashboard() {
  const cell=(value,format,max,kind)=>`<div class="table-metric ${numeric(value)?'':'missing'}"><strong>${numeric(value)?format(value):'—'}</strong><span class="mini-track ${kind}" aria-hidden="true">${numeric(value)?`<i style="width:${max>0?Math.min(100,Math.max(0,value/max*100)):0}%"></i>`:''}</span>${numeric(value)?'':'<small>Not available</small>'}</div>`;
  app.innerHTML=`<div class="dashboard-heading"><div><p class="eyebrow">MIGRATION OVERVIEW / ${esc(m.pr?.target_repo||m.task)}</p><h1>New model. Same expectations.</h1><p>Find what changed. See what’s ready to ship.</p></div><div class="heading-actions"><span class="ready-badge"><i></i>${m.final.ready_to_merge?'Ready for review':'Needs review'}</span><button class="text-button" id="full-report">Full report ↗</button></div></div>
  <div class="migration-route"><span class="route-caption">MODEL UPGRADE</span><strong>${esc(m.baseline.model)}</strong><span class="route-line"><i></i>→</span><strong>${esc(m.chosen)}</strong><span class="route-tag">Prompt repaired</span><span class="route-note">Recorded evaluation</span></div>
- <div class="visual-grid">${m.pipeline?pipelineSection(m.pipeline,0):''}<section class="viz-card model-chart comparison-table-card"><div class="viz-title"><div><p class="eyebrow">MODEL COMPARISON</p><h2>The trade-offs, side by side.</h2></div><span class="table-stage">Before prompt repair</span></div><div class="comparison-scroll"><table class="comparison-table"><caption class="sr-only">Baseline and candidate metrics before prompt repair. Missing values retain their column positions.</caption><thead><tr><th scope="col">Model<span>Baseline & candidates</span></th><th scope="col">Quality <em>↑</em><span>Entity F1 · higher is better</span></th><th scope="col">Cost <em>↓</em><span>USD / 1,000 calls</span></th><th scope="col">Speed <em>↓</em><span>Median response · seconds</span></th><th scope="col">Tail latency <em>↓</em><span>p95 · seconds</span></th><th scope="col">Regressions <em>↓</em><span>Inputs worse than baseline</span></th></tr></thead><tbody>${rows.map(r=>`<tr class="${r.isBaseline?'baseline-row':r.model===selectedModel?'focused-row':''}"><th scope="row">${r.isBaseline?`<strong>${esc(r.model)}</strong>`:`<button class="model-select" data-model="${esc(r.model)}" aria-pressed="${r.model===selectedModel}">${esc(r.model)}</button>`}<span class="model-tag ${r.model===m.chosen?'chosen-tag':''}">${r.isBaseline?'Current model':r.model===m.chosen?'Selected for migration':'Alternative'}</span></th><td>${cell(r.accuracy,percent,1,'quality-bar')}</td><td>${cell(r.cost_per_1k_calls_usd,money,maximum('cost_per_1k_calls_usd'),'cost-bar')}</td><td>${cell(r.latency_p50_s,v=>v.toFixed(3),maximum('latency_p50_s'),'speed-bar')}</td><td>${cell(r.latency_p95_s,v=>v.toFixed(3),maximum('latency_p95_s'),'tail-bar')}</td><td>${r.isBaseline?'<span class="baseline-reference">Reference</span>':numeric(r.regressed)?`<span class="regression-pill ${r.regressed?'has-regressions':''}">${esc(r.regressed)} ${r.regressed===1?'input':'inputs'}</span>`:'<span class="baseline-reference">—<br>Not available</span>'}</td></tr>`).join('')}</tbody></table></div><div class="comparison-foot"><span>Bars share a scale within each column. Shorter cost and latency bars are better.</span><span>— Not supplied · space reserved</span></div></section>
+ <div class="visual-grid">${m.pipeline?pipelinePage(m,0):''}<section class="viz-card model-chart comparison-table-card"><div class="viz-title"><div><p class="eyebrow">MODEL COMPARISON</p><h2>The trade-offs, side by side.</h2></div><span class="table-stage">Before prompt repair</span></div><div class="comparison-scroll"><table class="comparison-table"><caption class="sr-only">Baseline and candidate metrics before prompt repair. Missing values retain their column positions.</caption><thead><tr><th scope="col">Model<span>Baseline & candidates</span></th><th scope="col">Quality <em>↑</em><span>${m.task==='agent'?'Gold score (category, order ID, action, reply)':'Entity F1'} · higher is better</span></th><th scope="col">Cost <em>↓</em><span>USD / 1,000 calls</span></th><th scope="col">Speed <em>↓</em><span>Median response · seconds</span></th><th scope="col">Tail latency <em>↓</em><span>p95 · seconds</span></th><th scope="col">Regressions <em>↓</em><span>Inputs worse than baseline</span></th></tr></thead><tbody>${rows.map(r=>`<tr class="${r.isBaseline?'baseline-row':r.model===selectedModel?'focused-row':''}"><th scope="row">${r.isBaseline?`<strong>${esc(r.model)}</strong>`:`<button class="model-select" data-model="${esc(r.model)}" aria-pressed="${r.model===selectedModel}">${esc(r.model)}</button>`}<span class="model-tag ${r.model===m.chosen?'chosen-tag':''}">${r.isBaseline?'Current model':r.model===m.chosen?'Selected for migration':'Alternative'}</span></th><td>${cell(r.accuracy,percent,1,'quality-bar')}</td><td>${cell(r.cost_per_1k_calls_usd,money,maximum('cost_per_1k_calls_usd'),'cost-bar')}</td><td>${cell(r.latency_p50_s,v=>v.toFixed(3),maximum('latency_p50_s'),'speed-bar')}</td><td>${cell(r.latency_p95_s,v=>v.toFixed(3),maximum('latency_p95_s'),'tail-bar')}</td><td>${r.isBaseline?'<span class="baseline-reference">Reference</span>':numeric(r.regressed)?`<span class="regression-pill ${r.regressed?'has-regressions':''}">${esc(r.regressed)} ${r.regressed===1?'input':'inputs'}</span>`:'<span class="baseline-reference">—<br>Not available</span>'}</td></tr>`).join('')}</tbody></table></div><div class="comparison-foot"><span>Bars share a scale within each column. Shorter cost and latency bars are better.</span><span>— Not supplied · space reserved</span></div></section>
  <section class="viz-card repair-chart"><div class="viz-title"><div><p class="eyebrow">REPAIR IMPACT</p><h2>${m.final.verdict_counts.REGRESSED===0?(initial?.regressed?'One fix. The regression is gone.':'No regressions to fix.'):m.fix_attempts?.length?'A fix is proposed. Awaiting review.':'Regressions remain.'}</h2></div><span class="repair-symbol">↗</span></div><div class="impact-number"><span>${esc(initial?.regressed??'—')}</span><span class="impact-arrow">→</span><strong>${esc(m.final.verdict_counts.REGRESSED)}</strong><small>regressions</small></div><div class="stack-row"><span>Before</span><div class="stack" aria-label="Before repair: ${esc(initial?.regressed)} regressions">${stack(initial?.verdict_counts)}</div></div><div class="stack-row"><span>After</span><div class="stack" aria-label="After repair: ${esc(m.final.verdict_counts.REGRESSED)} regressions">${stack(m.final.verdict_counts)}</div></div><div class="stack-legend"><span><i class="same"></i>Same</span><span><i class="improved"></i>Improved</span><span><i class="changed"></i>Changed</span><span><i class="regressed"></i>Regressed</span></div></section>
  <section class="viz-card evidence-card"><div class="viz-title"><div><p class="eyebrow">WHAT SWITCHYARD CAUGHT</p><h2>${m.task==='agent'?'One step. One line. A wrong decision.':'A small word. A wrong label.'}</h2></div><span class="pill">${esc(cause?.input_id||'Evidence')}</span></div><p class="evidence-quote">“${esc(cause?.text||'No input evidence supplied.')}”</p><div class="evidence-flow"><div><span class="demo-label">Before repair</span><div class="entity-list">${(cause?.candidate_output||[]).map(v=>`<span class="entity ${cause.baseline_output.includes(v)?'':'entity-bad'}">${esc(v)}</span>`).join('')}</div></div><span class="flow-arrow">→</span><div><span class="demo-label">After repair</span><div class="entity-list">${(m.comparison.items.find(i=>i.input_id===cause?.input_id)?.candidate.output||[]).map(v=>`<span class="entity">${esc(v)}</span>`).join('')}</div></div></div><details class="inline-details"><summary>What changed in the prompt?</summary><p>${esc(edit?.rationale||'No edit recorded.')}</p><div class="diff"><div class="removed">− ${esc(edit?.old_text)}</div><div class="added">+ ${esc(edit?.new_text)}</div></div></details></section>
  <section class="viz-card checks-card"><div class="viz-title"><div><p class="eyebrow">FINAL EVALUATION</p><h2>Every input, at a glance.</h2></div><span class="chart-unit">${total} inputs</span></div><div class="result-mosaic">${data.candidates[0].results.map((r,i)=>`<button class="mosaic-cell ${r.status}" data-result="${i}" aria-label="Input ${i+1}: ${esc(r.ner_item.verdict)}" title="${esc(r.input_id)} · ${esc(r.ner_item.verdict)}">${r.status==='changed'?'≈':r.status==='improved'?'↑':r.status==='regressed'?'!':'·'}</button>`).join('')}</div><p class="mosaic-caption">${esc(m.final.verdict_counts.REGRESSED)} regressed · ${esc(m.final.verdict_counts.IMPROVED)} improved · ${esc(m.final.verdict_counts.CHANGED)} changed</p><p class="chart-caption">Click any square to inspect its output. Same means unchanged, not necessarily error-free.</p><div class="quality-summary"><span>Final extraction quality</span><strong>${percent(final.accuracy)}</strong><span class="quality-delta">${((final.accuracy-m.baseline.accuracy)*100).toFixed(1)} pp above baseline</span></div></section></div>
@@ -152,7 +182,13 @@ function renderVisualDashboard() {
  app.querySelectorAll('[data-result]').forEach(b=>b.onclick=()=>openDetail(0,Number(b.dataset.result)));
  app.querySelector('#full-report').onclick=()=>{reportView=true;phase='complete';completed=entries.length;render();};
  app.querySelector('#view-diff').onclick=()=>{dialog.innerHTML=`<div class="detail-head"><div><p class="eyebrow">PROPOSED CODE CHANGE</p><h2 id="detail-title">Review the migration</h2></div><button class="close" aria-label="Close details">×</button></div><div class="detail-body"><p>${esc(m.pr?.target_path)}</p><pre class="diff code-diff">${esc(m.pr?.diff||'No diff supplied.')}</pre><p class="provider">Recorded proposal. No published PR link supplied.</p></div>`;dialog.querySelector('.close').onclick=()=>dialog.close();dialog.showModal();};
- if(m.pipeline)installPipeline(m.pipeline);
+ if(m.pipeline){
+  // Agent reports: 1 initial migration (with the comparison table) · 2 step · 3 fixes · 4 final result.
+  const table=document.querySelector('.comparison-table-card');if(table)document.querySelector('#pp-initial .pp-slot').append(table);
+  document.querySelectorAll('.repair-chart,.evidence-card,.checks-card,.delivery-strip,.scroll-repair,.mosaic-card').forEach(el=>el.remove());
+  document.querySelectorAll('#pp-initial .pipe-tile[data-ti],#pp-final .pipe-tile[data-ti]').forEach(b=>b.addEventListener('click',()=>{selectTicket(m,Number(b.dataset.ti));document.querySelector('#pp-step').scrollIntoView({behavior:'smooth',block:'start'});}));
+  installPipeline(m);return;
+ }
  installDashboardMotion(m);
 }
 function installDashboardMotion(m) {
