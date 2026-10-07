@@ -260,6 +260,7 @@ def main():
     ap.add_argument("--tag", help="suffix for the results file, e.g. fix1 (keeps patched runs separate)")
     ap.add_argument("--runs", type=int, default=3)
     ap.add_argument("--limit", type=int)
+    ap.add_argument("--only", help="comma-separated input IDs to run (e.g. failing inputs during ablation)")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--outdir", default=str(HERE / "results"))
     ap.add_argument("--api-base", help="send OpenAI calls here instead (testing/proxy)")
@@ -285,6 +286,8 @@ def main():
 
     for task in tasks:
         inputs = load_jsonl(TASKS[task]["inputs"])[: args.limit]
+        if args.only:
+            inputs = [i for i in inputs if i["id"] in args.only.split(",")]
         for variant in variants:
             label = model_label(task, variant, args.name)
             out = outdir / f"{task}__{variant}__{label}{'__' + args.tag if args.tag else ''}.jsonl"

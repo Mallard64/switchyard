@@ -21,6 +21,7 @@ Baseline: this example's prompt on `spacy.GPT-4.v3` (`gpt-4`), the stronger of t
 | Inputs regressed vs baseline | - | 1 | 0 |
 | Inputs whose output varies between runs | 0 | 2 | 3 |
 | Latency p50 | 2.89s | 3.66s | 3.75s |
+| Cost per 1k calls | $15.63 | $7.51 | $7.48 |
 
 Other candidates tested:
 
@@ -33,7 +34,7 @@ Other candidates tested:
 - `gpt-4`: ['pho/DISH']
 - `gpt-5.6-sol`: ['bowl/EQUIPMENT', 'pho/DISH']
 - Evidence: spurious: predicted ('bowl', 'EQUIPMENT')
-- Cause (confirmed): `label_definitions.EQUIPMENT`. Editing only that component removes the regression, with no new regressions elsewhere.
+- Cause (confirmed by fix): `label_definitions.EQUIPMENT`. Editing only that component removes the regression, with no new regressions elsewhere.
 
 ### Prompt change
 

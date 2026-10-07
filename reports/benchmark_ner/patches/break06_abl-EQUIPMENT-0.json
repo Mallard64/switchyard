@@ -1,0 +1,6 @@
+{
+  "label_definitions": {
+    "DISH": "Known food dishes, e.g. Lobster Ravioli, garlic bread, including raw ingredients plated for serving, e.g. sliced tomatoes",
+    "EQUIPMENT": "e.g. oven, cooking pot, grill"
+  }
+}

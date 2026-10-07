@@ -9,7 +9,10 @@ Steps (all results are cached, so re-running only does missing work):
   2. Compare each against the baseline (compare.py) and rank them.
   3. Cause: map every regression on the best candidate to the prompt components it implicates
      (a failed hard check -> its instruction; a wrong/spurious/missed label -> that label's
-     definition; a span-boundary error -> the task description).
+     definition; a span-boundary error -> the task description). That heuristic only orders
+     the search: ablation.py then removes one sentence at a time, re-runs the failing inputs
+     on the candidate, and marks a cause "confirmed" (by ablation) when removing a sentence
+     makes the input stop regressing.
   4. Fix: an LLM rewrites ONE implicated component. The full suite is re-run with the patch.
      The fix is accepted only if no input regresses against the baseline. A cause is
      "confirmed" when editing that component alone removes the regression.
@@ -129,7 +132,8 @@ def find_causes(report, components):
                    "text": components.get(c)} for c, s in suspects.most_common()]
         causes.append({"input_id": it["input_id"], "text": it["text"],
                        "baseline_output": it["baseline"]["output"], "candidate_output": it["candidate"]["output"],
-                       "evidence": evidence, "suspects": ranked, "status": "suspected", "confirmed_component": None})
+                       "evidence": evidence, "suspects": ranked, "status": "suspected", "confirmed_component": None,
+                       "confirmed_by": None, "confirmed_lines": [], "lines": []})
     return causes
 
 
@@ -153,7 +157,10 @@ def fixer_prompt(task, components, causes, report, history):
     for c in causes:
         lines.append(f"- Text: {c['text']}\n  old model: {c['baseline_output']}\n  new model: {c['candidate_output']}"
                      f"\n  evidence: {'; '.join(c['evidence'])}"
-                     f"\n  most likely components: {[s['component'] for s in c['suspects'] if s['editable']][:3]}")
+                     + (f"\n  proven cause (removing these sentences removes the regression): "
+                        f"{[(u['component'], u['text']) for u in c.get('confirmed_lines', [])]}"
+                        if c.get("confirmed_lines") else "")
+                     + f"\n  most likely components: {[s['component'] for s in c['suspects'] if s['editable']][:3]}")
     keep = [it for it in report["items"] if it["verdict"] in ("SAME", "IMPROVED")][:6]
     lines.append("\nInputs that are currently correct and must stay that way (sample):")
     for it in keep:
@@ -301,9 +308,12 @@ def pr_body(task, chosen, base_rep, cand_rep, final_rep, causes, accepted, candi
             out += [f"**\"{cs['text']}\"**", "",
                     f"- `gpt-4`: {cs['baseline_output']}", f"- `{chosen}`: {cs['candidate_output']}",
                     f"- Evidence: {'; '.join(cs['evidence'])}"]
-            if cs["status"] == "confirmed":
-                out.append(f"- Cause (confirmed): `{cs['confirmed_component']}`. Editing only that component removes "
-                           "the regression, with no new regressions elsewhere.")
+            for u in cs.get("confirmed_lines", []):
+                out.append(f"- Proven line (`{u['component']}`): \"{u['text']}\". Removing only this sentence "
+                           "makes the input stop regressing.")
+            if cs["status"] == "confirmed" and "fix" in (cs.get("confirmed_by") or "fix"):
+                out.append(f"- Cause (confirmed by fix): `{cs['confirmed_component']}`. Editing only that component "
+                           "removes the regression, with no new regressions elsewhere.")
             else:
                 top = [s["component"] for s in cs["suspects"]][:2]
                 out.append(f"- Suspected cause: {', '.join(f'`{t}`' for t in top)} (not confirmed by a fix)")
@@ -341,6 +351,7 @@ def main():
     ap.add_argument("--results", default=str(HERE / "results"))
     ap.add_argument("--out", default=None, help="default reports/migration_<task>")
     ap.add_argument("--api-base", help="send OpenAI calls here instead (testing/proxy)")
+    ap.add_argument("--no-ablate", action="store_true", help="skip line-level ablation (heuristic causes only)")
     args = ap.parse_args()
     if not os.environ.get("OPENAI_API_KEY"):
         sys.exit("Set OPENAI_API_KEY first.")
@@ -386,6 +397,15 @@ def main():
     for cs in causes:
         print(f"      {cs['input_id']}: {'; '.join(cs['evidence'])}")
         print(f"        suspects: {[s['component'] for s in cs['suspects']]}")
+    if causes and not args.no_ablate:
+        from ablation import ablate
+        print(f"      ablation: removing one sentence at a time, {len(causes)} input(s) x {args.runs} runs on {chosen}")
+        ablate(args.task, base_path, components, causes, variant=args.variant, name=chosen,
+               model_config=args.model_config, runs=args.runs, results_dir=Path(args.results),
+               patch_dir=out / "ablation_patches", api_base=args.api_base)
+        for cs in causes:
+            print(f"      {cs['input_id']}: {cs['status']}"
+                  + "".join(f"\n        line: {u['component']}: \"{u['text']}\"" for u in cs["confirmed_lines"]))
 
     # 4. fix ------------------------------------------------------------------------------
     attempts, accepted, final_rep = [], None, None
@@ -454,7 +474,9 @@ def main():
                 accepted, final_rep = edit, rep
                 for cs in causes:
                     if cs["input_id"] not in still:
-                        cs["status"], cs["confirmed_component"] = "confirmed", edit["component"]
+                        cs["confirmed_by"] = "ablation+fix" if cs.get("confirmed_by") == "ablation" else "fix"
+                        cs["status"] = "confirmed"
+                        cs["confirmed_component"] = cs["confirmed_component"] or edit["component"]
                 break
             history.append({"component": edit["component"], "new_text": edit["new_text"], "outcome": outcome})
 

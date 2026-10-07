@@ -12,6 +12,7 @@ record_baseline.py's --patch/--tag, which keeps its own resumable cache.
   python benchmark.py --only break01       # smoke test one break (~60 calls, ~$1)
   python benchmark.py                      # all breaks + the false-alarm check
   python benchmark.py --skip-fix           # catch/cause only, skip the fix step (half the cost)
+  python benchmark.py --ablate             # line-level ablation on the caught breaks (reuses caches)
 
 Everything lands in reports/benchmark_ner/.
 """
@@ -161,13 +162,67 @@ def false_alarm_check(spend):
     return {"verdict_counts": report["verdict_counts"], "false_alarms": report["verdict_counts"]["REGRESSED"]}
 
 
+def planted_units(spec):
+    """unit_ids in the broken component whose text is not in the original (None for pure deletions)."""
+    from ablation import split_units
+    orig = " ".join(ORIG[spec["component"]].split())
+    new = [u["unit_id"] for u in split_units({spec["component"]: spec["new_text"]}) if u["text"] not in orig]
+    return set(new) or None
+
+
+def ablate_caught(spend):
+    """Re-score cause-finding on the caught breaks: heuristic top suspect vs. ablation."""
+    from ablation import ablate
+    prev = json.loads((OUT / "results.json").read_text())
+    out = []
+    for b in [x for x in prev["breaks"] if x.get("caught")]:
+        spec = next(x for x in BREAKS if x["id"] == b["id"])
+        print(f"\n[{b['id']}] {spec['component']} ({spec['kind']})")
+        report = build_report(BASELINE, RESULTS / f"{TASK}__{VARIANT}__{MODEL}__{b['id']}.jsonl")
+        comps = {**ORIG, spec["component"]: spec["new_text"]}
+        causes = find_causes(report, comps)
+        heur_top = [c["suspects"][0]["component"] for c in causes if c["suspects"] and c["suspects"][0]["editable"]]
+        ablate(TASK, BASELINE, comps, causes, variant=VARIANT, base_patch=patch_for(spec["component"], spec["new_text"]),
+               tag_prefix=f"{b['id']}_", runs=RUNS, results_dir=RESULTS, patch_dir=OUT / "patches")
+        for f in {l["file"] for c in causes for l in c["lines"] if l.get("file")}:
+            spend[0] += total_cost(RESULTS / f)
+        planted = planted_units(spec)
+        abl_top = [c["confirmed_lines"][0]["component"] for c in causes if c["confirmed_lines"]]
+        confirmed = [u for c in causes for u in c["confirmed_lines"]]
+        hits = [u for u in confirmed if planted and u["unit_id"] in planted]
+        r = {"id": b["id"], "component": spec["component"], "kind": spec["kind"],
+             "regressed_ids": [c["input_id"] for c in causes],
+             "top_before": spec["component"] in heur_top, "top_after": spec["component"] in abl_top,
+             "planted_units": sorted(planted or []),
+             "unstable_inputs": [c["input_id"] for c in causes if not c["ablation_control"]["stable"]],
+             "any_confirmed": bool(confirmed), "planted_unit_confirmed": bool(hits) if planted else None,
+             "confirmed_units": confirmed,
+             "other_units_confirmed": [u for u in confirmed if u not in hits],
+             "causes": causes}
+        print(f"   top-ranked: heuristic {r['top_before']} -> ablation {r['top_after']}   "
+              f"planted {r['planted_units']} confirmed: {r['planted_unit_confirmed']}   confirmed: "
+              f"{[u['unit_id'] for u in confirmed]}   unstable: {r['unstable_inputs']}")
+        out.append(r)
+    n = len(out)
+    summary = {"n_caught": n,
+               "top_rate_before": sum(r["top_before"] for r in out) / n if n else None,
+               "top_rate_after": sum(r["top_after"] for r in out) / n if n else None,
+               "breaks": out, "spend_usd": round(spend[0], 4)}
+    (OUT / "ablation.json").write_text(json.dumps(summary, indent=2, default=list))
+    print(f"\ntop-ranked component: {sum(r['top_before'] for r in out)}/{n} (heuristic) -> "
+          f"{sum(r['top_after'] for r in out)}/{n} (ablation)   spend ${spend[0]:.2f} -> {OUT / 'ablation.json'}")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--only", nargs="+", help="run only these break ids, e.g. break01")
     ap.add_argument("--skip-fix", action="store_true", help="catch/cause only, skip the fix step")
     ap.add_argument("--skip-false-alarm", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="show the plan and cost estimate; no calls")
+    ap.add_argument("--ablate", action="store_true", help="line-level ablation on the caught breaks")
     args = ap.parse_args()
+    if args.ablate:
+        return ablate_caught([0.0])
 
     breaks = [b for b in BREAKS if not args.only or b["id"] in args.only]
     if args.dry_run:

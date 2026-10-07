@@ -1,0 +1,6 @@
+{
+  "description": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nPronouns are not entities.",
+  "label_definitions": {
+    "INGREDIENT": ""
+  }
+}

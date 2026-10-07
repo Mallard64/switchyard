@@ -52,7 +52,7 @@
     "unstable_inputs": 2,
     "latency_p50_s": 3.657,
     "latency_p95_s": 5.459,
-    "cost_per_1k_calls_usd": null
+    "cost_per_1k_calls_usd": 7.51
   },
   "instructions_implicated": {},
   "items": [

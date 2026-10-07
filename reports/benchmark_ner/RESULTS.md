@@ -72,3 +72,30 @@ prompt (`upstream/ner_fewshot.cfg`), each re-run for real against gpt-4 (3 runs 
 Actual spend, from real `cost_usd` fields in the recorded rows: **$14.18** for all 10 breaks
 (4 of which also triggered a fix-verification re-run) plus the false-alarm re-run. In line
 with the ~$10–15 (up to ~$19 worst case) estimate given before running.
+
+## Line-level ablation on the 4 caught breaks (Oct 7)
+
+`python benchmark.py --ablate` reuses each break's cached run, then for every regressed input removes one
+sentence (or "e.g." example list) at a time and re-runs gpt-4 3x. A unit is *confirmed* when removing it makes
+the input stop regressing. A control re-run of the unablated broken prompt stayed REGRESSED for all 5 inputs,
+so these regressions are stable, not noise. Cost $1.91 (about 135 gpt-4 calls). Details: `ablation.json`.
+
+| Break | Planted change | Heuristic top = right component | Ablation top = right component | Planted unit confirmed | Other units confirmed |
+|---|---|---|---|---|---|
+| break02 | deleted "Adjectives, verbs, adverbs are not entities." | no | no (nothing confirmed) | n/a (deletion) | none |
+| break03 | adjective rule replaced by a contradiction | no | no | **no** | `INGREDIENT#0` |
+| break06 | DISH examples + "including raw ingredients…, e.g. sliced tomatoes" | yes | no | **no** | `description#1`, `description#2`, `EQUIPMENT#0`, `INGREDIENT#0` |
+| break10 | EQUIPMENT examples + "bowl, plate, cup" | yes | **yes** | **yes**, the only one | none |
+
+**Top-ranked rate: 2/4 (heuristic) → 1/4 (ablation).** Single-sentence removal is worse than the heuristic here.
+Why, from the data:
+- **Missing instructions can't be found by removal** (break02, and the real gpt-5.6-sol regression on ner-16,
+  where the accepted fix *adds* a clarification).
+- **A misread line that is also needed** (break03): removing it leaves the instruction missing, so the input
+  stays broken.
+- **A plant spanning two units** (break06): removing either half leaves the other half in place.
+- **Low specificity:** removing unrelated sentences flipped 2 inputs. "Removal repairs it" means the input is
+  sensitive to that sentence, not necessarily that the sentence is the cause.
+
+Where it works: a single added line that the model over-applies (break10 here, and the planted agent line in
+`reports/agent/linefinder_gpt-5.6-sol.json`, where only the planted line out of 8 repaired 3/3).

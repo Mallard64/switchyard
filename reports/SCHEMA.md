@@ -51,9 +51,17 @@ One entry per input that regressed on the chosen candidate.
 | `text` | the input text |
 | `baseline_output`, `candidate_output` | human-readable outputs, e.g. `"bowl/EQUIPMENT"` |
 | `evidence` | strings explaining what went wrong (failed check, wrong/spurious/missed label, boundary) |
-| `suspects` | ranked list of `{component, score, editable, text}` — which prompt piece is implicated, and whether a config patch can edit it |
-| `status` | `"suspected"` until a fix removes the regression, then `"confirmed"` |
-| `confirmed_component` | the component ID that fixed it, once confirmed |
+| `suspects` | ranked list of `{component, score, editable, text}` from a heuristic. **Only used to order the ablation search; not proof.** |
+| `status` | `"confirmed"` once ablation or an accepted fix proves the cause, otherwise `"suspected"` |
+| `confirmed_by` | `"ablation"`, `"fix"`, `"ablation+fix"`, or `null` (still suspected) |
+| `confirmed_component` | the component ID proven to cause it (from ablation if available, else from the fix) |
+| `confirmed_lines` | `[{unit_id, component, text}]` — the sentences whose removal alone makes this input stop regressing. Show these as "the lines that broke". Empty if ablation found none (e.g. the cause is a *missing* instruction, which removal can't reveal) |
+| `lines` | every sentence tested: `[{unit_id, component, text, status, verdict, repaired_runs, output, file}]`, confirmed first. `status` is `"confirmed"` / `"no_effect"` / `"error"`; `repaired_runs` like `"3/3"` = runs at or above the baseline's worst score |
+
+`unit_id` is `<component>#<n>`: sentence (or "e.g." example list) number `n` of that component, e.g.
+`label_definitions.EQUIPMENT#1` = `"e.g. oven, cooking pot, grill"`.
+
+**Display rule:** say "proven" only when `status == "confirmed"`. For `"suspected"`, say "suspected" and show `suspects`.
 
 ## `fix_attempts[]`
 

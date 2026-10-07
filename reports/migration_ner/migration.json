@@ -1,7 +1,7 @@
 {
   "task": "ner",
-  "started": "2026-10-06T18:41:04.840939+00:00",
-  "finished": "2026-10-06T18:41:05.918678+00:00",
+  "started": "2026-10-07T07:37:06.443852+00:00",
+  "finished": "2026-10-07T07:38:06.522301+00:00",
   "baseline": {
     "file": "ner__gpt-4__gpt-4.jsonl",
     "model": "gpt-4",
@@ -43,7 +43,7 @@
       "passed_all": 1.0,
       "unstable_inputs": 2,
       "latency_p50_s": 3.657,
-      "cost_per_1k_calls_usd": null,
+      "cost_per_1k_calls_usd": 7.51,
       "report": "compare_gpt-5.6-sol.json",
       "rank": 1
     },
@@ -64,7 +64,7 @@
       "passed_all": 1.0,
       "unstable_inputs": 5,
       "latency_p50_s": 2.419,
-      "cost_per_1k_calls_usd": null,
+      "cost_per_1k_calls_usd": 2.91,
       "report": "compare_gpt-5.6-terra.json",
       "rank": 2
     }
@@ -106,7 +106,125 @@
         }
       ],
       "status": "confirmed",
-      "confirmed_component": "label_definitions.EQUIPMENT"
+      "confirmed_component": "label_definitions.EQUIPMENT",
+      "confirmed_by": "fix",
+      "confirmed_lines": [],
+      "lines": [
+        {
+          "unit_id": "label_definitions.EQUIPMENT#0",
+          "component": "label_definitions.EQUIPMENT",
+          "text": "Any kind of cooking equipment.",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-EQUIPMENT-0.jsonl"
+        },
+        {
+          "unit_id": "label_definitions.EQUIPMENT#1",
+          "component": "label_definitions.EQUIPMENT",
+          "text": "e.g. oven, cooking pot, grill",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-EQUIPMENT-1.jsonl"
+        },
+        {
+          "unit_id": "description#0",
+          "component": "description",
+          "text": "Entities are the names food dishes, ingredients, and any kind of cooking equipment.",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-description-0.jsonl"
+        },
+        {
+          "unit_id": "description#1",
+          "component": "description",
+          "text": "Adjectives, verbs, adverbs are not entities.",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-description-1.jsonl"
+        },
+        {
+          "unit_id": "description#2",
+          "component": "description",
+          "text": "Pronouns are not entities.",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-description-2.jsonl"
+        },
+        {
+          "unit_id": "label_definitions.DISH#0",
+          "component": "label_definitions.DISH",
+          "text": "Known food dishes",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-DISH-0.jsonl"
+        },
+        {
+          "unit_id": "label_definitions.DISH#1",
+          "component": "label_definitions.DISH",
+          "text": "e.g. Lobster Ravioli, garlic bread",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-DISH-1.jsonl"
+        },
+        {
+          "unit_id": "label_definitions.INGREDIENT#0",
+          "component": "label_definitions.INGREDIENT",
+          "text": "Individual parts of a food dish, including herbs and spices.",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-INGREDIENT-0.jsonl"
+        }
+      ],
+      "ablation_control": {
+        "verdict": "REGRESSED",
+        "score_runs": [
+          0.6667,
+          0.6667,
+          0.6667
+        ],
+        "file": "ner__gpt-4__gpt-5.6-sol__abl-control.jsonl",
+        "stable": true
+      }
     }
   ],
   "fix_attempts": [
@@ -168,7 +286,7 @@
       "unstable_inputs": 3,
       "latency_p50_s": 3.751,
       "latency_p95_s": 6.763,
-      "cost_per_1k_calls_usd": null
+      "cost_per_1k_calls_usd": 7.48
     }
   },
   "pr": {
@@ -234,7 +352,7 @@
       "unstable_inputs": 3,
       "latency_p50_s": 3.751,
       "latency_p95_s": 6.763,
-      "cost_per_1k_calls_usd": null
+      "cost_per_1k_calls_usd": 7.48
     },
     "instructions_implicated": {},
     "items": [

@@ -1,0 +1,6 @@
+{
+  "label_definitions": {
+    "EQUIPMENT": "Any kind of cooking equipment. e.g. oven, cooking pot, grill, bowl, plate, cup"
+  },
+  "description": "Adjectives, verbs, adverbs are not entities.\nPronouns are not entities."
+}
