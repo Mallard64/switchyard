@@ -76,6 +76,7 @@ Everything below has run for real against the OpenAI API.
 | `support_agent.py` | 4-step support agent (classify → decide → draft → tone), fake deterministic tools, line-list prompts, resumable cache `results/agent__<config>.jsonl`. `decide` contains one **planted** line (chosen by `probe_plant.py`). |
 | `stepfinder.py` / `linefinder.py` | Prove which agent step, then which prompt line, broke (swap / ablation, 3 runs, compare.py's rule). Reports in `reports/agent/`. |
 | `ablation.py` | Sentence-level ablation for NER causes, with a no-ablation control; used by `migrate.py` and `benchmark.py --ablate`. |
+| `dashboard_export.py` | Writes `reports/<dir>/dashboard.json` (Switchyard fixture shape) for agent reports; called by `migrate_agent.py` and `demo_e2e.py`. The dashboard (`../switchyard-dashboard`, branch `samegrade-integration`) serves these plus live rows from `results/*.jsonl`. |
 | `judge.py` | Claude judge for CHANGED items: both orders, old-vs-old noise floor, cached in `results/judge__<model>.jsonl`; skipped without Anthropic credentials. `migrate.py` calls it (`--no-judge` to skip). |
 | `pr_report.py` | Renders PR.md in fixed order: step → lines → evidence → fixes (each accept / edit / reject). |
 | `migrate_agent.py` | Agent migration report + review flow (`--accept`, `--reject`, `--apply-edit`); writes `reports/migration_agent/`. `migrate.py` has the same flags for NER. |

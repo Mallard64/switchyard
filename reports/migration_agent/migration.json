@@ -171,8 +171,8 @@
     "**The `decide` prompt line \"Final-sale items are not eligible for refunds or replacements.\" was planted** for this demo, chosen because it breaks only the new model (see `reports/agent/plant_probe.json`). Apart from it, this candidate showed no regressions.",
     "Line-level proof works when the new model over-applies a line that is present. It cannot find a missing instruction; those are proven at component level by the fix instead."
   ],
-  "started": "2026-10-07T17:24:22.599831+00:00",
-  "finished": "2026-10-07T17:24:22.722378+00:00",
+  "started": "2026-10-07T17:44:17.691541+00:00",
+  "finished": "2026-10-07T17:44:17.810996+00:00",
   "ready_to_merge": false,
   "comparison_file": "compare_gpt-5.6-sol.json"
 }
