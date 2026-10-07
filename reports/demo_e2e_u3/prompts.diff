@@ -1,0 +1,8 @@
+--- a/classify prompt
++++ b/classify prompt
+@@ -2,5 +2,4 @@
+ Classify the ticket into exactly one category: refund, damaged, shipping, cancel, billing, account, other.
+ refund: wants money back for an item they no longer want. damaged: item arrived broken or defective. shipping: order is late or missing. cancel: wants to cancel an order. billing: charges or payment disputes. account: login, password or account details. other: anything else.
+ Extract the order ID if the ticket gives one: the letter A followed by 4 digits, in uppercase (e.g. A1234). Use null if there is none.
+-Tickets about late or missing orders are cancel requests.
+ Respond with only a JSON object: {"category": "...", "order_id": "..." or null}

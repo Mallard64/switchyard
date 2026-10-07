@@ -66,6 +66,19 @@ BREAKS = [
      "prompts": {"classify": replaced("classify", 3, ORDER_DIGITS), "draft": replaced("draft", 2, NO_FACTS)}},
 ]
 
+# Downstream-symptom set (Oct 7, written before any run): the cause is planted in one step but the
+# visible error shows up in a later step, so a trace reader is tempted to blame the later step.
+DOWNSTREAM = [
+    {"id": "u1", "desc": "classify calls damaged-item tickets refunds (symptom: decide refunds instead of replacing)",
+     "prompts": {"classify": appended("classify", "Tickets about broken or damaged items are refund requests.")}},
+    {"id": "u2", "desc": "decide deducts a 15% restocking fee (symptom: the reply states the wrong amount)",
+     "prompts": {"decide": appended("decide", "For refunds and cancellations, deduct a 15% restocking fee from the "
+                                              "amount.")}},
+    {"id": "u3", "desc": "classify calls late or missing orders cancellations (symptom: decide denies or cancels)",
+     "prompts": {"classify": appended("classify", "Tickets about late or missing orders are cancel requests.")}},
+]
+BREAK_SETS = {"v1": BREAKS, "downstream": DOWNSTREAM}
+
 ATTRIBUTION_SYSTEM = (
     "You debug a 4-step customer-support pipeline: classify -> decide -> draft -> tone. After a model upgrade, "
     "this ticket's final result became wrong. You get the step instructions, the expected outcome, and the "
@@ -74,14 +87,21 @@ ATTRIBUTION_SCHEMA = {"type": "object", "additionalProperties": False, "required
                       "properties": {"step": {"type": "string", "enum": A.STEPS}, "reason": {"type": "string"}}}
 
 
-def attribute_with_llm(ticket, row, model="gpt-5.6-sol"):
-    """Baseline: ask an LLM which step failed, from the failing trace (Who&When-style)."""
+def attribute_with_llm(ticket, row, model="gpt-5.6-sol", info="gold", old_row=None):
+    """Baseline: ask an LLM which step failed, from the failing trace (Who&When-style).
+    info="gold": also gets the expected category, order ID, action and reply rules (easy mode).
+    info="final": gets only what a migration has: the old model's final decision and reply."""
     trace = "\n\n".join(f"[{s['step']}] output:\n{s['raw']}" for s in row["steps"])
     steps = "\n\n".join(f"[{s}] instructions:\n" + "\n".join(P[s]) for s in A.STEPS)
     g = ticket["gold"]
-    user = (f"{steps}\n\nTicket:\n{ticket['text']}\n\nExpected: category {g['category']}, order ID {g['order_id']}, "
-            f"action {g['action']}; reply must include {ticket['must_include']} and must not include "
-            f"{ticket['must_not_include']}.\n\nFailing trace:\n{trace}\n\nWhich step first went wrong?")
+    if info == "gold":
+        expected = (f"Expected: category {g['category']}, order ID {g['order_id']}, action {g['action']}; reply must "
+                    f"include {ticket['must_include']} and must not include {ticket['must_not_include']}.")
+    else:
+        expected = (f"Before the upgrade, the pipeline's final result was: action {(old_row['decision'] or {}).get('action')}"
+                    f"; reply:\n{old_row['final_reply']}")
+    user = (f"{steps}\n\nTicket:\n{ticket['text']}\n\n{expected}\n\nFailing trace (after the upgrade):\n{trace}"
+            f"\n\nWhich step first went wrong?")
     out = A.call_openai(model, {"response_format": {"type": "json_schema", "json_schema": {
         "name": "attribution", "strict": True, "schema": ATTRIBUTION_SCHEMA}}},
         [{"role": "system", "content": ATTRIBUTION_SYSTEM}, {"role": "user", "content": user}])
@@ -96,17 +116,27 @@ def main():
     ap.add_argument("--only", nargs="+")
     ap.add_argument("--no-llm-baseline", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--set", choices=sorted(BREAK_SETS), default="v1")
+    ap.add_argument("--old", default=OLD["label"])
+    ap.add_argument("--new", default=NEW["label"])
+    ap.add_argument("--attributor", default="gpt-5.6-sol", help="model for the LLM 'which step failed?' baseline")
+    ap.add_argument("--attr-info", choices=["gold", "final"], default="gold",
+                    help="what the attributor sees besides the trace (final = only the old model's final output)")
     args = ap.parse_args()
-    breaks = [b for b in BREAKS if not args.only or b["id"] in args.only]
+    global OUT
+    old_spec, new_spec = spec(args.old, {}), spec(args.new, {})
+    if (args.set, args.old, args.new) != ("v1", OLD["label"], NEW["label"]):
+        OUT = OUT.with_name(f"agent_bench_{args.set}_{args.old}_{args.new}")
+    breaks = [b for b in BREAK_SETS[args.set] if not args.only or b["id"] in args.only]
     if args.dry_run:
         for b in breaks:
             print(f"{b['id']}: {b['desc']}  (steps {sorted(b['prompts'], key=A.STEPS.index)})")
         return
     OUT.mkdir(parents=True, exist_ok=True)
     tickets = {t["id"]: t for t in A.load_tickets()}
-    base_path, clean_path = RESULTS / f"agent__{OLD['label']}.jsonl", RESULTS / f"agent__{NEW['label']}.jsonl"
+    base_path, clean_path = RESULTS / f"agent__{old_spec['label']}.jsonl", RESULTS / f"agent__{new_spec['label']}.jsonl"
     background = [it["input_id"] for it in build_report(base_path, clean_path)["items"] if it["verdict"] == "REGRESSED"]
-    print(f"background (clean {NEW['label']} vs {OLD['label']}): {background}")
+    print(f"background (clean {new_spec['label']} vs {old_spec['label']}): {background}")
     clean_src = {tid: {r["run"]: r for r in rs} for tid, rs in load(clean_path).items()}
     attributions_path = OUT / "llm_attributions.jsonl"
     cached_attr = {}
@@ -118,7 +148,7 @@ def main():
 
     for b in breaks:
         planted = sorted(b["prompts"], key=A.STEPS.index)
-        new_b = spec(NEW["model"], NEW["params"], b["prompts"], f"{NEW['label']}+{b['id']}")
+        new_b = spec(new_spec["model"], new_spec["params"], b["prompts"], f"{new_spec['label']}+{b['id']}")
         first = min(A.STEPS.index(s) for s in planted)
         cand_path = run_config(list(tickets.values()), new_b["label"], plan_of(new_b, {}), clean_src, first,
                                args.runs, RESULTS, args.workers)
@@ -134,9 +164,9 @@ def main():
             # Localize only the sampled tickets: a candidate file restricted to them.
             sub = cand_path.with_name(cand_path.stem + f"__sample{len(sample)}.jsonl")
             sub.write_text("".join(l for l in open(cand_path) if json.loads(l)["input_id"] in sample))
-            loc = localize(OLD, new_b, base_path, sub, args.runs, RESULTS, args.workers)
+            loc = localize(old_spec, new_b, base_path, sub, args.runs, RESULTS, args.workers)
             r["live_calls_localize"] = loc["live_calls"]
-            cand_rows = load(cand_path)
+            cand_rows, base_rows = load(cand_path), load(base_path)
             for tk in loc["tickets"]:
                 tid = tk["input_id"]
                 found = tk["causal_steps"]
@@ -151,7 +181,8 @@ def main():
                 if not args.no_llm_baseline:
                     key = (b["id"], tid)
                     if key not in cached_attr:
-                        ans, cost = attribute_with_llm(tickets[tid], cand_rows[tid][0])
+                        ans, cost = attribute_with_llm(tickets[tid], cand_rows[tid][0], args.attributor,
+                                                       args.attr_info, base_rows[tid][0])
                         cached_attr[key] = {"break": b["id"], "input_id": tid, "step": ans["step"],
                                             "reason": ans["reason"], "cost_usd": cost}
                         with open(attributions_path, "a") as f:
@@ -167,7 +198,8 @@ def main():
     scored = [t for r in results for t in r["tickets"]]
     n = len(scored)
     summary = {
-        "old": OLD["label"], "new": NEW["label"], "runs": args.runs, "max_tickets_per_break": args.max_tickets,
+        "old": old_spec["label"], "new": new_spec["label"], "runs": args.runs, "max_tickets_per_break": args.max_tickets,
+        "break_set": args.set, "attributor": args.attributor, "attributor_info": args.attr_info,
         "background": background, "breaks": len(results),
         "breaks_with_effect": sum(bool(r["regressed"]) for r in results), "tickets_localized": n,
         "stepfinder": {v: sum(t["verdict"] == v for t in scored)

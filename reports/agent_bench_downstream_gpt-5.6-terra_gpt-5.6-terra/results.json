@@ -1,0 +1,214 @@
+{
+  "old": "gpt-5.6-terra",
+  "new": "gpt-5.6-terra",
+  "runs": 1,
+  "max_tickets_per_break": 6,
+  "break_set": "downstream",
+  "attributor": "gpt-5.6-terra",
+  "attributor_info": "final",
+  "background": [],
+  "breaks": 3,
+  "breaks_with_effect": 3,
+  "tickets_localized": 10,
+  "stepfinder": {
+    "correct": 8,
+    "correct_subset": 0,
+    "over_attributed": 2,
+    "partial": 0,
+    "wrong": 0,
+    "unexplained": 0
+  },
+  "llm_baseline_exact": 9,
+  "stepfinder_confirmed_both_ways": 8,
+  "llm_baseline_correct": 9,
+  "breaks_detail": [
+    {
+      "id": "u1",
+      "desc": "classify calls damaged-item tickets refunds (symptom: decide refunds instead of replacing)",
+      "planted_steps": [
+        "classify"
+      ],
+      "regressed": [
+        "t20"
+      ],
+      "localized": [
+        "t20"
+      ],
+      "tickets": [
+        {
+          "input_id": "t20",
+          "causal_steps": [
+            "classify",
+            "decide",
+            "draft"
+          ],
+          "status": "necessary_only",
+          "verdict": "over_attributed",
+          "llm_says": "draft",
+          "llm_correct": false
+        }
+      ],
+      "live_calls_localize": {
+        "gpt-5.6-terra": {
+          "calls": 23,
+          "usd": 0.028
+        }
+      }
+    },
+    {
+      "id": "u2",
+      "desc": "decide deducts a 15% restocking fee (symptom: the reply states the wrong amount)",
+      "planted_steps": [
+        "decide"
+      ],
+      "regressed": [
+        "t01",
+        "t04",
+        "t07",
+        "t11",
+        "t21",
+        "t22",
+        "t24"
+      ],
+      "localized": [
+        "t01",
+        "t04",
+        "t07",
+        "t11",
+        "t21",
+        "t22"
+      ],
+      "tickets": [
+        {
+          "input_id": "t01",
+          "causal_steps": [
+            "decide"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "decide",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t04",
+          "causal_steps": [
+            "decide"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "decide",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t07",
+          "causal_steps": [
+            "classify",
+            "decide"
+          ],
+          "status": "necessary_only",
+          "verdict": "over_attributed",
+          "llm_says": "decide",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t11",
+          "causal_steps": [
+            "decide"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "decide",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t21",
+          "causal_steps": [
+            "decide"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "decide",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t22",
+          "causal_steps": [
+            "decide"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "decide",
+          "llm_correct": true
+        }
+      ],
+      "live_calls_localize": {
+        "gpt-5.6-terra": {
+          "calls": 104,
+          "usd": 0.1628
+        }
+      }
+    },
+    {
+      "id": "u3",
+      "desc": "classify calls late or missing orders cancellations (symptom: decide denies or cancels)",
+      "planted_steps": [
+        "classify"
+      ],
+      "regressed": [
+        "t09",
+        "t10",
+        "t23"
+      ],
+      "localized": [
+        "t09",
+        "t10",
+        "t23"
+      ],
+      "tickets": [
+        {
+          "input_id": "t09",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t10",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t23",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        }
+      ],
+      "live_calls_localize": {
+        "gpt-5.6-terra": {
+          "calls": 42,
+          "usd": 0.0494
+        }
+      }
+    }
+  ],
+  "live_calls_candidate_runs": {
+    "gpt-5.6-terra": {
+      "calls": 264,
+      "usd": 0.3214
+    }
+  },
+  "llm_baseline_cost_usd": 0.0381
+}
