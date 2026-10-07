@@ -314,7 +314,8 @@ def run_ticket(ticket, plan, reuse=None, call=call_openai, prompts=None):
     ctx = {"ticket": ticket}
     steps, raws = [], {}
     for i, step in enumerate(STEPS):
-        messages = render(step, ctx, (prompts or {}).get(step))
+        # A plan entry may carry its own prompt (it follows that model through step swaps).
+        messages = render(step, ctx, plan[step].get("prompt") or (prompts or {}).get(step))
         if reuse and i < len(reuse):
             rec = dict(reuse[i], replayed=True)
         else:

@@ -96,6 +96,7 @@
           "file": "agent__gpt-4__decide-gpt-5.6-sol.jsonl"
         }
       },
+      "narrowed": null,
       "step_outputs": {
         "decide": {
           "new": {

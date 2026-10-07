@@ -86,6 +86,121 @@ def new_calls_cost(paths):
             for m, v in by_model.items()}
 
 
+def spec(model, params, prompts=None, label=None):
+    """A side of the comparison: model + sampling params, optionally its own prompts per step."""
+    return {"model": model, "params": params, "prompts": prompts or {}, "label": label or model}
+
+
+def plan_of(default, overrides):
+    """Plan with `default` on every step and `overrides` ({step: spec}) on some; prompts follow the spec."""
+    plan = {}
+    for st in A.STEPS:
+        sp = overrides.get(st, default)
+        plan[st] = {"model": sp["model"], "params": sp["params"],
+                    **({"prompt": sp["prompts"][st]} if st in sp["prompts"] else {})}
+    return plan
+
+
+def label_of(default, overrides):
+    return default["label"] + "".join(f"__{st}-{overrides[st]['label']}" for st in A.STEPS if st in overrides)
+
+
+def localize(old, new, base_path, cand_path, runs, outdir, workers, max_pairs=True):
+    """The step-finder. old/new are spec() dicts; base_path/cand_path their cached full runs."""
+    report = build_report(base_path, cand_path)
+    regressed = [it["input_id"] for it in report["items"] if it["verdict"] == "REGRESSED"]
+    if not regressed:
+        return {"old_model": old["label"], "candidate": new["label"], "runs": runs, "regressed": [],
+                "summary": {}, "unexplained": [], "tickets": [], "live_calls": {}}
+    tickets = [t for t in A.load_tickets() if t["id"] in regressed]
+    base, cand, gold = load(base_path), load(cand_path), load_gold("agent")
+    by_run = lambda rows: {tid: {r["run"]: r for r in rs} for tid, rs in rows.items()}
+    cand_src, base_src = by_run(cand), by_run(base)
+    files = []
+
+    # Necessity: swap one step back to the old model.
+    singles = {}
+    for k, step in enumerate(A.STEPS):
+        files.append(run_config(tickets, label_of(new, {step: old}), plan_of(new, {step: old}), cand_src, k, runs,
+                                outdir, workers))
+        singles[step] = {tid: judge(files[-1], tid, base, gold) for tid in regressed}
+
+    # Pairs, only for tickets no single step repairs.
+    stuck = [tid for tid in regressed if all(singles[s][tid]["verdict"] == "REGRESSED" for s in A.STEPS)]
+    pairs = {}
+    for a, b in combinations(A.STEPS, 2) if stuck and max_pairs else []:
+        files.append(run_config([t for t in tickets if t["id"] in stuck], label_of(new, {a: old, b: old}),
+                                plan_of(new, {a: old, b: old}), cand_src, A.STEPS.index(a), runs, outdir, workers))
+        pairs[f"{a}+{b}"] = {tid: judge(files[-1], tid, base, gold) for tid in stuck}
+
+    # Causal steps: single steps that repair it; else the pairs that do.
+    causal = {}
+    for tid in regressed:
+        steps = [s for s in A.STEPS if singles[s][tid]["verdict"] != "REGRESSED"]
+        if not steps:
+            fixing = [p for p, v in pairs.items() if tid in v and v[tid]["verdict"] != "REGRESSED"]
+            steps = sorted({s for p in fixing for s in p.split("+")}, key=A.STEPS.index) if fixing else []
+        causal[tid] = steps
+
+    # Several single steps "repair" it (often run-to-run noise downstream of the real cause): keep
+    # the steps that reproduce the regression on their own (new model only at that step).
+    ambiguous = [tid for tid in regressed if len(causal[tid]) > 1
+                 and all(singles[s][tid]["verdict"] != "REGRESSED" for s in causal[tid])]
+    alone, narrowed = {}, {}
+    for step in sorted({s for tid in ambiguous for s in causal[tid]}, key=A.STEPS.index):
+        tids = [t for t in ambiguous if step in causal[t]]
+        files.append(run_config([t for t in tickets if t["id"] in tids], label_of(old, {step: new}),
+                                plan_of(old, {step: new}), base_src, A.STEPS.index(step), runs, outdir, workers))
+        alone[step] = {t: judge(files[-1], t, base, gold) for t in tids}
+    for tid in ambiguous:
+        keep = [s for s in causal[tid] if alone[s][tid]["verdict"] == "REGRESSED"]
+        if keep:
+            narrowed[tid] = {"from": causal[tid], "to": keep}
+            causal[tid] = keep
+
+    # Sufficiency: the new model on the causal step(s) only.
+    suff = {}
+    for tid in regressed:
+        if not causal[tid]:
+            continue
+        key = "+".join(causal[tid])
+        if key not in suff:
+            ov = {s: new for s in causal[tid]}
+            tids = [t for t in regressed if causal[t] == causal[tid]]
+            files.append(run_config([t for t in tickets if t["id"] in tids], label_of(old, ov), plan_of(old, ov),
+                                    base_src, min(A.STEPS.index(s) for s in causal[tid]), runs, outdir, workers))
+            suff[key] = {t: judge(files[-1], t, base, gold) for t in tids}
+
+    out_tickets = []
+    for t in tickets:
+        tid = t["id"]
+        steps = causal[tid]
+        key = "+".join(steps)
+        item = next(it for it in report["items"] if it["input_id"] == tid)
+        out_tickets.append({
+            "input_id": tid, "text": t["text"], "tricky": t.get("tricky", False),
+            "baseline_output": item["baseline"]["output"], "candidate_output": item["candidate"]["output"],
+            "causal_steps": steps,
+            "status": ("confirmed" if steps and suff[key][tid]["verdict"] == "REGRESSED"
+                       else "necessary_only" if steps else "unexplained"),
+            "necessity": {s: singles[s][tid] for s in A.STEPS},
+            "pairs": {p: v[tid] for p, v in pairs.items() if tid in v},
+            "sufficiency": {key: suff[key][tid]} if steps else {},
+            "narrowed": narrowed.get(tid),
+            # What the causal step(s) actually said, on each model (first run).
+            "step_outputs": {s: {"new": step_raw(cand[tid], s), "old": step_raw(base[tid], s)} for s in steps},
+        })
+    n = len(regressed)
+    summary = {s: {"explains": sum(s in causal[tid] for tid in regressed), "of": n} for s in A.STEPS}
+    for v in summary.values():
+        v["pct"] = round(100 * v["explains"] / n)
+    return {"old_model": old["label"], "candidate": new["label"], "runs": runs,
+            "baseline_file": Path(base_path).name, "candidate_file": Path(cand_path).name,
+            "regressed": regressed, "summary": summary,
+            "unexplained": [tid for tid in regressed if not causal[tid]],
+            "tickets": out_tickets, "live_calls": new_calls_cost(files)}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--old", default="gpt-4")
@@ -99,74 +214,13 @@ def main():
     if len(A.STEPS) > 4:
         sys.exit("more than 4 steps: add the binary-search mode before using this")
     outdir = Path(args.outdir)
-    base_path = outdir / f"agent__{args.old}.jsonl"
-    cand_path = outdir / f"agent__{args.candidate}.jsonl"
-    report = build_report(base_path, cand_path)
-    regressed = [it["input_id"] for it in report["items"] if it["verdict"] == "REGRESSED"]
-    print(f"{args.old} -> {args.candidate}: {len(regressed)} regressed ticket(s): {regressed}")
-    if not regressed:
+    result = localize(spec(args.old, args.old_config), spec(args.candidate, args.candidate_config),
+                      outdir / f"agent__{args.old}.jsonl", outdir / f"agent__{args.candidate}.jsonl",
+                      args.runs, outdir, args.workers)
+    print(f"{args.old} -> {args.candidate}: {len(result['regressed'])} regressed ticket(s): {result['regressed']}")
+    if not result["regressed"]:
         return
-    tickets = [t for t in A.load_tickets() if t["id"] in regressed]
-    base, cand, gold = load(base_path), load(cand_path), load_gold("agent")
-    by_run = lambda rows: {tid: {r["run"]: r for r in rs} for tid, rs in rows.items()}
-    cand_src, base_src = by_run(cand), by_run(base)
-    old, new = (args.old, args.old_config), (args.candidate, args.candidate_config)
-    files = []
-
-    # Necessity: swap one step back to the old model.
-    singles = {}
-    for k, step in enumerate(A.STEPS):
-        label = A.config_label(args.candidate, {step: args.old})
-        files.append(run_config(tickets, label, make_plan(new, {step: old}), cand_src, k, args.runs, outdir,
-                                args.workers))
-        singles[step] = {tid: judge(files[-1], tid, base, gold) for tid in regressed}
-
-    # Pairs, only for tickets no single step repairs.
-    stuck = [tid for tid in regressed if all(singles[s][tid]["verdict"] == "REGRESSED" for s in A.STEPS)]
-    pairs = {}
-    for a, b in combinations(A.STEPS, 2) if stuck else []:
-        label = A.config_label(args.candidate, {a: args.old, b: args.old})
-        files.append(run_config([t for t in tickets if t["id"] in stuck], label,
-                                make_plan(new, {a: old, b: old}), cand_src, A.STEPS.index(a), args.runs,
-                                outdir, args.workers))
-        pairs[f"{a}+{b}"] = {tid: judge(files[-1], tid, base, gold) for tid in stuck}
-
-    # Sufficiency: for each causal step, the new model on that step alone.
-    causal = {tid: [s for s in A.STEPS if singles[s][tid]["verdict"] != "REGRESSED"] for tid in regressed}
-    suff = {}
-    for step in sorted({s for ss in causal.values() for s in ss}, key=A.STEPS.index):
-        label = A.config_label(args.old, {step: args.candidate})
-        tids = [tid for tid in regressed if step in causal[tid]]
-        files.append(run_config([t for t in tickets if t["id"] in tids], label, make_plan(old, {step: new}),
-                                base_src, A.STEPS.index(step), args.runs, outdir, args.workers))
-        suff[step] = {tid: judge(files[-1], tid, base, gold) for tid in tids}
-
-    out_tickets = []
-    for t in tickets:
-        tid = t["id"]
-        steps = causal[tid]
-        out_tickets.append({
-            "input_id": tid, "text": t["text"], "tricky": t.get("tricky", False),
-            "baseline_output": next(it for it in report["items"] if it["input_id"] == tid)["baseline"]["output"],
-            "candidate_output": next(it for it in report["items"] if it["input_id"] == tid)["candidate"]["output"],
-            "causal_steps": steps,
-            "status": "confirmed" if steps and all(suff[s][tid]["verdict"] == "REGRESSED" for s in steps)
-                      else "necessary_only" if steps else "unexplained",
-            "necessity": {s: singles[s][tid] for s in A.STEPS},
-            "pairs": {p: v[tid] for p, v in pairs.items() if tid in v},
-            "sufficiency": {s: suff[s][tid] for s in steps},
-            # What the causal step actually said, on each model (first run).
-            "step_outputs": {s: {"new": step_raw(cand[tid], s), "old": step_raw(base[tid], s)} for s in steps},
-        })
-    n = len(regressed)
-    summary = {s: {"explains": sum(s in causal[tid] for tid in regressed), "of": n} for s in A.STEPS}
-    for v in summary.values():
-        v["pct"] = round(100 * v["explains"] / n)
-    result = {"old_model": args.old, "candidate": args.candidate, "runs": args.runs,
-              "baseline_file": base_path.name, "candidate_file": cand_path.name,
-              "regressed": regressed, "summary": summary,
-              "unexplained": [tid for tid in regressed if not causal[tid]],
-              "tickets": out_tickets, "live_calls": new_calls_cost(files)}
+    summary, out_tickets, n = result["summary"], result["tickets"], len(result["regressed"])
     out_path = REPORTS / f"stepfinder_{args.candidate}.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(result, indent=2))

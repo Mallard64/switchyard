@@ -127,4 +127,5 @@ Dropped: second real example (nasa-petal/bidara). Don't build an eval dashboard,
   - One label definition needed a one-line clarification.
 - **Silent failure mode:** when the model lists entities out of order, spacy-llm silently drops the rest. The `in_order` check catches it.
 - **Benchmark (real):** 0 false alarms on a fresh gpt-4 re-run; when a break is caught, the real component is in the suspect list 4/4.
+- **Step-finder benchmark (Oct 7, `reports/agent_bench/`, terra -> sol, 9 planted breaks):** on 39 localized tickets, 0 wrong steps; 34/39 exact held-out (37/39 after the narrowing fix), all confirmed both ways; two-step break found as two steps 6/8. An LLM asked "which step failed?" also named a planted step 39/39 (31/39 exact), so **don't cite the 14–29% figure as something we reproduced**: our edge here is proof and multi-step causes.
 - **Don't claim** "nobody has built migration tooling". Claim "nobody proves which step and which lines broke".

@@ -1,0 +1,728 @@
+{
+  "old": "gpt-5.6-terra",
+  "new": "gpt-5.6-sol",
+  "runs": 3,
+  "max_tickets_per_break": 8,
+  "background": [
+    "t07"
+  ],
+  "breaks": 9,
+  "breaks_with_effect": 7,
+  "tickets_localized": 39,
+  "stepfinder": {
+    "correct": 37,
+    "correct_subset": 2,
+    "over_attributed": 0,
+    "partial": 0,
+    "wrong": 0,
+    "unexplained": 0
+  },
+  "llm_baseline_exact": 31,
+  "stepfinder_confirmed_both_ways": 39,
+  "llm_baseline_correct": 39,
+  "breaks_detail": [
+    {
+      "id": "c1",
+      "desc": "classify: money-back requests routed to billing",
+      "planted_steps": [
+        "classify"
+      ],
+      "regressed": [
+        "t01",
+        "t03",
+        "t19",
+        "t22"
+      ],
+      "localized": [
+        "t01",
+        "t03",
+        "t19",
+        "t22"
+      ],
+      "tickets": [
+        {
+          "input_id": "t01",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t03",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t19",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t22",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        }
+      ],
+      "live_calls_localize": {
+        "gpt-5.6-terra": {
+          "calls": 84,
+          "usd": 0.1277
+        },
+        "gpt-5.6-sol": {
+          "calls": 84,
+          "usd": 0.3024
+        }
+      }
+    },
+    {
+      "id": "c2",
+      "desc": "classify: order ID extracted without its letter",
+      "planted_steps": [
+        "classify"
+      ],
+      "regressed": [
+        "t01",
+        "t02",
+        "t03",
+        "t04",
+        "t05",
+        "t06",
+        "t08",
+        "t09",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t19",
+        "t20",
+        "t21",
+        "t22",
+        "t23",
+        "t24"
+      ],
+      "localized": [
+        "t01",
+        "t02",
+        "t03",
+        "t04",
+        "t05",
+        "t06",
+        "t08",
+        "t09"
+      ],
+      "tickets": [
+        {
+          "input_id": "t01",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t02",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t03",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t04",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t05",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t06",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t08",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t09",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        }
+      ],
+      "live_calls_localize": {
+        "gpt-5.6-terra": {
+          "calls": 168,
+          "usd": 0.1799
+        },
+        "gpt-5.6-sol": {
+          "calls": 168,
+          "usd": 0.4668
+        }
+      }
+    },
+    {
+      "id": "d1",
+      "desc": "decide: upset or urgent customers get what they ask for",
+      "planted_steps": [
+        "decide"
+      ],
+      "regressed": [],
+      "localized": [],
+      "tickets": []
+    },
+    {
+      "id": "d2",
+      "desc": "decide: damaged items refunded instead of replaced",
+      "planted_steps": [
+        "decide"
+      ],
+      "regressed": [
+        "t06",
+        "t20"
+      ],
+      "localized": [
+        "t06",
+        "t20"
+      ],
+      "tickets": [
+        {
+          "input_id": "t06",
+          "causal_steps": [
+            "decide"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "decide",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t20",
+          "causal_steps": [
+            "decide"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "decide",
+          "llm_correct": true
+        }
+      ],
+      "live_calls_localize": {
+        "gpt-5.6-terra": {
+          "calls": 36,
+          "usd": 0.0697
+        },
+        "gpt-5.6-sol": {
+          "calls": 42,
+          "usd": 0.228
+        }
+      }
+    },
+    {
+      "id": "r1",
+      "desc": "draft: no order IDs, amounts or timelines",
+      "planted_steps": [
+        "draft"
+      ],
+      "regressed": [
+        "t02",
+        "t03",
+        "t05",
+        "t06",
+        "t08",
+        "t09",
+        "t12",
+        "t13",
+        "t14",
+        "t19",
+        "t20"
+      ],
+      "localized": [
+        "t02",
+        "t03",
+        "t05",
+        "t06",
+        "t08",
+        "t09",
+        "t12",
+        "t13"
+      ],
+      "tickets": [
+        {
+          "input_id": "t02",
+          "causal_steps": [
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "draft",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t03",
+          "causal_steps": [
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "draft",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t05",
+          "causal_steps": [
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "draft",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t06",
+          "causal_steps": [
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "draft",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t08",
+          "causal_steps": [
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "draft",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t09",
+          "causal_steps": [
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "draft",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t12",
+          "causal_steps": [
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "draft",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t13",
+          "causal_steps": [
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "draft",
+          "llm_correct": true
+        }
+      ],
+      "live_calls_localize": {
+        "gpt-5.6-terra": {
+          "calls": 165,
+          "usd": 0.1834
+        },
+        "gpt-5.6-sol": {
+          "calls": 201,
+          "usd": 0.6862
+        }
+      }
+    },
+    {
+      "id": "r2",
+      "desc": "draft: always promise a refund if still unhappy",
+      "planted_steps": [
+        "draft"
+      ],
+      "regressed": [],
+      "localized": [],
+      "tickets": []
+    },
+    {
+      "id": "t1",
+      "desc": "tone: always rewrite to at most 20 words",
+      "planted_steps": [
+        "tone"
+      ],
+      "regressed": [
+        "t15"
+      ],
+      "localized": [
+        "t15"
+      ],
+      "tickets": [
+        {
+          "input_id": "t15",
+          "causal_steps": [
+            "tone"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "tone",
+          "llm_correct": true
+        }
+      ],
+      "live_calls_localize": {
+        "gpt-5.6-terra": {
+          "calls": 30,
+          "usd": 0.0301
+        },
+        "gpt-5.6-sol": {
+          "calls": 33,
+          "usd": 0.1157
+        }
+      }
+    },
+    {
+      "id": "t2",
+      "desc": "tone: JSON wrapped in a code block",
+      "planted_steps": [
+        "tone"
+      ],
+      "regressed": [
+        "t01",
+        "t02",
+        "t03",
+        "t04",
+        "t05",
+        "t06",
+        "t08",
+        "t09",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t15",
+        "t16",
+        "t17",
+        "t18",
+        "t19",
+        "t20",
+        "t21",
+        "t22",
+        "t23",
+        "t24"
+      ],
+      "localized": [
+        "t01",
+        "t02",
+        "t03",
+        "t04",
+        "t05",
+        "t06",
+        "t08",
+        "t09"
+      ],
+      "tickets": [
+        {
+          "input_id": "t01",
+          "causal_steps": [
+            "tone"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "tone",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t02",
+          "causal_steps": [
+            "tone"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "tone",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t03",
+          "causal_steps": [
+            "tone"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "tone",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t04",
+          "causal_steps": [
+            "tone"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "tone",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t05",
+          "causal_steps": [
+            "tone"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "tone",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t06",
+          "causal_steps": [
+            "tone"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "tone",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t08",
+          "causal_steps": [
+            "tone"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "tone",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t09",
+          "causal_steps": [
+            "tone"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "tone",
+          "llm_correct": true
+        }
+      ],
+      "live_calls_localize": {
+        "gpt-5.6-terra": {
+          "calls": 96,
+          "usd": 0.1171
+        },
+        "gpt-5.6-sol": {
+          "calls": 168,
+          "usd": 0.7383
+        }
+      }
+    },
+    {
+      "id": "p1",
+      "desc": "two steps: classify drops the order ID letter AND draft omits IDs/amounts",
+      "planted_steps": [
+        "classify",
+        "draft"
+      ],
+      "regressed": [
+        "t01",
+        "t02",
+        "t03",
+        "t04",
+        "t05",
+        "t06",
+        "t08",
+        "t09",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t19",
+        "t20",
+        "t21",
+        "t22",
+        "t23",
+        "t24"
+      ],
+      "localized": [
+        "t01",
+        "t02",
+        "t03",
+        "t04",
+        "t05",
+        "t06",
+        "t08",
+        "t09"
+      ],
+      "tickets": [
+        {
+          "input_id": "t01",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct_subset",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t02",
+          "causal_steps": [
+            "classify",
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t03",
+          "causal_steps": [
+            "classify",
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t04",
+          "causal_steps": [
+            "classify"
+          ],
+          "status": "confirmed",
+          "verdict": "correct_subset",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t05",
+          "causal_steps": [
+            "classify",
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t06",
+          "causal_steps": [
+            "classify",
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t08",
+          "causal_steps": [
+            "classify",
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        },
+        {
+          "input_id": "t09",
+          "causal_steps": [
+            "classify",
+            "draft"
+          ],
+          "status": "confirmed",
+          "verdict": "correct",
+          "llm_says": "classify",
+          "llm_correct": true
+        }
+      ],
+      "live_calls_localize": {
+        "gpt-5.6-terra": {
+          "calls": 366,
+          "usd": 0.3972
+        },
+        "gpt-5.6-sol": {
+          "calls": 330,
+          "usd": 1.1615
+        }
+      }
+    }
+  ],
+  "live_calls_candidate_runs": {
+    "gpt-5.6-sol": {
+      "calls": 1728,
+      "usd": 6.7365
+    }
+  },
+  "llm_baseline_cost_usd": 0.2715
+}
