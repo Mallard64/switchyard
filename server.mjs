@@ -25,7 +25,8 @@ async function listReports() {
       try {
         const raw = JSON.parse(await readFile(full, 'utf8'));
         if (!raw.comparison || !Array.isArray(raw.candidates)) continue;
-        out.push({id: name, title: raw.pr?.title || name, task: raw.task, updated: (await stat(full)).mtimeMs, file: full});
+        out.push({id: name, title: raw.pr?.title || name, task: raw.task, group: raw.group || 'Migrations',
+                  label: raw.label || null, updated: (await stat(full)).mtimeMs, file: full});
         break;
       } catch { /* not present or not a dashboard report */ }
     }
@@ -82,6 +83,16 @@ async function scan() {
 }
 await scan();
 setInterval(scan, 1000);
+// Reports appear or change when a run (or an export) writes them: tell open pages.
+let reportsSig = '';
+async function watchReports() {
+  const list = (await listReports()).map(({file, ...r}) => r);
+  const sig = JSON.stringify(list.map(r => [r.id, r.updated]));
+  if (reportsSig && sig !== reportsSig) for (const res of clients) send(res, 'reports', list);
+  reportsSig = sig;
+}
+await watchReports();
+setInterval(watchReports, 2000);
 setInterval(() => { for (const res of clients) res.write(': keep-alive\n\n'); }, 15000);
 
 // ---- Replays of recorded runs -----------------------------------------------------------------

@@ -54,7 +54,9 @@ latest rows. Start a run in samegrade, for example `python demo_e2e.py --break u
 "Reload report" re-reads the report once a run has rewritten it. **▶ Replay a run** streams a recorded run behind the current report (baseline, candidate or fix re-run) back
 through the live view, in recorded order and pacing, compressed to 20 s / 1 min or in real time. Replays make **no model
 calls** and work offline (`POST /api/replay`, accepted only from the dashboard page itself). Without the backend, the page falls back to
-`results.json` exactly as before.
+`results.json` exactly as before. The report list follows whatever samegrade has produced (migrations, end-to-end demos and every
+tested planted break, grouped in the picker); when a run or an export writes a report, open pages update the list and
+reload the report they are showing.
 
 **This version displays recorded results.** Replay controls animate those results; they do not call models, run evaluations, apply real code changes, or create GitHub pull requests. Model names, dates, scores and recommendations come from the supplied fixtures, not live provider information.
 

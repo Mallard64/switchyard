@@ -38,32 +38,43 @@ function normalizeNER(raw) {
  };
  return normalized;
 }
-// ---- Inside the pipeline: the 4 steps, one ticket's journey, the step-swap proof, the line, the fix ----
+// ---- Inside the pipeline: the 4 steps, every tested ticket, one ticket's journey, the proof, the line, the fix ----
 const decisionPart=v=>String(v??'').split(' — ')[0];
+const VERDICT={REGRESSED:['bad','broken'],CHANGED:['chg','changed'],IMPROVED:['ok','improved'],SAME:['ok','as before']};
 function pipelineSection(p,ti){
  const t=p.tickets[ti]||p.tickets[0];if(!t)return'';
- const steps=p.steps,cause=new Set(p.causal_steps),lineStep=p.lines?.[0]?.step;
- const node=(s,i)=>`<div class="pipe-node ${cause.has(s)?'cause':''}"><span class="pipe-num">${i+1}</span><strong>${esc(s)}</strong><small>${esc(p.info[s])}</small>${cause.has(s)?'<em>broken here</em>':''}</div>`;
+ const steps=p.steps,cause=new Set(p.causal_steps),planted=new Set(p.planted_steps||[]),lineStep=p.lines?.[0]?.step;
+ const broken=p.tickets.filter(x=>x.verdict==='REGRESSED').length;
+ const node=(s,i)=>`<div class="pipe-node ${cause.has(s)?'cause':''}"><span class="pipe-num">${i+1}</span><strong>${esc(s)}</strong><small>${esc(p.info[s])}</small><span class="pipe-tags">${planted.has(s)?'<em class="planted">planted here</em>':''}${cause.has(s)?'<em>found here</em>':''}</span></div>`;
  const flow=steps.map((s,i)=>node(s,i)+(i<steps.length-1?'<span class="pipe-arrow" aria-hidden="true">→</span>':'')).join('');
+ const map=p.tickets.map((x,i)=>{const [cls]=VERDICT[x.verdict]||['ok'];return `<button class="pipe-tile ${cls} ${i===ti?'on':''}" data-ti="${i}" title="${esc(x.id)}: ${esc(VERDICT[x.verdict]?.[1]||x.verdict)}${x.fixed_verdict?` · with fix: ${esc(VERDICT[x.fixed_verdict]?.[1]||x.fixed_verdict)}`:''}">${esc(x.id)}${x.verdict==='REGRESSED'&&x.fixed_verdict&&x.fixed_verdict!=='REGRESSED'?'<i>fixed</i>':''}</button>`;}).join('');
  const differs=(s,row)=>['classify','decide'].includes(s)&&row[s]!=null&&t.old[s]!=null&&decisionPart(row[s])!==decisionPart(t.old[s]);
- const traceRow=(label,sub,row,out,ok,kind)=>row?`<div class="trace-row ${kind}"><div class="trace-label"><strong>${esc(label)}</strong><small>${esc(sub)}</small></div>${steps.map(s=>`<div class="trace-cell ${cause.has(s)?'cause-col':''} ${kind!=='old'&&differs(s,row)?'changed-cell':''}" tabindex="0" data-row="${kind}" data-step="${esc(s)}" aria-label="${esc(s)}, ${esc(label)}: show prompt, expected and actual answer">${esc(row[s]??'—')}</div>`).join('')}<div class="trace-out ${ok?'ok':'bad'}">${ok?'✓':'✗'} ${esc((out||[]).join?out.join(' · '):out)}</div></div>`:'';
+ const promptMark=(row,s)=>{const c=t.cells?.[row]?.[s];return c&&(c.added.length||c.removed.length)?'<span class="cell-mark" title="prompt differs from the old pipeline">prompt ±</span>':'';};
+ const traceRow=(label,sub,row,out,ok,kind)=>row?`<div class="trace-row ${kind}"><div class="trace-label"><strong>${esc(label)}</strong><small>${esc(sub)}</small></div>${steps.map(s=>`<div class="trace-cell ${cause.has(s)?'cause-col':''} ${kind!=='old'&&differs(s,row)?'changed-cell':''}" tabindex="0" data-row="${kind}" data-step="${esc(s)}" aria-label="${esc(s)}, ${esc(label)}: show prompt, expected and actual answer">${promptMark(kind,s)}${esc(row[s]??'—')}</div>`).join('')}<div class="trace-out ${ok?'ok':'bad'}">${ok?'✓':'✗'} ${esc((out||[]).join?out.join(' · '):out)}</div></div>`:'';
  const head=`<div class="trace-row trace-head"><div></div>${steps.map(s=>`<div class="${cause.has(s)?'cause-col':''}">${esc(s)}</div>`).join('')}<div>final result</div></div>`;
  const verdict=r=>r.kind==='reference'?(r.ok?'✓ correct':'✗ wrong'):r.kind==='swap_back'?(r.ok?'✓ fixed':'✗ still wrong'):(r.ok?'✓ not reproduced':'✗ breaks again');
  const decisive=r=>(r.kind==='swap_back'&&r.ok)||(r.kind==='only_new'&&!r.ok);
+ const exps=t.experiments||[];
  const proofHead=`<div class="proof-row proof-head"><span></span><span class="proof-dots">${steps.map(s=>`<b class="${cause.has(s)?'cause':''}">${esc(s)}</b>`).join('')}</span><span></span></div>`;
- const proof=(t.experiments||[]).length?proofHead+(t.experiments||[]).map(r=>`<div class="proof-row ${r.kind} ${decisive(r)?'decisive':''}"><span class="proof-label">${esc(r.label)}</span><span class="proof-dots">${steps.map(s=>`<i class="${r.models[s]}" title="${esc(s)}: ${esc(r.models[s])} model"></i>`).join('')}</span><span class="proof-result ${r.ok?'ok':'bad'}">${verdict(r)} <small>${esc(r.output)}</small></span></div>`).join(''):'';
+ const proof=exps.length?proofHead+exps.map(r=>`<div class="proof-row ${r.kind} ${decisive(r)?'decisive':''}"><span class="proof-label">${esc(r.label)}</span><span class="proof-dots">${steps.map(s=>`<i class="${r.models[s]}" title="${esc(s)}: ${esc(r.models[s])}"></i>`).join('')}</span><span class="proof-result ${r.ok?'ok':'bad'}">${verdict(r)} <small>${esc(r.output)}</small></span></div>`).join(''):'';
  const lines=(p.lines||[]).map(l=>`<li class="${l.proven?'proven':''}"><span>${esc(l.text)}</span><b>${l.proven?`removing it fixes ${esc(l.repaired)}`:`${esc(l.repaired)}`}</b></li>`).join('');
  const f=p.fix,bar=(n,cls)=>`<div class="fix-bar ${cls}"><i style="width:${f.total&&n?Math.max(2,100*n/f.total):0}%"></i></div>`;
+ const headline=broken?(cause.size?`The new pipeline broke the <span class="pipe-hl">${esc([...cause].join(' + '))}</span> step${cause.size>1?'s':''}.`:`${broken} ticket${broken===1?'':'s'} broke; not yet localized.`):'Nothing broke: every ticket came out as before.';
+ const plantedNote=planted.size?`<p class="pipe-planted">Planted in <b>${esc([...planted].join(' + '))}</b> · step-finder found <b>${esc([...cause].join(' + ')||'nothing')}</b>${[...planted].every(s=>cause.has(s))&&[...cause].every(s=>planted.has(s))?' <span class="ok-text">✓ match</span>':''}</p>`:'';
+ const noProof=t.verdict==='REGRESSED'?'<p class="pipe-caption">This broken ticket wasn’t among the ones localized (a sample per break), so there are no swap experiments for it.</p>':`<p class="pipe-caption">This ticket ${t.verdict==='SAME'?'came out the same on both pipelines':`is ${esc(VERDICT[t.verdict]?.[1]||t.verdict)}`}, so there was nothing to localize. Hover any cell to see what each step got and said.</p>`;
  return `<section class="viz-card pipe-card" id="pipeline-card" aria-label="Inside the pipeline">
- <div class="viz-title"><div><p class="eyebrow">INSIDE THE PIPELINE</p><h2>${cause.size?`The new model broke the <span class="pipe-hl">${esc([...cause].join(' + '))}</span> step.`:'Where the new model changed things'}</h2></div><span class="pill">${p.tickets.length} broken ticket${p.tickets.length===1?'':'s'}</span></div>
+ <div class="viz-title"><div><p class="eyebrow">INSIDE THE PIPELINE</p><h2>${headline}</h2></div><span class="pill">${broken} of ${p.tickets.length} tickets broken</span></div>
+ ${plantedNote}
  <div class="pipe-flow">${flow}</div>
- <div class="pipe-tickets" role="tablist" aria-label="Broken tickets">${p.tickets.map((x,i)=>`<button class="pipe-chip ${i===ti?'on':''}" data-ti="${i}" role="tab" aria-selected="${i===ti}">${esc(x.id)}</button>`).join('')}</div>
- <p class="pipe-input">“${esc(t.text)}”</p>
- <h3 class="pipe-h">One ticket, step by step</h3>
- <div class="trace">${head}${traceRow('Old pipeline',p.old_label,t.old,t.outputs.old,true,'old')}${traceRow('New pipeline',p.new_label,t.new,t.outputs.new,false,'new')}${t.fixed?traceRow('New + fix',f.change||'',t.fixed,t.outputs.fixed||[],true,'fixed'):''}</div>
- <p class="pipe-caption">Red cells: decisions that differ from the old pipeline. ${t.first_divergence&&cause.size&&!cause.has(t.first_divergence)?`The first difference shows up in <b>${esc(t.first_divergence)}</b>, but the cause is <b>${esc([...cause].join(' + '))}</b>: the error travels downstream.`:''}</p>
- ${proof?`<h3 class="pipe-h">The proof: swap one step at a time</h3><div class="proof-legend"><span><i class="old"></i>old model</span><span><i class="new"></i>new model</span></div><div class="proof">${proof}</div>
- <p class="pipe-caption">A step is the cause when putting <b>only that step</b> back on the old model fixes the ticket, and running <b>only that step</b> on the new model breaks it again.</p>`:''}
+ <h3 class="pipe-h">Every ticket tested <small>· click one</small></h3>
+ <div class="pipe-map" role="tablist" aria-label="Tickets">${map}</div>
+ <p class="pipe-legend"><span class="pipe-tile ok">t01</span> as before <span class="pipe-tile chg">t02</span> changed, not worse <span class="pipe-tile bad">t07</span> broken${p.fix.after!=null?' · <i class="fixed-key">fixed</i> = repaired by the proposed fix':''}</p>
+ <p class="pipe-input"><b>${esc(t.id)}</b> “${esc(t.text)}”</p>
+ <h3 class="pipe-h">One ticket, step by step <small>· hover a cell for its prompt, expected and actual answer</small></h3>
+ <div class="trace">${head}${traceRow('Old pipeline',p.old_label,t.old,t.outputs.old,true,'old')}${traceRow('New pipeline',p.new_label,t.new,t.outputs.new,t.verdict!=='REGRESSED','new')}${t.fixed?traceRow('New + fix',f.change||'',t.fixed,t.outputs.fixed||[],t.fixed_verdict!=='REGRESSED','fixed'):''}</div>
+ <p class="pipe-caption">Red cells: decisions that differ from the old pipeline. <span class="cell-mark">prompt ±</span>: that step’s prompt differs from the old pipeline’s. ${t.first_divergence&&cause.size&&!cause.has(t.first_divergence)?`The first difference shows up in <b>${esc(t.first_divergence)}</b>, but the cause is <b>${esc([...cause].join(' + '))}</b>: the error travels downstream.`:''}</p>
+ ${proof?`<h3 class="pipe-h">The proof: swap one step at a time</h3><div class="proof-legend"><span><i class="old"></i>old</span><span><i class="new"></i>new</span></div><div class="proof">${proof}</div>
+ <p class="pipe-caption">A step is the cause when putting <b>only that step</b> back on the old version fixes the ticket, and running <b>only that step</b> on the new version breaks it again.</p>`:noProof}
  ${lines?`<h3 class="pipe-h">The line: ${esc(lineStep)} prompt</h3><ol class="pipe-lines">${lines}</ol><p class="pipe-caption">Each line was removed on its own and the broken tickets re-run.</p>`:''}
  ${f.after!=null?`<h3 class="pipe-h">The fix</h3><div class="pipe-fix"><div><span>Before</span>${bar(f.before,'before')}<b>${esc(f.before)} of ${esc(f.total)} broken</b></div><div><span>After: ${esc(f.change)}</span>${bar(f.after,'after')}<b>${esc(f.after)} of ${esc(f.total)} broken</b></div><p>${f.decision==='pending'?'Proposed fix, awaiting an engineer’s review.':`Fix ${esc(f.decision)}.`}</p></div>`:''}
  </section>`;
@@ -73,8 +84,7 @@ const cellPop=Object.assign(document.createElement('div'),{id:'cell-pop',role:'d
 document.body.append(cellPop);
 let popTimer=null,popPinned=false;
 function cellVerdict(step,expected,output){
- // Only classify and decide have a single right answer to compare against.
- if(step==='classify'){try{const o=JSON.parse(output);return expected===`category: ${o.category} · order ${o.order_id||'none'}`;}catch{return null;}}
+ if(step==='classify'){try{const o=JSON.parse(output.slice(output.indexOf('{'),output.lastIndexOf('}')+1));return expected===`category: ${o.category} · order ${o.order_id||'none'}`;}catch{return null;}}
  if(step==='decide'){try{return expected===`action: ${JSON.parse(output.slice(output.indexOf('{'),output.lastIndexOf('}')+1)).action}`;}catch{return null;}}
  return null;
 }
@@ -83,16 +93,21 @@ function showCellPop(el,p,ti){
  const t=p.tickets[ti],row=el.dataset.row,step=el.dataset.step,c=t.cells?.[row]?.[step];if(!c)return;
  const label={old:'Old pipeline',new:'New pipeline',fixed:'New + fix'}[row];
  const exp=t.expected?.[step]||'—',ok=cellVerdict(step,exp,c.output),old=t.cells.old?.[step];
- cellPop.innerHTML=`<div class="pop-head"><div><strong>${esc(step)}</strong> · ${esc(label)} <small>${esc(c.model)}</small></div>${ok===null?'':`<span class="pop-verdict ${ok?'ok':'bad'}">${ok?'✓ matches expected':'✗ not what was expected'}</span>`}</div>
- <div class="pop-cols"><section><h4>Prompt (system)</h4><ol class="pop-system">${c.system.map((l,i)=>`<li class="${c.changed.includes(i)?'changed':''}">${esc(l)}</li>`).join('')}</ol>
- ${c.changed.length?'<p class="pop-note">Highlighted: not in the old pipeline’s prompt for this step.</p>':''}
+ const system=p.prompts?.[c.prompt]||c.system||[];
+ const sameModel=old&&old.model===c.model;
+ const diffNote=row==='old'?'':c.added.length||c.removed.length
+  ?`<p class="pop-note">Compared with the old pipeline’s prompt for this step: ${[c.added.length?`<b>${c.added.length} line${c.added.length===1?'':'s'} added</b> (highlighted)`:'',c.removed.length?`<b>${c.removed.length} line${c.removed.length===1?'':'s'} removed</b> (struck through, below)`:''].filter(Boolean).join(', ')}.</p>`
+  :`<p class="pop-note same">Same prompt as the old pipeline.${sameModel?'':` Only the model changed: <b>${esc(old?.model)}</b> → <b>${esc(c.model)}</b>.`}</p>`;
+ cellPop.innerHTML=`<div class="pop-head"><div><strong>${esc(step)}</strong> · ${esc(label)} · ${esc(t.id)} <small>${esc(c.model)}</small></div>${ok===null?'':`<span class="pop-verdict ${ok?'ok':'bad'}">${ok?'✓ matches expected':'✗ not what was expected'}</span>`}</div>
+ <div class="pop-cols"><section><h4>Prompt (system)</h4>${diffNote}<ol class="pop-system">${system.map((l,i)=>`<li class="${c.added.includes(i)?'changed':''}">${esc(l)}</li>`).join('')}</ol>
+ ${c.removed.length?`<ul class="pop-removed">${c.removed.map(l=>`<li><s>${esc(l)}</s> <small>removed</small></li>`).join('')}</ul>`:''}
  <details><summary>Input this step received</summary><pre>${esc(c.user)}</pre></details></section>
  <section><h4>Expected</h4><p class="pop-expected">${esc(exp)}</p>
  ${row!=='old'&&old?`<h4>Old pipeline answered</h4><pre>${esc(old.output)}</pre>`:''}
  <h4>Actual</h4><pre class="${ok===false?'bad':ok?'ok':''}">${esc(c.output)}</pre></section></div>
  <p class="pop-hint">${popPinned?'Pinned · Esc or click outside to close':'Click the cell to pin'}</p>`;
  cellPop.classList.add('open');
- const r=el.getBoundingClientRect(),w=Math.min(780,innerWidth-24),h=cellPop.offsetHeight;
+ const r=el.getBoundingClientRect(),w=Math.min(800,innerWidth-24),h=cellPop.offsetHeight;
  cellPop.style.width=`${w}px`;
  cellPop.style.left=`${Math.max(12,Math.min(r.left+r.width/2-w/2,innerWidth-w-12))}px`;
  cellPop.style.top=`${r.bottom+8+h<innerHeight?r.bottom+8:Math.max(12,r.top-8-h)}px`;
@@ -105,15 +120,15 @@ document.addEventListener('click',e=>{if(popPinned&&!cellPop.contains(e.target)&
 addEventListener('scroll',()=>{if(!popPinned)cellPop.classList.remove('open');},{passive:true});
 function installPipeline(p){
  const card=document.querySelector('#pipeline-card');if(!card)return;
- const ti=Number(card.querySelector('.pipe-chip.on')?.dataset.ti||0);
+ const ti=Number(card.querySelector('.pipe-tile.on')?.dataset.ti||0);
  card.querySelectorAll('.trace-cell[data-row]').forEach(el=>{
   el.addEventListener('mouseenter',()=>showCellPop(el,p,ti));el.addEventListener('mouseleave',hideCellPop);
   el.addEventListener('focus',()=>showCellPop(el,p,ti));el.addEventListener('blur',hideCellPop);
   el.addEventListener('click',()=>{popPinned=!popPinned;showCellPop(el,p,ti);});
  });
- card.addEventListener('click',e=>{const b=e.target.closest('.pipe-chip');if(!b)return;popPinned=false;cellPop.classList.remove('open');
+ card.addEventListener('click',e=>{const b=e.target.closest('.pipe-tile[data-ti]');if(!b)return;popPinned=false;cellPop.classList.remove('open');
   const fresh=document.createElement('div');fresh.innerHTML=pipelineSection(p,Number(b.dataset.ti));
-  const next=fresh.firstElementChild;card.replaceWith(next);installPipeline(p);next.querySelector('.pipe-chip.on')?.focus();});
+  const next=fresh.firstElementChild;card.replaceWith(next);installPipeline(p);next.querySelector('.pipe-tile.on')?.focus({preventScroll:true});});
 }
 function renderVisualDashboard() {
  motionCleanup();
@@ -250,9 +265,21 @@ async function loadReport(url){
  const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error(`Could not load the report (${response.status}).`);
  const raw=await response.json();data=raw?.comparison && Array.isArray(raw.candidates)?normalizeMigration(raw):raw?.task==='ner'?normalizeNER(raw):raw;validate(data);entries=data.candidates.flatMap((c,ci)=>c.results.map((r,ri)=>({r,ci,ri})));render();
 }
+function pickerOptions(){
+ const groups=[...new Set(reports.map(r=>r.group||'Reports'))];
+ return groups.map(g=>`<optgroup label="${esc(g)}">${reports.filter(r=>(r.group||'Reports')===g).map(r=>`<option value="${esc(r.id)}" ${r.id===currentReport?'selected':''}>${esc(r.label||r.id.replaceAll('_',' '))}</option>`).join('')}</optgroup>`).join('');
+}
+function toast(text){const el=Object.assign(document.createElement('div'),{className:'toast',textContent:text});document.body.append(el);setTimeout(()=>el.remove(),3500);}
+async function onReportsChanged(list){
+ const before=reports.find(r=>r.id===currentReport)?.updated,added=list.filter(r=>!reports.some(x=>x.id===r.id));
+ reports=list;const select=document.querySelector('.report-picker');if(select)select.innerHTML=pickerOptions();
+ const now=reports.find(r=>r.id===currentReport)?.updated;
+ if(currentReport&&now&&now!==before){try{await loadReport(reportURL(currentReport));toast('Report updated from the latest run');}catch(e){showError(e);}}
+ else if(added.length)toast(`New report: ${added.map(r=>r.label||r.id).join(', ')}`);
+}
 function installReportPicker(){
  const select=document.createElement('select');select.className='report-picker';select.setAttribute('aria-label','Report');
- select.innerHTML=reports.map(r=>`<option value="${esc(r.id)}">${esc(r.id.replaceAll('_',' '))}</option>`).join('');
+ select.innerHTML=pickerOptions();
  select.onchange=async()=>{try{await loadReport(reportURL(select.value));currentReport=select.value;}catch(e){showError(e);}};
  document.querySelector('.mast-meta').prepend(select);
 }
@@ -338,6 +365,7 @@ function installLive(){
   source.addEventListener('hello',e=>{const h=JSON.parse(e.data);live.connected=true;replayState=h.replay||replayState;h.recent.forEach(addLiveRow);paint();});
   source.addEventListener('row',e=>{const ev=JSON.parse(e.data);addLiveRow(ev);if(ev.replay&&replayState?.state==='running'&&ev.file===`replay: ${replayState.file}`)replayState.sent++;paint();});
   source.addEventListener('replay',e=>{replayState=JSON.parse(e.data);paint();});
+  source.addEventListener('reports',e=>onReportsChanged(JSON.parse(e.data)));
   source.onerror=()=>{live.connected=false;paint();};
  }
  setInterval(paint,5000);paint();
@@ -345,6 +373,7 @@ function installLive(){
 }
 
 try{const r=await fetch('/api/reports',{cache:'no-store'});if(r.ok)reports=await r.json();}catch{reports=[];}
+currentReport=reports[0]?.id??null;
 if(reports.length)installReportPicker();
-try{await loadReport(reports.length?reportURL(reports[0].id):'./results.json');currentReport=reports[0]?.id??null;}catch(error){showError(error);}
+try{await loadReport(reports.length?reportURL(reports[0].id):'./results.json');}catch(error){showError(error);}
 installLive();
