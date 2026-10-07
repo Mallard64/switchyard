@@ -1274,6 +1274,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days."
+          }
+        ],
         "outputs": {
           "old": "refund/refund",
           "new": "refund/refund",
@@ -1389,6 +1396,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "damaged/replace",
           "new": "damaged/deny",
@@ -1504,6 +1518,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days."
+          }
+        ],
         "outputs": {
           "old": "cancel/cancel",
           "new": "cancel/cancel",
@@ -1619,6 +1640,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days."
+          }
+        ],
         "outputs": {
           "old": "refund/refund",
           "new": "refund/refund",
@@ -1734,6 +1762,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "refund/deny",
           "new": "refund/deny",
@@ -1849,6 +1878,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "refund/deny",
           "new": "refund/deny",
@@ -1964,6 +1994,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "refund/refund",
           "new": "refund/refund",
@@ -2079,6 +2110,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "refund/deny",
           "new": "refund/deny",
@@ -2194,6 +2226,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "damaged/replace",
           "new": "damaged/replace",
@@ -2309,6 +2342,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "damaged/escalate",
           "new": "damaged/escalate",
@@ -2424,6 +2458,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "shipping/info",
           "new": "shipping/info",
@@ -2539,6 +2574,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "shipping/replace",
           "new": "shipping/replace",
@@ -2654,6 +2690,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "cancel/deny",
           "new": "cancel/deny",
@@ -2769,6 +2806,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "billing/escalate",
           "new": "billing/escalate",
@@ -2884,6 +2922,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "billing/escalate",
           "new": "billing/escalate",
@@ -2999,6 +3038,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "account/info",
           "new": "account/info",
@@ -3114,6 +3154,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "account/escalate",
           "new": "account/escalate",
@@ -3229,6 +3270,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "refund/ask_for_info",
           "new": "refund/ask_for_info",
@@ -3344,6 +3386,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "other/escalate",
           "new": "other/escalate",
@@ -3459,6 +3502,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "refund/deny",
           "new": "refund/deny",
@@ -3574,6 +3618,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "damaged/replace",
           "new": "damaged/replace",
@@ -3689,6 +3734,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "refund/refund",
           "new": "refund/refund",
@@ -3804,6 +3850,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "shipping/replace",
           "new": "shipping/replace",
@@ -3919,6 +3966,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "cancel/cancel",
           "new": "cancel/cancel",

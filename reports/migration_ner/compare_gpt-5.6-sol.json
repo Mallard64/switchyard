@@ -1,7 +1,7 @@
 {
   "task": "ner",
-  "baseline_file": "ner__gpt-4__gpt-4.jsonl",
   "candidate_file": "ner__gpt-4__gpt-5.6-sol.jsonl",
+  "baseline_file": "ner__gpt-4__gpt-4.jsonl + ner__gpt-4__gpt-4__ext.jsonl",
   "inputs_compared": 20,
   "verdict_counts": {
     "REGRESSED": 1,

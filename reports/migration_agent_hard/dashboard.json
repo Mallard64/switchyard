@@ -1,7 +1,7 @@
 {
   "task": "agent",
-  "started": "2026-10-07T21:11:08.452994+00:00",
-  "finished": "2026-10-07T21:11:08.640970+00:00",
+  "started": "2026-10-07T23:17:56.793423+00:00",
+  "finished": "2026-10-07T23:17:56.937808+00:00",
   "group": "Migrations",
   "label": "agent \u00b7 gpt-4 \u2192 gpt-5.6-sol \u00b7 hard tickets",
   "baseline": {

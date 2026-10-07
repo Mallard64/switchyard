@@ -1,13 +1,13 @@
 {
   "task": "ner",
-  "baseline_file": "ner__gpt-4__gpt-4.jsonl",
   "candidate_file": "ner__gpt-4__gpt-5.6-terra.jsonl",
-  "inputs_compared": 20,
+  "baseline_file": "ner__gpt-4__gpt-4.jsonl + ner__gpt-4__gpt-4__ext.jsonl",
+  "inputs_compared": 50,
   "verdict_counts": {
-    "REGRESSED": 2,
-    "IMPROVED": 1,
-    "CHANGED": 2,
-    "SAME": 15
+    "REGRESSED": 3,
+    "IMPROVED": 3,
+    "CHANGED": 5,
+    "SAME": 39
   },
   "ready_to_merge": false,
   "baseline": {
@@ -15,7 +15,7 @@
     "resolved_model": [
       "gpt-4-0613"
     ],
-    "outputs": 60,
+    "outputs": 150,
     "passed_all": 1.0,
     "checks": {
       "format": 1.0,
@@ -25,19 +25,19 @@
       "nonempty": 1.0,
       "in_order": 1.0
     },
-    "accuracy": 0.9708,
+    "accuracy": 0.9583,
     "accuracy_metric": "lenient entity F1",
-    "unstable_inputs": 0,
-    "latency_p50_s": 2.888,
-    "latency_p95_s": 6.802,
-    "cost_per_1k_calls_usd": 15.63
+    "unstable_inputs": 1,
+    "latency_p50_s": 2.495,
+    "latency_p95_s": 5.361,
+    "cost_per_1k_calls_usd": 14.84
   },
   "candidate": {
     "model": "gpt-5.6-terra",
     "resolved_model": [
       "gpt-5.6-terra"
     ],
-    "outputs": 60,
+    "outputs": 150,
     "passed_all": 1.0,
     "checks": {
       "format": 1.0,
@@ -47,12 +47,12 @@
       "nonempty": 1.0,
       "in_order": 1.0
     },
-    "accuracy": 0.9578,
+    "accuracy": 0.9573,
     "accuracy_metric": "lenient entity F1",
-    "unstable_inputs": 5,
-    "latency_p50_s": 2.419,
-    "latency_p95_s": 4.071,
-    "cost_per_1k_calls_usd": 2.91
+    "unstable_inputs": 12,
+    "latency_p50_s": 2.197,
+    "latency_p95_s": 4.168,
+    "cost_per_1k_calls_usd": 2.56
   },
   "instructions_implicated": {},
   "items": [
@@ -937,6 +937,1311 @@
           "blueberries/INGREDIENT",
           "batter/INGREDIENT",
           "rubber spatula/EQUIPMENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-21",
+      "text": "Chop the onions and toss them into the hot wok.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "onions/INGREDIENT",
+          "hot wok/EQUIPMENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [
+          {
+            "type": "boundary",
+            "gold": [
+              "wok",
+              "EQUIPMENT"
+            ],
+            "pred": [
+              "hot wok",
+              "EQUIPMENT"
+            ]
+          }
+        ],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "onions/INGREDIENT",
+          "hot wok/EQUIPMENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [
+          {
+            "type": "boundary",
+            "gold": [
+              "wok",
+              "EQUIPMENT"
+            ],
+            "pred": [
+              "hot wok",
+              "EQUIPMENT"
+            ]
+          }
+        ],
+        "stable": false,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-22",
+      "text": "The ramen was great, and I'd order it again.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "ramen/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "ramen/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-23",
+      "text": "Grate some parmesan and sprinkle it over the soup.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "parmesan/INGREDIENT",
+          "soup/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "parmesan/INGREDIENT",
+          "soup/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-24",
+      "text": "The crispy, golden fries were perfectly salted.",
+      "tricky": true,
+      "verdict": "CHANGED",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "crispy, golden fries/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [
+          {
+            "type": "boundary",
+            "gold": [
+              "fries",
+              "DISH"
+            ],
+            "pred": [
+              "crispy, golden fries",
+              "DISH"
+            ]
+          }
+        ],
+        "stable": false
+      },
+      "candidate": {
+        "output": [
+          "fries/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-25",
+      "text": "Saut\u00e9 the garlic quickly so it doesn't burn.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "garlic/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "garlic/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-26",
+      "text": "Grill the halloumi until it's charred and smoky.",
+      "tricky": true,
+      "verdict": "IMPROVED",
+      "regressions": [],
+      "improvements": [
+        {
+          "kind": "accuracy",
+          "baseline": [
+            0.6667,
+            0.6667,
+            0.6667
+          ],
+          "candidate": [
+            0.6667,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "baseline": {
+        "output": [
+          "Grill/EQUIPMENT",
+          "halloumi/INGREDIENT"
+        ],
+        "score_runs": [
+          0.6667,
+          0.6667,
+          0.6667
+        ],
+        "errors": [
+          {
+            "type": "spurious",
+            "pred": [
+              "grill",
+              "EQUIPMENT"
+            ]
+          }
+        ],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "halloumi/INGREDIENT"
+        ],
+        "score_runs": [
+          0.6667,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": false,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-27",
+      "text": "Steam the dumplings for eight minutes.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "dumplings/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "dumplings/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-28",
+      "text": "Roast the carrots with honey until caramelized.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "carrots/INGREDIENT",
+          "honey/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "carrots/INGREDIENT",
+          "honey/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-29",
+      "text": "Heat the oil in a Dutch oven before adding the beans.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "oil/INGREDIENT",
+          "Dutch oven/EQUIPMENT",
+          "beans/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "oil/INGREDIENT",
+          "Dutch oven/EQUIPMENT",
+          "beans/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-30",
+      "text": "Knead the dough in a stand mixer with the dough hook.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "dough/INGREDIENT",
+          "stand mixer/EQUIPMENT",
+          "dough hook/EQUIPMENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "dough/INGREDIENT",
+          "stand mixer/EQUIPMENT",
+          "dough hook/EQUIPMENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-31",
+      "text": "Pipe the frosting onto the cupcakes with a piping bag.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "frosting/INGREDIENT",
+          "cupcakes/DISH",
+          "piping bag/EQUIPMENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "frosting/INGREDIENT",
+          "cupcakes/DISH",
+          "piping bag/EQUIPMENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-32",
+      "text": "Use a thermometer to check the chicken reaches 165 degrees.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "thermometer/EQUIPMENT",
+          "chicken/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "thermometer/EQUIPMENT",
+          "chicken/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-33",
+      "text": "Crush the garlic with a garlic press and add it to the pan.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "garlic/INGREDIENT",
+          "garlic press/EQUIPMENT",
+          "pan/EQUIPMENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "garlic/INGREDIENT",
+          "garlic press/EQUIPMENT",
+          "pan/EQUIPMENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-34",
+      "text": "Pour the soup into a mug and sip it slowly.",
+      "tricky": true,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "soup/DISH",
+          "mug/EQUIPMENT"
+        ],
+        "score_runs": [
+          0.6667,
+          0.6667,
+          0.6667
+        ],
+        "errors": [
+          {
+            "type": "spurious",
+            "pred": [
+              "mug",
+              "EQUIPMENT"
+            ]
+          }
+        ],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "soup/DISH",
+          "mug/EQUIPMENT"
+        ],
+        "score_runs": [
+          0.6667,
+          0.6667,
+          0.6667
+        ],
+        "errors": [
+          {
+            "type": "spurious",
+            "pred": [
+              "mug",
+              "EQUIPMENT"
+            ]
+          }
+        ],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-35",
+      "text": "She served the salad on a large plate.",
+      "tricky": true,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "salad/DISH",
+          "large plate/EQUIPMENT"
+        ],
+        "score_runs": [
+          0.6667,
+          0.6667,
+          0.6667
+        ],
+        "errors": [
+          {
+            "type": "spurious",
+            "pred": [
+              "large plate",
+              "EQUIPMENT"
+            ]
+          }
+        ],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "salad/DISH",
+          "large plate/EQUIPMENT"
+        ],
+        "score_runs": [
+          0.6667,
+          0.6667,
+          0.6667
+        ],
+        "errors": [
+          {
+            "type": "spurious",
+            "pred": [
+              "large plate",
+              "EQUIPMENT"
+            ]
+          }
+        ],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-36",
+      "text": "I'll have a cup of miso soup with my sushi.",
+      "tricky": true,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "miso soup/DISH",
+          "sushi/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "miso soup/DISH",
+          "sushi/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          0.8
+        ],
+        "errors": [],
+        "stable": false,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-37",
+      "text": "Melt the butter in a small bowl in the microwave.",
+      "tricky": true,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "butter/INGREDIENT",
+          "small bowl/EQUIPMENT",
+          "microwave/EQUIPMENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "butter/INGREDIENT",
+          "small bowl/EQUIPMENT",
+          "microwave/EQUIPMENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": false,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-38",
+      "text": "Nothing hits like a plate of nachos after the game.",
+      "tricky": true,
+      "verdict": "REGRESSED",
+      "regressions": [
+        {
+          "kind": "accuracy",
+          "baseline": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "candidate": [
+            0.6667,
+            0.6667,
+            0.6667
+          ]
+        }
+      ],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "plate of nachos/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [
+          {
+            "type": "boundary",
+            "gold": [
+              "nachos",
+              "DISH"
+            ],
+            "pred": [
+              "plate of nachos",
+              "DISH"
+            ]
+          }
+        ],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "plate/EQUIPMENT",
+          "nachos/DISH"
+        ],
+        "score_runs": [
+          0.6667,
+          0.6667,
+          0.6667
+        ],
+        "errors": [
+          {
+            "type": "spurious",
+            "pred": [
+              "plate",
+              "EQUIPMENT"
+            ]
+          }
+        ],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-39",
+      "text": "For dinner we had shakshuka and a fattoush salad.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "shakshuka/DISH",
+          "fattoush salad/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "shakshuka/DISH",
+          "fattoush salad/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-40",
+      "text": "We grabbed bibimbap and japchae from the Korean place.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "bibimbap/DISH",
+          "japchae/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "bibimbap/DISH",
+          "japchae/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-41",
+      "text": "Moussaka takes hours, but the eggplant layer is worth it.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "Moussaka/DISH",
+          "eggplant/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "Moussaka/DISH",
+          "eggplant/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-42",
+      "text": "The side of sliced tomatoes needed more salt.",
+      "tricky": true,
+      "verdict": "IMPROVED",
+      "regressions": [],
+      "improvements": [
+        {
+          "kind": "accuracy",
+          "baseline": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "candidate": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "baseline": {
+        "output": [
+          "sliced tomatoes/DISH",
+          "salt/INGREDIENT"
+        ],
+        "score_runs": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "errors": [
+          {
+            "type": "missed",
+            "gold": [
+              "tomatoes",
+              "INGREDIENT"
+            ]
+          },
+          {
+            "type": "spurious",
+            "pred": [
+              "sliced tomatoes",
+              "DISH"
+            ]
+          }
+        ],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "sliced tomatoes/INGREDIENT",
+          "salt/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [
+          {
+            "type": "boundary",
+            "gold": [
+              "tomatoes",
+              "INGREDIENT"
+            ],
+            "pred": [
+              "sliced tomatoes",
+              "INGREDIENT"
+            ]
+          }
+        ],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-43",
+      "text": "Add diced cucumber and feta to the greek salad.",
+      "tricky": false,
+      "verdict": "CHANGED",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "diced cucumber/INGREDIENT",
+          "feta/INGREDIENT",
+          "greek salad/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [
+          {
+            "type": "boundary",
+            "gold": [
+              "cucumber",
+              "INGREDIENT"
+            ],
+            "pred": [
+              "diced cucumber",
+              "INGREDIENT"
+            ]
+          }
+        ],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "cucumber/INGREDIENT",
+          "feta/INGREDIENT",
+          "greek salad/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": false,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-44",
+      "text": "Finish the curry with garam masala and fresh cilantro.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "curry/DISH",
+          "garam masala/INGREDIENT",
+          "fresh cilantro/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [
+          {
+            "type": "boundary",
+            "gold": [
+              "cilantro",
+              "INGREDIENT"
+            ],
+            "pred": [
+              "fresh cilantro",
+              "INGREDIENT"
+            ]
+          }
+        ],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "curry/DISH",
+          "garam masala/INGREDIENT",
+          "fresh cilantro/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [
+          {
+            "type": "boundary",
+            "gold": [
+              "cilantro",
+              "INGREDIENT"
+            ],
+            "pred": [
+              "fresh cilantro",
+              "INGREDIENT"
+            ]
+          }
+        ],
+        "stable": false,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-45",
+      "text": "Rub the pork shoulder with smoked paprika, cumin and brown sugar.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "pork shoulder/INGREDIENT",
+          "smoked paprika/INGREDIENT",
+          "cumin/INGREDIENT",
+          "brown sugar/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "pork shoulder/INGREDIENT",
+          "smoked paprika/INGREDIENT",
+          "cumin/INGREDIENT",
+          "brown sugar/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-46",
+      "text": "Add a pinch of saffron and a bay leaf to the rice.",
+      "tricky": false,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "saffron/INGREDIENT",
+          "bay leaf/INGREDIENT",
+          "rice/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "saffron/INGREDIENT",
+          "bay leaf/INGREDIENT",
+          "rice/INGREDIENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-47",
+      "text": "Serve the spaghetti with garlic bread on the side.",
+      "tricky": true,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "spaghetti/DISH",
+          "garlic bread/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "spaghetti/DISH",
+          "garlic bread/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-48",
+      "text": "The steak came with mashed potatoes and creamed spinach.",
+      "tricky": true,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "steak/DISH",
+          "mashed potatoes/DISH",
+          "creamed spinach/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "steak/DISH",
+          "mashed potatoes/DISH",
+          "creamed spinach/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-49",
+      "text": "The cake has a lovely lemon flavor.",
+      "tricky": true,
+      "verdict": "SAME",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "cake/DISH"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "cake/DISH"
+        ],
+        "score_runs": [
+          0.6667,
+          1.0,
+          1.0
+        ],
+        "errors": [],
+        "stable": false,
+        "failing_raw_output": null
+      }
+    },
+    {
+      "intermittent_failures": [],
+      "input_id": "ner-50",
+      "text": "Strain the stock through a fine-mesh sieve into a clean pot.",
+      "tricky": false,
+      "verdict": "CHANGED",
+      "regressions": [],
+      "improvements": [],
+      "baseline": {
+        "output": [
+          "stock/INGREDIENT",
+          "fine-mesh sieve/EQUIPMENT",
+          "clean pot/EQUIPMENT"
+        ],
+        "score_runs": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "errors": [
+          {
+            "type": "boundary",
+            "gold": [
+              "pot",
+              "EQUIPMENT"
+            ],
+            "pred": [
+              "clean pot",
+              "EQUIPMENT"
+            ]
+          }
+        ],
+        "stable": true
+      },
+      "candidate": {
+        "output": [
+          "stock/INGREDIENT",
+          "fine-mesh sieve/EQUIPMENT",
+          "pot/EQUIPMENT"
         ],
         "score_runs": [
           1.0,

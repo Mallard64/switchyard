@@ -1,9 +1,9 @@
 {
   "task": "ner",
-  "started": "2026-10-07T07:53:55.666043+00:00",
-  "finished": "2026-10-07T07:54:00.128972+00:00",
+  "started": "2026-10-07T23:17:46.873625+00:00",
+  "finished": "2026-10-07T23:17:51.789956+00:00",
   "baseline": {
-    "file": "ner__gpt-4__gpt-4.jsonl",
+    "file": "ner__gpt-4__gpt-4.jsonl + ner__gpt-4__gpt-4__ext.jsonl",
     "model": "gpt-4",
     "resolved_model": [
       "gpt-4-0613"
@@ -52,19 +52,19 @@
       "resolved_model": [
         "gpt-5.6-terra"
       ],
-      "regressed": 2,
+      "regressed": 3,
       "verdict_counts": {
-        "REGRESSED": 2,
-        "IMPROVED": 1,
-        "CHANGED": 2,
-        "SAME": 15
+        "REGRESSED": 3,
+        "IMPROVED": 3,
+        "CHANGED": 5,
+        "SAME": 39
       },
-      "accuracy": 0.9578,
+      "accuracy": 0.9573,
       "accuracy_metric": "lenient entity F1",
       "passed_all": 1.0,
-      "unstable_inputs": 5,
-      "latency_p50_s": 2.419,
-      "cost_per_1k_calls_usd": 2.91,
+      "unstable_inputs": 12,
+      "latency_p50_s": 2.197,
+      "cost_per_1k_calls_usd": 2.56,
       "report": "compare_gpt-5.6-terra.json",
       "rank": 2
     }
@@ -89,7 +89,7 @@
         "pho/DISH"
       ],
       "evidence": [
-        "spurious: predicted ('bowl', 'EQUIPMENT')"
+        "spurious: predicted ('bowl', 'EQUIPMENT') (a NOUN)"
       ],
       "suspects": [
         {
@@ -294,6 +294,10 @@
     "component": "description | label_definitions.<LABEL>",
     "new_text": "full new text of that component"
   },
+  "judge": {
+    "skipped": "no Anthropic credentials",
+    "changed_items": 2
+  },
   "pr_view": {
     "title": "Move the `ner_v3_openai` example to `gpt-5.6-sol` before the Oct 23, 2026 model shutdowns",
     "why": [
@@ -349,7 +353,7 @@
       "changed: \"My grandmother's lasagna needs ricotta, mozzarella and a good marinara.\": `gpt-4` [\"grandmother's lasagna/DISH\", 'ricotta/INGREDIENT', 'mozzarella/INGREDIENT', 'marinara/INGREDIENT'] \u2192 `gpt-5.6-sol` ['lasagna/DISH', 'ricotta/INGREDIENT', 'mozzarella/INGREDIENT', 'marinara/INGREDIENT']",
       "changed: \"Toast the cumin and coriander seeds in a dry pan, then grind them with a mortar and pestle.\": `gpt-4` ['cumin/INGREDIENT', 'coriander seeds/INGREDIENT', 'dry pan/EQUIPMENT', 'mortar and pestle/EQUIPMENT'] \u2192 `gpt-5.6-sol` ['cumin/INGREDIENT', 'coriander seeds/INGREDIENT', 'pan/EQUIPMENT', 'mortar and pestle/EQUIPMENT']",
       "improved: \"Microwave the leftover curry for two minutes.\": `gpt-4` ['Microwave/EQUIPMENT', 'leftover curry/DISH'] \u2192 `gpt-5.6-sol` ['curry/DISH']",
-      "Other candidate `gpt-5.6-terra`: 2 regressed, lenient entity F1 0.96"
+      "Other candidate `gpt-5.6-terra`: 3 regressed, lenient entity F1 0.96"
     ],
     "limits": [
       "20 hand-labelled inputs; accuracy figures depend on those labels.",
@@ -403,8 +407,8 @@
   },
   "comparison": {
     "task": "ner",
-    "baseline_file": "ner__gpt-4__gpt-4.jsonl",
     "candidate_file": "ner__gpt-4__gpt-5.6-sol.jsonl",
+    "baseline_file": "ner__gpt-4__gpt-4.jsonl + ner__gpt-4__gpt-4__ext.jsonl",
     "inputs_compared": 20,
     "verdict_counts": {
       "REGRESSED": 1,

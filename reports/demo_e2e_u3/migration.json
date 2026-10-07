@@ -390,9 +390,9 @@
     "table": [
       [
         "Passed all hard checks",
-        "100%",
-        "100%",
-        "100%"
+        "86%",
+        "96%",
+        "83%"
       ],
       [
         "Gold score",
@@ -404,7 +404,7 @@
         "Tickets regressed vs old",
         "\u2013",
         3,
-        0
+        1
       ],
       [
         "Cost per 1k tickets",
@@ -437,14 +437,16 @@
         "inputs": 24,
         "runs": 1,
         "verdict_counts": {
-          "REGRESSED": 0,
+          "REGRESSED": 1,
           "IMPROVED": 0,
           "CHANGED": 0,
-          "SAME": 24
+          "SAME": 23
         },
         "still_regressed": [],
-        "newly_regressed": [],
-        "passes": true,
+        "newly_regressed": [
+          "t21"
+        ],
+        "passes": false,
         "report_file": "compare_fix1.json"
       },
       "decision": "pending",

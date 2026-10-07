@@ -1731,6 +1731,18 @@
             "ok": false
           }
         ],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days."
+          },
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "refund/refund",
           "new": "refund/refund",
@@ -1933,6 +1945,13 @@
             },
             "output": "refund/deny",
             "ok": false
+          }
+        ],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
           }
         ],
         "outputs": {
@@ -2139,6 +2158,13 @@
             "ok": false
           }
         ],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "refund/deny",
           "new": "refund/deny",
@@ -2341,6 +2367,13 @@
             },
             "output": "refund/refund",
             "ok": false
+          }
+        ],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
           }
         ],
         "outputs": {
@@ -2547,6 +2580,13 @@
             "ok": false
           }
         ],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "refund/deny",
           "new": "refund/deny",
@@ -2751,6 +2791,13 @@
             "ok": false
           }
         ],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "damaged/replace",
           "new": "damaged/replace",
@@ -2868,6 +2915,18 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          },
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "damaged/replace",
           "new": "damaged/deny",
@@ -3070,6 +3129,13 @@
             },
             "output": "damaged/escalate",
             "ok": false
+          }
+        ],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
           }
         ],
         "outputs": {
@@ -3276,6 +3342,13 @@
             "ok": false
           }
         ],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "shipping/info",
           "new": "shipping/info",
@@ -3393,6 +3466,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "shipping/replace",
           "new": "shipping/replace",
@@ -3510,6 +3590,18 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days."
+          },
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "cancel/cancel",
           "new": "cancel/cancel",
@@ -3627,6 +3719,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "cancel/deny",
           "new": "cancel/deny",
@@ -3744,6 +3843,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "billing/escalate",
           "new": "billing/escalate",
@@ -3861,6 +3967,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "billing/escalate",
           "new": "billing/escalate",
@@ -3978,6 +4091,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "account/info",
           "new": "account/info",
@@ -4095,6 +4215,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "account/escalate",
           "new": "account/escalate",
@@ -4212,6 +4339,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "refund/ask_for_info",
           "new": "refund/ask_for_info",
@@ -4329,6 +4463,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "other/escalate",
           "new": "other/escalate",
@@ -4446,6 +4587,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "refund/deny",
           "new": "refund/deny",
@@ -4563,6 +4711,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "damaged/replace",
           "new": "damaged/replace",
@@ -4680,6 +4835,18 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days."
+          },
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "refund/refund",
           "new": "refund/refund",
@@ -4797,6 +4964,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "refund/refund",
           "new": "refund/refund",
@@ -4914,6 +5088,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "shipping/replace",
           "new": "shipping/replace",
@@ -5031,6 +5212,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "tone.json_only",
+            "instruction": "Respond with only a JSON object: {\"verdict\": ..."
+          }
+        ],
         "outputs": {
           "old": "cancel/cancel",
           "new": "cancel/cancel",

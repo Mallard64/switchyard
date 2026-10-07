@@ -59,7 +59,7 @@ Accept: `python migrate.py --task ner --candidates gpt-5.6-sol gpt-5.6-terra --m
 - changed: "My grandmother's lasagna needs ricotta, mozzarella and a good marinara.": `gpt-4` ["grandmother's lasagna/DISH", 'ricotta/INGREDIENT', 'mozzarella/INGREDIENT', 'marinara/INGREDIENT'] → `gpt-5.6-sol` ['lasagna/DISH', 'ricotta/INGREDIENT', 'mozzarella/INGREDIENT', 'marinara/INGREDIENT']
 - changed: "Toast the cumin and coriander seeds in a dry pan, then grind them with a mortar and pestle.": `gpt-4` ['cumin/INGREDIENT', 'coriander seeds/INGREDIENT', 'dry pan/EQUIPMENT', 'mortar and pestle/EQUIPMENT'] → `gpt-5.6-sol` ['cumin/INGREDIENT', 'coriander seeds/INGREDIENT', 'pan/EQUIPMENT', 'mortar and pestle/EQUIPMENT']
 - improved: "Microwave the leftover curry for two minutes.": `gpt-4` ['Microwave/EQUIPMENT', 'leftover curry/DISH'] → `gpt-5.6-sol` ['curry/DISH']
-- Other candidate `gpt-5.6-terra`: 2 regressed, lenient entity F1 0.96
+- Other candidate `gpt-5.6-terra`: 3 regressed, lenient entity F1 0.96
 
 ## Limits
 

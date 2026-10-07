@@ -1906,6 +1906,13 @@
             "ok": false
           }
         ],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "refund/refund",
           "new": "refund/ask_for_info",
@@ -2108,6 +2115,13 @@
             },
             "output": "refund/ask_for_info",
             "ok": false
+          }
+        ],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
           }
         ],
         "outputs": {
@@ -2314,6 +2328,13 @@
             "ok": false
           }
         ],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "refund/deny",
           "new": "refund/ask_for_info",
@@ -2516,6 +2537,13 @@
             },
             "output": "refund/ask_for_info",
             "ok": false
+          }
+        ],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
           }
         ],
         "outputs": {
@@ -2722,6 +2750,13 @@
             "ok": false
           }
         ],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "refund/deny",
           "new": "refund/ask_for_info",
@@ -2926,6 +2961,13 @@
             "ok": false
           }
         ],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "damaged/replace",
           "new": "damaged/ask_for_info",
@@ -3043,6 +3085,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "damaged/replace",
           "new": "damaged/ask_for_info",
@@ -3245,6 +3294,13 @@
             },
             "output": "damaged/ask_for_info",
             "ok": false
+          }
+        ],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
           }
         ],
         "outputs": {
@@ -3451,6 +3507,13 @@
             "ok": false
           }
         ],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "shipping/info",
           "new": "shipping/ask_for_info",
@@ -3568,6 +3631,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "shipping/replace",
           "new": "shipping/ask_for_info",
@@ -3685,6 +3755,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "cancel/cancel",
           "new": "cancel/ask_for_info",
@@ -3802,6 +3879,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "cancel/deny",
           "new": "cancel/ask_for_info",
@@ -3919,6 +4003,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "billing/escalate",
           "new": "billing/escalate",
@@ -4036,6 +4127,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "billing/escalate",
           "new": "billing/escalate",
@@ -4153,6 +4251,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "refund/deny",
           "new": "refund/ask_for_info",
@@ -4270,6 +4375,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "damaged/replace",
           "new": "damaged/ask_for_info",
@@ -4387,6 +4499,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "refund/refund",
           "new": "refund/ask_for_info",
@@ -4504,6 +4623,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "refund/refund",
           "new": "refund/ask_for_info",
@@ -4621,6 +4747,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "shipping/replace",
           "new": "shipping/ask_for_info",
@@ -4738,6 +4871,13 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "cancel/cancel",
           "new": "cancel/ask_for_info",
@@ -4855,6 +4995,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "account/info",
           "new": "account/info",
@@ -4972,6 +5113,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "account/escalate",
           "new": "account/escalate",
@@ -5089,6 +5231,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "refund/ask_for_info",
           "new": "refund/ask_for_info",
@@ -5206,6 +5349,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "other/escalate",
           "new": "other/escalate",
