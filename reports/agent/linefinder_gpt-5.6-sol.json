@@ -5,6 +5,200 @@
   "method": "remove one line of the causal step's prompt; re-run on the new model; confirmed = ticket no longer REGRESSED under compare.py's noise-floor rule",
   "items": [
     {
+      "input_id": "t01",
+      "step": "tone",
+      "baseline_output": "refund/refund",
+      "candidate_output": "refund/refund",
+      "lines_tested": 6,
+      "lines_total": 6,
+      "lines": [
+        {
+          "line_index": 2,
+          "line": "It must not promise anything beyond the decision.",
+          "heuristic": 0.2,
+          "verdict": "SAME",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "confirmed"
+        },
+        {
+          "line_index": 3,
+          "line": "If the draft passes, set verdict to PASS and final_reply to null.",
+          "heuristic": 0.5,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 5,
+          "line": "Respond with only a JSON object: {\"verdict\": \"PASS\" or \"REVISED\", \"issues\": [\"...\"], \"final_reply\": \"...\" or null}",
+          "heuristic": 0.5,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 0,
+          "line": "You are the final tone check before a support reply is sent to a customer.",
+          "heuristic": 0.375,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 4,
+          "line": "If not, set verdict to REVISED and rewrite only what is needed, keeping every fact (order ID, amounts, timelines).",
+          "heuristic": 0.231,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 1,
+          "line": "The reply must be polite and calm, must not blame the customer, and must not be sarcastic.",
+          "heuristic": 0.143,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        }
+      ],
+      "confirmed": [
+        "It must not promise anything beyond the decision."
+      ]
+    },
+    {
+      "input_id": "t04",
+      "step": "tone",
+      "baseline_output": "refund/refund",
+      "candidate_output": "refund/refund",
+      "lines_tested": 6,
+      "lines_total": 6,
+      "lines": [
+        {
+          "line_index": 2,
+          "line": "It must not promise anything beyond the decision.",
+          "heuristic": 0.2,
+          "verdict": "SAME",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "confirmed"
+        },
+        {
+          "line_index": 3,
+          "line": "If the draft passes, set verdict to PASS and final_reply to null.",
+          "heuristic": 0.5,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 5,
+          "line": "Respond with only a JSON object: {\"verdict\": \"PASS\" or \"REVISED\", \"issues\": [\"...\"], \"final_reply\": \"...\" or null}",
+          "heuristic": 0.5,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 0,
+          "line": "You are the final tone check before a support reply is sent to a customer.",
+          "heuristic": 0.375,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 4,
+          "line": "If not, set verdict to REVISED and rewrite only what is needed, keeping every fact (order ID, amounts, timelines).",
+          "heuristic": 0.231,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 1,
+          "line": "The reply must be polite and calm, must not blame the customer, and must not be sarcastic.",
+          "heuristic": 0.143,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        }
+      ],
+      "confirmed": [
+        "It must not promise anything beyond the decision."
+      ]
+    },
+    {
       "input_id": "t07",
       "step": "decide",
       "baseline_output": "damaged/replace",
@@ -128,12 +322,304 @@
       "confirmed": [
         "Final-sale items are not eligible for refunds or replacements."
       ]
+    },
+    {
+      "input_id": "t11",
+      "step": "tone",
+      "baseline_output": "cancel/cancel",
+      "candidate_output": "cancel/cancel",
+      "lines_tested": 6,
+      "lines_total": 6,
+      "lines": [
+        {
+          "line_index": 2,
+          "line": "It must not promise anything beyond the decision.",
+          "heuristic": 0.2,
+          "verdict": "SAME",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "confirmed"
+        },
+        {
+          "line_index": 5,
+          "line": "Respond with only a JSON object: {\"verdict\": \"PASS\" or \"REVISED\", \"issues\": [\"...\"], \"final_reply\": \"...\" or null}",
+          "heuristic": 0.5,
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 0,
+          "line": "You are the final tone check before a support reply is sent to a customer.",
+          "heuristic": 0.375,
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 3,
+          "line": "If the draft passes, set verdict to PASS and final_reply to null.",
+          "heuristic": 0.375,
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 4,
+          "line": "If not, set verdict to REVISED and rewrite only what is needed, keeping every fact (order ID, amounts, timelines).",
+          "heuristic": 0.231,
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 1,
+          "line": "The reply must be polite and calm, must not blame the customer, and must not be sarcastic.",
+          "heuristic": 0.143,
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        }
+      ],
+      "confirmed": [
+        "It must not promise anything beyond the decision."
+      ]
+    },
+    {
+      "input_id": "t21",
+      "step": "tone",
+      "baseline_output": "refund/refund",
+      "candidate_output": "refund/refund",
+      "lines_tested": 6,
+      "lines_total": 6,
+      "lines": [
+        {
+          "line_index": 2,
+          "line": "It must not promise anything beyond the decision.",
+          "heuristic": 0.4,
+          "verdict": "SAME",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "confirmed"
+        },
+        {
+          "line_index": 3,
+          "line": "If the draft passes, set verdict to PASS and final_reply to null.",
+          "heuristic": 0.5,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 5,
+          "line": "Respond with only a JSON object: {\"verdict\": \"PASS\" or \"REVISED\", \"issues\": [\"...\"], \"final_reply\": \"...\" or null}",
+          "heuristic": 0.5,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 0,
+          "line": "You are the final tone check before a support reply is sent to a customer.",
+          "heuristic": 0.375,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 4,
+          "line": "If not, set verdict to REVISED and rewrite only what is needed, keeping every fact (order ID, amounts, timelines).",
+          "heuristic": 0.231,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 1,
+          "line": "The reply must be polite and calm, must not blame the customer, and must not be sarcastic.",
+          "heuristic": 0.143,
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        }
+      ],
+      "confirmed": [
+        "It must not promise anything beyond the decision."
+      ]
+    },
+    {
+      "input_id": "t24",
+      "step": "tone",
+      "baseline_output": "cancel/cancel",
+      "candidate_output": "cancel/cancel",
+      "lines_tested": 6,
+      "lines_total": 6,
+      "lines": [
+        {
+          "line_index": 3,
+          "line": "If the draft passes, set verdict to PASS and final_reply to null.",
+          "heuristic": 0.375,
+          "verdict": "SAME",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "confirmed"
+        },
+        {
+          "line_index": 2,
+          "line": "It must not promise anything beyond the decision.",
+          "heuristic": 0.2,
+          "verdict": "SAME",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "confirmed"
+        },
+        {
+          "line_index": 5,
+          "line": "Respond with only a JSON object: {\"verdict\": \"PASS\" or \"REVISED\", \"issues\": [\"...\"], \"final_reply\": \"...\" or null}",
+          "heuristic": 0.5,
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 0,
+          "line": "You are the final tone check before a support reply is sent to a customer.",
+          "heuristic": 0.375,
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 4,
+          "line": "If not, set verdict to REVISED and rewrite only what is needed, keeping every fact (order ID, amounts, timelines).",
+          "heuristic": 0.231,
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        },
+        {
+          "line_index": 1,
+          "line": "The reply must be polite and calm, must not blame the customer, and must not be sarcastic.",
+          "heuristic": 0.143,
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "repaired_runs": "3/3",
+          "status": "no_effect"
+        }
+      ],
+      "confirmed": [
+        "If the draft passes, set verdict to PASS and final_reply to null.",
+        "It must not promise anything beyond the decision."
+      ]
     }
   ],
   "live_calls": {
     "gpt-5.6-sol": {
-      "calls": 72,
-      "usd": 0.2697
+      "calls": 702,
+      "usd": 4.7598
     }
   }
 }

@@ -11,7 +11,7 @@
       "gpt-5.6-terra"
     ],
     "outputs": 72,
-    "passed_all": 1.0,
+    "passed_all": 0.8611,
     "checks": {
       "classify.json_only": 1.0,
       "classify.valid_category": 1.0,
@@ -20,6 +20,7 @@
       "decide.amount_matches": 1.0,
       "draft.mentions_order_id": 1.0,
       "draft.states_amount": 1.0,
+      "draft.states_timeline": 0.8611,
       "draft.word_limit": 1.0,
       "draft.no_placeholder": 1.0,
       "tone.json_only": 1.0,
@@ -261,6 +262,7 @@
         "decide.amount_matches": 1.0,
         "draft.mentions_order_id": 1.0,
         "draft.states_amount": 1.0,
+        "draft.states_timeline": 1.0,
         "draft.word_limit": 1.0,
         "draft.no_placeholder": 1.0,
         "tone.json_only": 1.0,
@@ -300,7 +302,7 @@
         "gpt-5.6-terra"
       ],
       "outputs": 72,
-      "passed_all": 1.0,
+      "passed_all": 0.8611,
       "checks": {
         "classify.json_only": 1.0,
         "classify.valid_category": 1.0,
@@ -309,6 +311,7 @@
         "decide.amount_matches": 1.0,
         "draft.mentions_order_id": 1.0,
         "draft.states_amount": 1.0,
+        "draft.states_timeline": 0.8611,
         "draft.word_limit": 1.0,
         "draft.no_placeholder": 1.0,
         "tone.json_only": 1.0,
@@ -337,6 +340,7 @@
         "decide.amount_matches": 1.0,
         "draft.mentions_order_id": 1.0,
         "draft.states_amount": 1.0,
+        "draft.states_timeline": 1.0,
         "draft.word_limit": 1.0,
         "draft.no_placeholder": 1.0,
         "tone.json_only": 1.0,
@@ -547,7 +551,15 @@
             ]
           }
         ],
-        "improvements": [],
+        "improvements": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+            "baseline_fail": "3/3",
+            "candidate_fail": "0/3"
+          }
+        ],
         "baseline": {
           "output": [
             "category: refund",
@@ -1501,7 +1513,15 @@
             ]
           }
         ],
-        "improvements": [],
+        "improvements": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+            "baseline_fail": "3/3",
+            "candidate_fail": "0/3"
+          }
+        ],
         "baseline": {
           "output": [
             "category: refund",
@@ -1618,7 +1638,15 @@
             ]
           }
         ],
-        "improvements": [],
+        "improvements": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+            "baseline_fail": "2/3",
+            "candidate_fail": "0/3"
+          }
+        ],
         "baseline": {
           "output": [
             "category: cancel",

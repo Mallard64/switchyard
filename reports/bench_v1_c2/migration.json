@@ -787,6 +787,7 @@
   ],
   "fixes": [],
   "lines": [],
+  "evidence_note": "Comparison verdicts were refreshed; step-swap evidence is retained from the original benchmark because the new check has no matching hybrid cache rows.",
   "steps": null,
   "started": null,
   "finished": null,

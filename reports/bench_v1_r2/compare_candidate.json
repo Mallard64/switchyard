@@ -5,9 +5,9 @@
   "inputs_compared": 24,
   "verdict_counts": {
     "REGRESSED": 1,
-    "IMPROVED": 0,
+    "IMPROVED": 2,
     "CHANGED": 0,
-    "SAME": 23
+    "SAME": 21
   },
   "ready_to_merge": false,
   "baseline": {
@@ -16,7 +16,7 @@
       "gpt-5.6-terra"
     ],
     "outputs": 72,
-    "passed_all": 1.0,
+    "passed_all": 0.8611,
     "checks": {
       "classify.json_only": 1.0,
       "classify.valid_category": 1.0,
@@ -25,6 +25,7 @@
       "decide.amount_matches": 1.0,
       "draft.mentions_order_id": 1.0,
       "draft.states_amount": 1.0,
+      "draft.states_timeline": 0.8611,
       "draft.word_limit": 1.0,
       "draft.no_placeholder": 1.0,
       "tone.json_only": 1.0,
@@ -44,7 +45,7 @@
       "gpt-5.6-sol"
     ],
     "outputs": 72,
-    "passed_all": 1.0,
+    "passed_all": 0.9444,
     "checks": {
       "classify.json_only": 1.0,
       "classify.valid_category": 1.0,
@@ -53,6 +54,7 @@
       "decide.amount_matches": 1.0,
       "draft.mentions_order_id": 1.0,
       "draft.states_amount": 1.0,
+      "draft.states_timeline": 0.9444,
       "draft.word_limit": 1.0,
       "draft.no_placeholder": 1.0,
       "tone.json_only": 1.0,
@@ -163,9 +165,17 @@
       "input_id": "t04",
       "text": "Return request for my backpack, order A1007. Never used it.",
       "tricky": true,
-      "verdict": "SAME",
+      "verdict": "IMPROVED",
       "regressions": [],
-      "improvements": [],
+      "improvements": [
+        {
+          "kind": "hard_check",
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "baseline_fail": "3/3",
+          "candidate_fail": "0/3"
+        }
+      ],
       "baseline": {
         "output": "refund/refund",
         "score_runs": [
@@ -687,7 +697,14 @@
       }
     },
     {
-      "intermittent_failures": [],
+      "intermittent_failures": [
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 2,
+          "raw_output": "Your return for order A1011 is approved because the scarf is unused and the request was made within 30 days of delivery. You\u2019ll receive a refund of $54.50.\n\nThe Support Team"
+        }
+      ],
       "input_id": "t21",
       "text": "Hello, the scarf from order A1011 was a gift and they already have one. Unopened. Can I return it?",
       "tricky": false,
@@ -713,11 +730,30 @@
         ],
         "errors": [],
         "stable": true,
-        "failing_raw_output": null
+        "failing_raw_output": "Your return for order A1011 is approved because the scarf is unused and the request was made within 30 days of delivery. You\u2019ll receive a refund of $54.50.\n\nThe Support Team"
       }
     },
     {
-      "intermittent_failures": [],
+      "intermittent_failures": [
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 1,
+          "raw_output": "Hemos aprobado el reembolso completo de $79.00 del pedido A1001 porque los auriculares no se usaron y la devoluci\u00f3n se solicit\u00f3 dentro de los 30 d\u00edas posteriores a la entrega.\n\nEl equipo de soporte"
+        },
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 2,
+          "raw_output": "Hemos aprobado un reembolso de $79.00 para el pedido A1001 porque los auriculares no se han usado y la devoluci\u00f3n se solicit\u00f3 dentro de los 30 d\u00edas posteriores a la entrega.\n\nThe Support Team"
+        },
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 3,
+          "raw_output": "Hemos aprobado el reembolso del pedido A1001 porque los auriculares no se han usado y la devoluci\u00f3n se solicit\u00f3 dentro de los 30 d\u00edas posteriores a la entrega.\n\nRecibir\u00e1 un reembolso de $79.00 en el m\u00e9todo de pago original en un plazo de 5 a 7 d\u00edas h\u00e1biles.\n\nThe Support Team"
+        }
+      ],
       "input_id": "t22",
       "text": "Hola, quiero devolver los auriculares del pedido A1001. No los he usado. \u00bfMe pueden reembolsar?",
       "tricky": true,
@@ -743,7 +779,7 @@
         ],
         "errors": [],
         "stable": true,
-        "failing_raw_output": null
+        "failing_raw_output": "Hemos aprobado el reembolso completo de $79.00 del pedido A1001 porque los auriculares no se usaron y la devoluci\u00f3n se solicit\u00f3 dentro de los 30 d\u00edas posteriores a la entrega.\n\nEl equipo de soporte"
       }
     },
     {
@@ -781,9 +817,17 @@
       "input_id": "t24",
       "text": "Cancel A1006. Your site is a mess and I shouldn't have to email you for this.",
       "tricky": true,
-      "verdict": "SAME",
+      "verdict": "IMPROVED",
       "regressions": [],
-      "improvements": [],
+      "improvements": [
+        {
+          "kind": "hard_check",
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "baseline_fail": "2/3",
+          "candidate_fail": "0/3"
+        }
+      ],
       "baseline": {
         "output": "cancel/cancel",
         "score_runs": [

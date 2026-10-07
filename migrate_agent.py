@@ -37,7 +37,8 @@ OUT = HERE / "reports" / "migration_agent"
 REPORTS = HERE / "reports" / "agent"
 EDIT_FORMAT = {"fix": "fix id this edit replaces (optional)", "step": "classify|decide|draft|tone",
                "line_index": "0-based line to replace (PR.md shows lines 1-based)", "new_text": "replacement line, or null to delete it",
-               "lines": "alternatively: the full new list of prompt lines for the step"}
+               "lines": "alternatively: the full new list of prompt lines for the step",
+               "edits": "alternatively: a list of {step, line_index, new_text} edits, verified together"}
 
 
 def sha(obj):
@@ -48,13 +49,13 @@ def tagged(model, args):
     return Path(args.results) / f"agent__{model}{'__' + args.tag if args.tag else ''}.jsonl"
 
 
-def verify(args, step, lines, label):
-    """Full re-run of every ticket in this migration on the candidate with one step's prompt replaced."""
+def verify(args, prompt_edits, label):
+    """Full re-run with one or more step prompts replaced."""
     cand = load(tagged(args.candidate, args))
     source = {tid: {r["run"]: r for r in rs} for tid, rs in cand.items()}
     tickets = [t for t in A.load_tickets(sets="all") if t["id"] in cand]
     path = run_config(tickets, label, make_plan((args.candidate, args.candidate_config), {}), source, 0,
-                      args.runs, Path(args.results), args.workers, prompts={step: lines})
+                      args.runs, Path(args.results), args.workers, prompts=prompt_edits)
     return build_report(tagged(args.old, args), path)
 
 
@@ -140,18 +141,20 @@ def main():
         print("[2/4] step-finder: " + ", ".join(f"{s} {v['explains']}/{v['of']}" for s, v in sf["summary"].items()))
 
     # 3. fixes: one per proven line, plus engineer edits ----------------------------------------
-    fixes = {f["id"]: f for f in prev.get("fixes", [])}
+    # An engineer-supplied edit supersedes auto-removal proposals. This matters when several
+    # independent prompt lines must be fixed together: no individual removal can pass the full suite.
+    fixes = {} if args.apply_edit else {f["id"]: f for f in prev.get("fixes", [])}
     proven = []
     for it in (lf or {}).get("items", []):
         for r in it["lines"]:
             if r["status"] == "confirmed" and (it["step"], r["line_index"]) not in [p[:2] for p in proven]:
                 proven.append((it["step"], r["line_index"], r["line"]))
-    for n, (step, i, line) in enumerate(proven, 1):
+    for n, (step, i, line) in ([] if args.apply_edit else enumerate(proven, 1)):
         fid = f"fix{n}"
         if fixes.get(fid, {}).get("source", "").startswith("engineer"):
             continue  # an engineer edit replaced this fix; keep it
         lines = A.PROMPTS[step][:i] + A.PROMPTS[step][i + 1:]
-        v = verification(verify(args, step, lines, f"{args.candidate}__fix-{step}-L{i}{'__' + args.tag if args.tag else ''}"), regressed, args.runs,
+        v = verification(verify(args, {step: lines}, f"{args.candidate}__fix-{step}-L{i}{'__' + args.tag if args.tag else ''}"), regressed, args.runs,
                          f"compare_{args.candidate}_{fid}.json")
         fixes[fid] = {"id": fid, "step": step, "component": f"{step} prompt, line {i + 1}", "line_index": i,
                       "kind": "remove_line", "old_text": line, "new_text": None, "new_lines": lines,
@@ -165,21 +168,39 @@ def main():
 
     if args.apply_edit:
         e = json.loads(Path(args.apply_edit).read_text())
-        step = e["step"]
-        if "lines" in e:
-            lines, old_text, new_text = e["lines"], "\n".join(A.PROMPTS[step]), "\n".join(e["lines"])
+        if "edits" in e:
+            prompt_edits = {}
+            changes = []
+            for change in e["edits"]:
+                step, i, new_text = change["step"], change["line_index"], change.get("new_text")
+                lines = prompt_edits.get(step, list(A.PROMPTS[step]))
+                old_text = lines[i]
+                lines = lines[:i] + ([new_text] if new_text else []) + lines[i + 1:]
+                prompt_edits[step] = lines
+                changes.append({"step": step, "line_index": i, "old_text": old_text, "new_text": new_text})
+            step = " + ".join(s for s in A.STEPS if s in prompt_edits)
+            old_text = "\n".join(f"[{c['step']} line {c['line_index'] + 1}] {c['old_text']}" for c in changes)
+            new_text = "\n".join(f"[{c['step']} line {c['line_index'] + 1}] {c['new_text'] or ''}" for c in changes)
+            lines = None
         else:
-            i = e["line_index"]
-            old_text, new_text = A.PROMPTS[step][i], e.get("new_text")
-            lines = A.PROMPTS[step][:i] + ([new_text] if new_text else []) + A.PROMPTS[step][i + 1:]
+            step = e["step"]
+            if "lines" in e:
+                lines, old_text, new_text = e["lines"], "\n".join(A.PROMPTS[step]), "\n".join(e["lines"])
+            else:
+                i = e["line_index"]
+                old_text, new_text = A.PROMPTS[step][i], e.get("new_text")
+                lines = A.PROMPTS[step][:i] + ([new_text] if new_text else []) + A.PROMPTS[step][i + 1:]
+            prompt_edits = {step: lines}
         fid = e.get("fix") or f"edit{sum(f['id'].startswith('edit') for f in fixes.values()) + 1}"
-        v = verification(verify(args, step, lines, f"{args.candidate}__edit-{step}-{sha(lines)}"), regressed,
+        v = verification(verify(args, prompt_edits, f"{args.candidate}__edit-{sha(prompt_edits)}"), regressed,
                          args.runs, f"compare_{args.candidate}_{fid}_edit.json")
         original = fixes.get(fid)
-        where = f"{step} prompt" + ("" if "lines" in e else f", line {e['line_index'] + 1}")
+        where = (f"{step} prompts ({len(changes)} lines)" if "edits" in e else
+                 f"{step} prompt" + ("" if "lines" in e else f", line {e['line_index'] + 1}"))
         fixes[fid] = {"id": fid, "step": step, "component": where, "kind": "edit",
                       "old_text": old_text, "new_text": new_text, "new_lines": lines,
-                      "summary": f"engineer edit of the `{step}` prompt",
+                      **({"new_prompts": prompt_edits, "changes": changes} if "edits" in e else {}),
+                      "summary": f"engineer edit of the `{step}` prompt" + ("s" if "edits" in e else ""),
                       "source": "engineer edit" + (f" replacing proposed {fid}" if original else ""),
                       "original": original, "verification": v, "edit_file": Path(args.apply_edit).name,
                       "decision": "edited" if v["passes"] else "pending",
@@ -266,9 +287,11 @@ def main():
     (OUT / "PR.md").write_text(pr_report.render(m))
     diff = []
     for f in live:
-        diff += difflib.unified_diff([l + "\n" for l in A.PROMPTS[f["step"]]], [l + "\n" for l in f["new_lines"]],
-                                     fromfile=f"a/support_agent.py PROMPTS[{f['step']!r}]",
-                                     tofile=f"b/support_agent.py PROMPTS[{f['step']!r}]")
+        prompts = f.get("new_prompts") or {f["step"]: f["new_lines"]}
+        for step, lines in prompts.items():
+            diff += difflib.unified_diff([l + "\n" for l in A.PROMPTS[step]], [l + "\n" for l in lines],
+                                         fromfile=f"a/support_agent.py PROMPTS[{step!r}]",
+                                         tofile=f"b/support_agent.py PROMPTS[{step!r}]")
     (OUT / "prompts.diff").write_text("".join(diff))
     (OUT / "migration.json").write_text(json.dumps(m, indent=2, default=list))
     import dashboard_export

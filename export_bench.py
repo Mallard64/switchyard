@@ -35,19 +35,38 @@ def export_break(res, brk, detail, group):
     rep = build_report(base_path, cand_path)
     sample = detail["localized"]
     tickets = []
+    reused_evidence = False
     if sample:
         sub = cand_path.with_name(cand_path.stem + f"__sample{len(sample)}.jsonl")
-        tickets = localize(old, new, base_path, sub, res["runs"], RESULTS, 4)["tickets"]
+        try:
+            tickets = localize(old, new, base_path, sub, res["runs"], RESULTS, 4)["tickets"]
+        except SystemExit as exc:
+            # A newly added check can expose regressions that the original benchmark never localized,
+            # so the exact hybrid rows do not exist. Export remains strictly offline: retain the
+            # previously exported experiment evidence while refreshing comparison verdicts below.
+            previous = HERE / "reports" / f"bench_{detail['set']}_{brk['id']}" / "migration.json"
+            if not previous.exists():
+                raise
+            causes = json.loads(previous.read_text()).get("causes", [])
+            tickets = [{"input_id": c["input_id"], "causal_steps": c.get("causal_steps", []),
+                        "status": c.get("status", "suspected"), "experiments": c.get("experiments", [])}
+                       for c in causes]
+            reused_evidence = True
+            print(f"{brk['id']}: {exc}; retaining cached step-swap evidence")
     items = {it["input_id"]: it for it in rep["items"]}
     causes = [{"input_id": t["input_id"], "text": items[t["input_id"]]["text"],
                "baseline_output": items[t["input_id"]]["baseline"]["output"],
                "candidate_output": items[t["input_id"]]["candidate"]["output"], "causal_steps": t["causal_steps"],
                "status": "confirmed" if t["status"] == "confirmed" else "suspected", "confirmed_lines": [],
-               "experiments": experiments(t, items[t["input_id"]]["baseline"]["output"],
-                                          items[t["input_id"]]["candidate"]["output"])} for t in tickets]
+               "experiments": (t.get("experiments", []) if reused_evidence else
+                               experiments(t, items[t["input_id"]]["baseline"]["output"],
+                                           items[t["input_id"]]["candidate"]["output"]))} for t in tickets]
     m = {"title": f"Planted break {brk['id']}: {brk['desc']}", "group": group,
          "label": f"{brk['id']} · {brk['desc'].split(' (')[0]}", "old_model": old["label"], "new_model": new["label"],
          "planted_steps": sorted(brk["prompts"], key=STEPS.index), "causes": causes, "fixes": [], "lines": [],
+         "evidence_note": ("Comparison verdicts were refreshed; step-swap evidence is retained from the original "
+                           "benchmark because the new check has no matching hybrid cache rows."
+                           if reused_evidence else None),
          "steps": None, "started": None, "finished": None}
     out = HERE / "reports" / f"bench_{detail['set']}_{brk['id']}"
     out.mkdir(parents=True, exist_ok=True)

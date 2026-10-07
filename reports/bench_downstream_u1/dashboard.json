@@ -11,7 +11,7 @@
       "gpt-5.6-terra"
     ],
     "outputs": 72,
-    "passed_all": 1.0,
+    "passed_all": 0.8611,
     "checks": {
       "classify.json_only": 1.0,
       "classify.valid_category": 1.0,
@@ -20,6 +20,7 @@
       "decide.amount_matches": 1.0,
       "draft.mentions_order_id": 1.0,
       "draft.states_amount": 1.0,
+      "draft.states_timeline": 0.8611,
       "draft.word_limit": 1.0,
       "draft.no_placeholder": 1.0,
       "tone.json_only": 1.0,
@@ -42,13 +43,13 @@
       "regressed": 1,
       "verdict_counts": {
         "REGRESSED": 1,
-        "IMPROVED": 0,
+        "IMPROVED": 2,
         "CHANGED": 0,
-        "SAME": 23
+        "SAME": 21
       },
       "accuracy": 0.9896,
       "accuracy_metric": "gold score",
-      "passed_all": 1.0,
+      "passed_all": 0.9583,
       "unstable_inputs": 0,
       "latency_p50_s": 5.349,
       "latency_p95_s": 8.895,
@@ -98,9 +99,9 @@
     "prompt_edit": null,
     "verdict_counts": {
       "REGRESSED": 1,
-      "IMPROVED": 0,
+      "IMPROVED": 2,
       "CHANGED": 0,
-      "SAME": 23
+      "SAME": 21
     },
     "candidate": {
       "model": "gpt-5.6-terra+u1",
@@ -108,7 +109,7 @@
         "gpt-5.6-terra"
       ],
       "outputs": 24,
-      "passed_all": 1.0,
+      "passed_all": 0.9583,
       "checks": {
         "classify.json_only": 1.0,
         "classify.valid_category": 1.0,
@@ -117,6 +118,7 @@
         "decide.amount_matches": 1.0,
         "draft.mentions_order_id": 1.0,
         "draft.states_amount": 1.0,
+        "draft.states_timeline": 0.9583,
         "draft.word_limit": 1.0,
         "draft.no_placeholder": 1.0,
         "tone.json_only": 1.0,
@@ -145,9 +147,9 @@
     "inputs_compared": 24,
     "verdict_counts": {
       "REGRESSED": 1,
-      "IMPROVED": 0,
+      "IMPROVED": 2,
       "CHANGED": 0,
-      "SAME": 23
+      "SAME": 21
     },
     "ready_to_merge": false,
     "baseline": {
@@ -156,7 +158,7 @@
         "gpt-5.6-terra"
       ],
       "outputs": 72,
-      "passed_all": 1.0,
+      "passed_all": 0.8611,
       "checks": {
         "classify.json_only": 1.0,
         "classify.valid_category": 1.0,
@@ -165,6 +167,7 @@
         "decide.amount_matches": 1.0,
         "draft.mentions_order_id": 1.0,
         "draft.states_amount": 1.0,
+        "draft.states_timeline": 0.8611,
         "draft.word_limit": 1.0,
         "draft.no_placeholder": 1.0,
         "tone.json_only": 1.0,
@@ -184,7 +187,7 @@
         "gpt-5.6-terra"
       ],
       "outputs": 24,
-      "passed_all": 1.0,
+      "passed_all": 0.9583,
       "checks": {
         "classify.json_only": 1.0,
         "classify.valid_category": 1.0,
@@ -193,6 +196,7 @@
         "decide.amount_matches": 1.0,
         "draft.mentions_order_id": 1.0,
         "draft.states_amount": 1.0,
+        "draft.states_timeline": 0.9583,
         "draft.word_limit": 1.0,
         "draft.no_placeholder": 1.0,
         "tone.json_only": 1.0,
@@ -315,9 +319,17 @@
         "input_id": "t04",
         "text": "Return request for my backpack, order A1007. Never used it.",
         "tricky": true,
-        "verdict": "SAME",
+        "verdict": "IMPROVED",
         "regressions": [],
-        "improvements": [],
+        "improvements": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+            "baseline_fail": "3/3",
+            "candidate_fail": "0/1"
+          }
+        ],
         "baseline": {
           "output": [
             "category: refund",
@@ -939,7 +951,14 @@
         }
       },
       {
-        "intermittent_failures": [],
+        "intermittent_failures": [
+          {
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+            "run": 1,
+            "raw_output": "Hemos aprobado el reembolso completo de $79.00 para el pedido A1001, ya que los auriculares no se han usado y est\u00e1n dentro del plazo de devoluci\u00f3n de 30 d\u00edas.\n\nEl reembolso se enviar\u00e1 al m\u00e9todo de pago original en un plazo de 5 a 7 d\u00edas h\u00e1biles.\n\nThe Support Team"
+          }
+        ],
         "input_id": "t22",
         "text": "Hola, quiero devolver los auriculares del pedido A1001. No los he usado. \u00bfMe pueden reembolsar?",
         "tricky": true,
@@ -969,7 +988,7 @@
           ],
           "errors": [],
           "stable": true,
-          "failing_raw_output": null
+          "failing_raw_output": "Hemos aprobado el reembolso completo de $79.00 para el pedido A1001, ya que los auriculares no se han usado y est\u00e1n dentro del plazo de devoluci\u00f3n de 30 d\u00edas.\n\nEl reembolso se enviar\u00e1 al m\u00e9todo de pago original en un plazo de 5 a 7 d\u00edas h\u00e1biles.\n\nThe Support Team"
         }
       },
       {
@@ -1011,9 +1030,17 @@
         "input_id": "t24",
         "text": "Cancel A1006. Your site is a mess and I shouldn't have to email you for this.",
         "tricky": true,
-        "verdict": "SAME",
+        "verdict": "IMPROVED",
         "regressions": [],
-        "improvements": [],
+        "improvements": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+            "baseline_fail": "2/3",
+            "candidate_fail": "0/1"
+          }
+        ],
         "baseline": {
           "output": [
             "category: cancel",
@@ -1266,6 +1293,236 @@
         "outputs": {
           "old": "damaged/replace",
           "new": "damaged/replace",
+          "fixed": null
+        }
+      },
+      {
+        "id": "t04",
+        "text": "Return request for my backpack, order A1007. Never used it.",
+        "verdict": "IMPROVED",
+        "fixed_verdict": null,
+        "old": {
+          "classify": "category: refund \u00b7 order A1007",
+          "decide": "refund \u00b7 $65.00 \u2014 The unused backpack is requested for return on day 30 after delivery, which qualifies for ",
+          "draft": "Your return for order A1007 has been approved. Since the backpack is unused and requested within 30 days of delivery, you will receive a ful\u2026",
+          "tone": "REVISED: The draft adds a refund method and 5\u20137 business day timeline not included in the decision."
+        },
+        "new": {
+          "classify": "category: refund \u00b7 order A1007",
+          "decide": "refund \u00b7 $65.00 \u2014 The unused backpack is requested for return on day 30 after delivery, which is within the ",
+          "draft": "Your return for order A1007 has been approved. Since the backpack is unused and your request was made within the refund window, we will issu\u2026",
+          "tone": "PASS"
+        },
+        "fixed": null,
+        "cells": {
+          "old": {
+            "classify": {
+              "model": "gpt-5.6-terra",
+              "prompt": "ccf9cd8534",
+              "system": null,
+              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.",
+              "output": "{\"category\":\"refund\",\"order_id\":\"A1007\"}",
+              "added": [],
+              "removed": []
+            },
+            "decide": {
+              "model": "gpt-5.6-terra",
+              "prompt": "8d38de68da",
+              "system": null,
+              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.\n\nCategory: refund\n\nPolicy REFUND-01:\nUnused items can be returned for a full refund within 30 days of delivery (day 30 counts). Final-sale items cannot be returned or refunded. Refunds go to the original payment method in 5-7 business days. Without an order ID, ask for it.\n\nOrder record: {\"order_id\": \"A1007\", \"item\": \"Backpack\", \"price\": 65.0, \"status\": \"delivered\", \"delivered\": \"2026-09-06\", \"days_since_delivery\": 30}",
+              "output": "{\"action\":\"refund\",\"policy_id\":\"REFUND-01\",\"amount\":65.0,\"reason\":\"The unused backpack is requested for return on day 30 after delivery, which qualifies for a full refund.\"}",
+              "added": [],
+              "removed": []
+            },
+            "draft": {
+              "model": "gpt-5.6-terra",
+              "prompt": "253daf5906",
+              "system": null,
+              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.\n\nDecision: {\"action\": \"refund\", \"policy_id\": \"REFUND-01\", \"amount\": 65.0, \"reason\": \"The unused backpack is requested for return on day 30 after delivery, which qualifies for a full refund.\"}\n\nOrder record: {\"order_id\": \"A1007\", \"item\": \"Backpack\", \"price\": 65.0, \"status\": \"delivered\", \"delivered\": \"2026-09-06\", \"days_since_delivery\": 30}",
+              "output": "Your return for order A1007 has been approved. Since the backpack is unused and requested within 30 days of delivery, you will receive a full refund of $65.00. The refund will be returned to your original payment method in 5\u20137 business days.\n\nThe Support Team",
+              "added": [],
+              "removed": []
+            },
+            "tone": {
+              "model": "gpt-5.6-terra",
+              "prompt": "6ab68ae579",
+              "system": null,
+              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.\n\nDecision: {\"action\": \"refund\", \"policy_id\": \"REFUND-01\", \"amount\": 65.0, \"reason\": \"The unused backpack is requested for return on day 30 after delivery, which qualifies for a full refund.\"}\n\nDraft reply:\nYour return for order A1007 has been approved. Since the backpack is unused and requested within 30 days of delivery, you will receive a full refund of $65.00. The refund will be returned to your original payment method in 5\u20137 business days.\n\nThe Support Team",
+              "output": "{\"verdict\":\"REVISED\",\"issues\":[\"The draft adds a refund method and 5\u20137 business day timeline not included in the decision.\"],\"final_reply\":\"Your return for order A1007 has been approved. Since the backpack is unused and the return was requested within 30 days of delivery, you will receive a full refund of $65.00.\\n\\nThe Support Team\"}",
+              "added": [],
+              "removed": []
+            }
+          },
+          "new": {
+            "classify": {
+              "model": "gpt-5.6-terra",
+              "prompt": "805482f501",
+              "system": null,
+              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.",
+              "output": "{\"category\":\"refund\",\"order_id\":\"A1007\"}",
+              "added": [
+                4
+              ],
+              "removed": []
+            },
+            "decide": {
+              "model": "gpt-5.6-terra",
+              "prompt": "8d38de68da",
+              "system": null,
+              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.\n\nCategory: refund\n\nPolicy REFUND-01:\nUnused items can be returned for a full refund within 30 days of delivery (day 30 counts). Final-sale items cannot be returned or refunded. Refunds go to the original payment method in 5-7 business days. Without an order ID, ask for it.\n\nOrder record: {\"order_id\": \"A1007\", \"item\": \"Backpack\", \"price\": 65.0, \"status\": \"delivered\", \"delivered\": \"2026-09-06\", \"days_since_delivery\": 30}",
+              "output": "{\"action\":\"refund\",\"policy_id\":\"REFUND-01\",\"amount\":65.0,\"reason\":\"The unused backpack is requested for return on day 30 after delivery, which is within the refund window.\"}",
+              "added": [],
+              "removed": []
+            },
+            "draft": {
+              "model": "gpt-5.6-terra",
+              "prompt": "253daf5906",
+              "system": null,
+              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.\n\nDecision: {\"action\": \"refund\", \"policy_id\": \"REFUND-01\", \"amount\": 65.0, \"reason\": \"The unused backpack is requested for return on day 30 after delivery, which is within the refund window.\"}\n\nOrder record: {\"order_id\": \"A1007\", \"item\": \"Backpack\", \"price\": 65.0, \"status\": \"delivered\", \"delivered\": \"2026-09-06\", \"days_since_delivery\": 30}",
+              "output": "Your return for order A1007 has been approved. Since the backpack is unused and your request was made within the refund window, we will issue a $65.00 refund to your original payment method within 5\u20137 business days.\n\nThe Support Team",
+              "added": [],
+              "removed": []
+            },
+            "tone": {
+              "model": "gpt-5.6-terra",
+              "prompt": "6ab68ae579",
+              "system": null,
+              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.\n\nDecision: {\"action\": \"refund\", \"policy_id\": \"REFUND-01\", \"amount\": 65.0, \"reason\": \"The unused backpack is requested for return on day 30 after delivery, which is within the refund window.\"}\n\nDraft reply:\nYour return for order A1007 has been approved. Since the backpack is unused and your request was made within the refund window, we will issue a $65.00 refund to your original payment method within 5\u20137 business days.\n\nThe Support Team",
+              "output": "{\"verdict\":\"PASS\",\"issues\":[],\"final_reply\":null}",
+              "added": [],
+              "removed": []
+            }
+          },
+          "fixed": {}
+        },
+        "expected": {
+          "classify": "category: refund \u00b7 order A1007",
+          "decide": "action: refund",
+          "draft": "A reply that states the refund decision. Must mention: \"A1007\", \"$65.00\". Must not say: (nothing specific).",
+          "tone": "PASS, or a rewrite that keeps every fact (order ID, amounts, timelines)."
+        },
+        "first_divergence": null,
+        "causal_steps": [],
+        "status": null,
+        "experiments": [],
+        "outputs": {
+          "old": "refund/refund",
+          "new": "refund/refund",
+          "fixed": null
+        }
+      },
+      {
+        "id": "t24",
+        "text": "Cancel A1006. Your site is a mess and I shouldn't have to email you for this.",
+        "verdict": "IMPROVED",
+        "fixed_verdict": null,
+        "old": {
+          "classify": "category: cancel \u00b7 order A1006",
+          "decide": "cancel \u00b7 $249.00 \u2014 Order A1006 is processing and can be cancelled for a full refund.",
+          "draft": "Order A1006 has been canceled. A full refund of $249.00 will be returned to your original payment method within 5\u20137 business days. We\u2019re sor\u2026",
+          "tone": "PASS"
+        },
+        "new": {
+          "classify": "category: cancel \u00b7 order A1006",
+          "decide": "cancel \u00b7 $249.00 \u2014 The order is still processing and can be cancelled for a full refund.",
+          "draft": "Your order A1006 has been canceled. A full refund of $249.00 will be returned to your original payment method within 5\u20137 business days. The \u2026",
+          "tone": "PASS"
+        },
+        "fixed": null,
+        "cells": {
+          "old": {
+            "classify": {
+              "model": "gpt-5.6-terra",
+              "prompt": "ccf9cd8534",
+              "system": null,
+              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.",
+              "output": "{\"category\":\"cancel\",\"order_id\":\"A1006\"}",
+              "added": [],
+              "removed": []
+            },
+            "decide": {
+              "model": "gpt-5.6-terra",
+              "prompt": "8d38de68da",
+              "system": null,
+              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.\n\nCategory: cancel\n\nPolicy CANCEL-04:\nOrders with status 'processing' can be cancelled for a full refund. Orders already shipped cannot be cancelled; the customer may return the item after delivery (action: deny). Without an order ID, ask for it.\n\nOrder record: {\"order_id\": \"A1006\", \"item\": \"Desk chair\", \"price\": 249.0, \"status\": \"processing\"}",
+              "output": "{\"action\":\"cancel\",\"policy_id\":\"CANCEL-04\",\"amount\":249.0,\"reason\":\"Order A1006 is processing and can be cancelled for a full refund.\"}",
+              "added": [],
+              "removed": []
+            },
+            "draft": {
+              "model": "gpt-5.6-terra",
+              "prompt": "253daf5906",
+              "system": null,
+              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.\n\nDecision: {\"action\": \"cancel\", \"policy_id\": \"CANCEL-04\", \"amount\": 249.0, \"reason\": \"Order A1006 is processing and can be cancelled for a full refund.\"}\n\nOrder record: {\"order_id\": \"A1006\", \"item\": \"Desk chair\", \"price\": 249.0, \"status\": \"processing\"}",
+              "output": "Order A1006 has been canceled. A full refund of $249.00 will be returned to your original payment method within 5\u20137 business days. We\u2019re sorry for the frustration.\n\nThe Support Team",
+              "added": [],
+              "removed": []
+            },
+            "tone": {
+              "model": "gpt-5.6-terra",
+              "prompt": "6ab68ae579",
+              "system": null,
+              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.\n\nDecision: {\"action\": \"cancel\", \"policy_id\": \"CANCEL-04\", \"amount\": 249.0, \"reason\": \"Order A1006 is processing and can be cancelled for a full refund.\"}\n\nDraft reply:\nOrder A1006 has been canceled. A full refund of $249.00 will be returned to your original payment method within 5\u20137 business days. We\u2019re sorry for the frustration.\n\nThe Support Team",
+              "output": "{\"verdict\":\"PASS\",\"issues\":[],\"final_reply\":null}",
+              "added": [],
+              "removed": []
+            }
+          },
+          "new": {
+            "classify": {
+              "model": "gpt-5.6-terra",
+              "prompt": "805482f501",
+              "system": null,
+              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.",
+              "output": "{\"category\":\"cancel\",\"order_id\":\"A1006\"}",
+              "added": [
+                4
+              ],
+              "removed": []
+            },
+            "decide": {
+              "model": "gpt-5.6-terra",
+              "prompt": "8d38de68da",
+              "system": null,
+              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.\n\nCategory: cancel\n\nPolicy CANCEL-04:\nOrders with status 'processing' can be cancelled for a full refund. Orders already shipped cannot be cancelled; the customer may return the item after delivery (action: deny). Without an order ID, ask for it.\n\nOrder record: {\"order_id\": \"A1006\", \"item\": \"Desk chair\", \"price\": 249.0, \"status\": \"processing\"}",
+              "output": "{\"action\":\"cancel\",\"policy_id\":\"CANCEL-04\",\"amount\":249.0,\"reason\":\"The order is still processing and can be cancelled for a full refund.\"}",
+              "added": [],
+              "removed": []
+            },
+            "draft": {
+              "model": "gpt-5.6-terra",
+              "prompt": "253daf5906",
+              "system": null,
+              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.\n\nDecision: {\"action\": \"cancel\", \"policy_id\": \"CANCEL-04\", \"amount\": 249.0, \"reason\": \"The order is still processing and can be cancelled for a full refund.\"}\n\nOrder record: {\"order_id\": \"A1006\", \"item\": \"Desk chair\", \"price\": 249.0, \"status\": \"processing\"}",
+              "output": "Your order A1006 has been canceled. A full refund of $249.00 will be returned to your original payment method within 5\u20137 business days.\n\nThe Support Team",
+              "added": [],
+              "removed": []
+            },
+            "tone": {
+              "model": "gpt-5.6-terra",
+              "prompt": "6ab68ae579",
+              "system": null,
+              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.\n\nDecision: {\"action\": \"cancel\", \"policy_id\": \"CANCEL-04\", \"amount\": 249.0, \"reason\": \"The order is still processing and can be cancelled for a full refund.\"}\n\nDraft reply:\nYour order A1006 has been canceled. A full refund of $249.00 will be returned to your original payment method within 5\u20137 business days.\n\nThe Support Team",
+              "output": "{\"verdict\":\"PASS\",\"issues\":[],\"final_reply\":null}",
+              "added": [],
+              "removed": []
+            }
+          },
+          "fixed": {}
+        },
+        "expected": {
+          "classify": "category: cancel \u00b7 order A1006",
+          "decide": "action: cancel",
+          "draft": "A reply that states the cancel decision. Must mention: \"A1006\", \"$249.00\". Must not say: (nothing specific).",
+          "tone": "PASS, or a rewrite that keeps every fact (order ID, amounts, timelines)."
+        },
+        "first_divergence": null,
+        "causal_steps": [],
+        "status": null,
+        "experiments": [],
+        "outputs": {
+          "old": "cancel/cancel",
+          "new": "cancel/cancel",
           "fixed": null
         }
       },
@@ -1611,121 +1868,6 @@
         "outputs": {
           "old": "refund/deny",
           "new": "refund/deny",
-          "fixed": null
-        }
-      },
-      {
-        "id": "t04",
-        "text": "Return request for my backpack, order A1007. Never used it.",
-        "verdict": "SAME",
-        "fixed_verdict": null,
-        "old": {
-          "classify": "category: refund \u00b7 order A1007",
-          "decide": "refund \u00b7 $65.00 \u2014 The unused backpack is requested for return on day 30 after delivery, which qualifies for ",
-          "draft": "Your return for order A1007 has been approved. Since the backpack is unused and requested within 30 days of delivery, you will receive a ful\u2026",
-          "tone": "REVISED: The draft adds a refund method and 5\u20137 business day timeline not included in the decision."
-        },
-        "new": {
-          "classify": "category: refund \u00b7 order A1007",
-          "decide": "refund \u00b7 $65.00 \u2014 The unused backpack is requested for return on day 30 after delivery, which is within the ",
-          "draft": "Your return for order A1007 has been approved. Since the backpack is unused and your request was made within the refund window, we will issu\u2026",
-          "tone": "PASS"
-        },
-        "fixed": null,
-        "cells": {
-          "old": {
-            "classify": {
-              "model": "gpt-5.6-terra",
-              "prompt": "ccf9cd8534",
-              "system": null,
-              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.",
-              "output": "{\"category\":\"refund\",\"order_id\":\"A1007\"}",
-              "added": [],
-              "removed": []
-            },
-            "decide": {
-              "model": "gpt-5.6-terra",
-              "prompt": "8d38de68da",
-              "system": null,
-              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.\n\nCategory: refund\n\nPolicy REFUND-01:\nUnused items can be returned for a full refund within 30 days of delivery (day 30 counts). Final-sale items cannot be returned or refunded. Refunds go to the original payment method in 5-7 business days. Without an order ID, ask for it.\n\nOrder record: {\"order_id\": \"A1007\", \"item\": \"Backpack\", \"price\": 65.0, \"status\": \"delivered\", \"delivered\": \"2026-09-06\", \"days_since_delivery\": 30}",
-              "output": "{\"action\":\"refund\",\"policy_id\":\"REFUND-01\",\"amount\":65.0,\"reason\":\"The unused backpack is requested for return on day 30 after delivery, which qualifies for a full refund.\"}",
-              "added": [],
-              "removed": []
-            },
-            "draft": {
-              "model": "gpt-5.6-terra",
-              "prompt": "253daf5906",
-              "system": null,
-              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.\n\nDecision: {\"action\": \"refund\", \"policy_id\": \"REFUND-01\", \"amount\": 65.0, \"reason\": \"The unused backpack is requested for return on day 30 after delivery, which qualifies for a full refund.\"}\n\nOrder record: {\"order_id\": \"A1007\", \"item\": \"Backpack\", \"price\": 65.0, \"status\": \"delivered\", \"delivered\": \"2026-09-06\", \"days_since_delivery\": 30}",
-              "output": "Your return for order A1007 has been approved. Since the backpack is unused and requested within 30 days of delivery, you will receive a full refund of $65.00. The refund will be returned to your original payment method in 5\u20137 business days.\n\nThe Support Team",
-              "added": [],
-              "removed": []
-            },
-            "tone": {
-              "model": "gpt-5.6-terra",
-              "prompt": "6ab68ae579",
-              "system": null,
-              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.\n\nDecision: {\"action\": \"refund\", \"policy_id\": \"REFUND-01\", \"amount\": 65.0, \"reason\": \"The unused backpack is requested for return on day 30 after delivery, which qualifies for a full refund.\"}\n\nDraft reply:\nYour return for order A1007 has been approved. Since the backpack is unused and requested within 30 days of delivery, you will receive a full refund of $65.00. The refund will be returned to your original payment method in 5\u20137 business days.\n\nThe Support Team",
-              "output": "{\"verdict\":\"REVISED\",\"issues\":[\"The draft adds a refund method and 5\u20137 business day timeline not included in the decision.\"],\"final_reply\":\"Your return for order A1007 has been approved. Since the backpack is unused and the return was requested within 30 days of delivery, you will receive a full refund of $65.00.\\n\\nThe Support Team\"}",
-              "added": [],
-              "removed": []
-            }
-          },
-          "new": {
-            "classify": {
-              "model": "gpt-5.6-terra",
-              "prompt": "805482f501",
-              "system": null,
-              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.",
-              "output": "{\"category\":\"refund\",\"order_id\":\"A1007\"}",
-              "added": [
-                4
-              ],
-              "removed": []
-            },
-            "decide": {
-              "model": "gpt-5.6-terra",
-              "prompt": "8d38de68da",
-              "system": null,
-              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.\n\nCategory: refund\n\nPolicy REFUND-01:\nUnused items can be returned for a full refund within 30 days of delivery (day 30 counts). Final-sale items cannot be returned or refunded. Refunds go to the original payment method in 5-7 business days. Without an order ID, ask for it.\n\nOrder record: {\"order_id\": \"A1007\", \"item\": \"Backpack\", \"price\": 65.0, \"status\": \"delivered\", \"delivered\": \"2026-09-06\", \"days_since_delivery\": 30}",
-              "output": "{\"action\":\"refund\",\"policy_id\":\"REFUND-01\",\"amount\":65.0,\"reason\":\"The unused backpack is requested for return on day 30 after delivery, which is within the refund window.\"}",
-              "added": [],
-              "removed": []
-            },
-            "draft": {
-              "model": "gpt-5.6-terra",
-              "prompt": "253daf5906",
-              "system": null,
-              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.\n\nDecision: {\"action\": \"refund\", \"policy_id\": \"REFUND-01\", \"amount\": 65.0, \"reason\": \"The unused backpack is requested for return on day 30 after delivery, which is within the refund window.\"}\n\nOrder record: {\"order_id\": \"A1007\", \"item\": \"Backpack\", \"price\": 65.0, \"status\": \"delivered\", \"delivered\": \"2026-09-06\", \"days_since_delivery\": 30}",
-              "output": "Your return for order A1007 has been approved. Since the backpack is unused and your request was made within the refund window, we will issue a $65.00 refund to your original payment method within 5\u20137 business days.\n\nThe Support Team",
-              "added": [],
-              "removed": []
-            },
-            "tone": {
-              "model": "gpt-5.6-terra",
-              "prompt": "6ab68ae579",
-              "system": null,
-              "user": "Ticket:\nReturn request for my backpack, order A1007. Never used it.\n\nDecision: {\"action\": \"refund\", \"policy_id\": \"REFUND-01\", \"amount\": 65.0, \"reason\": \"The unused backpack is requested for return on day 30 after delivery, which is within the refund window.\"}\n\nDraft reply:\nYour return for order A1007 has been approved. Since the backpack is unused and your request was made within the refund window, we will issue a $65.00 refund to your original payment method within 5\u20137 business days.\n\nThe Support Team",
-              "output": "{\"verdict\":\"PASS\",\"issues\":[],\"final_reply\":null}",
-              "added": [],
-              "removed": []
-            }
-          },
-          "fixed": {}
-        },
-        "expected": {
-          "classify": "category: refund \u00b7 order A1007",
-          "decide": "action: refund",
-          "draft": "A reply that states the refund decision. Must mention: \"A1007\", \"$65.00\". Must not say: (nothing specific).",
-          "tone": "PASS, or a rewrite that keeps every fact (order ID, amounts, timelines)."
-        },
-        "first_divergence": null,
-        "causal_steps": [],
-        "status": null,
-        "experiments": [],
-        "outputs": {
-          "old": "refund/refund",
-          "new": "refund/refund",
           "fixed": null
         }
       },
@@ -3796,121 +3938,6 @@
         "outputs": {
           "old": "shipping/replace",
           "new": "shipping/replace",
-          "fixed": null
-        }
-      },
-      {
-        "id": "t24",
-        "text": "Cancel A1006. Your site is a mess and I shouldn't have to email you for this.",
-        "verdict": "SAME",
-        "fixed_verdict": null,
-        "old": {
-          "classify": "category: cancel \u00b7 order A1006",
-          "decide": "cancel \u00b7 $249.00 \u2014 Order A1006 is processing and can be cancelled for a full refund.",
-          "draft": "Order A1006 has been canceled. A full refund of $249.00 will be returned to your original payment method within 5\u20137 business days. We\u2019re sor\u2026",
-          "tone": "PASS"
-        },
-        "new": {
-          "classify": "category: cancel \u00b7 order A1006",
-          "decide": "cancel \u00b7 $249.00 \u2014 The order is still processing and can be cancelled for a full refund.",
-          "draft": "Your order A1006 has been canceled. A full refund of $249.00 will be returned to your original payment method within 5\u20137 business days. The \u2026",
-          "tone": "PASS"
-        },
-        "fixed": null,
-        "cells": {
-          "old": {
-            "classify": {
-              "model": "gpt-5.6-terra",
-              "prompt": "ccf9cd8534",
-              "system": null,
-              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.",
-              "output": "{\"category\":\"cancel\",\"order_id\":\"A1006\"}",
-              "added": [],
-              "removed": []
-            },
-            "decide": {
-              "model": "gpt-5.6-terra",
-              "prompt": "8d38de68da",
-              "system": null,
-              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.\n\nCategory: cancel\n\nPolicy CANCEL-04:\nOrders with status 'processing' can be cancelled for a full refund. Orders already shipped cannot be cancelled; the customer may return the item after delivery (action: deny). Without an order ID, ask for it.\n\nOrder record: {\"order_id\": \"A1006\", \"item\": \"Desk chair\", \"price\": 249.0, \"status\": \"processing\"}",
-              "output": "{\"action\":\"cancel\",\"policy_id\":\"CANCEL-04\",\"amount\":249.0,\"reason\":\"Order A1006 is processing and can be cancelled for a full refund.\"}",
-              "added": [],
-              "removed": []
-            },
-            "draft": {
-              "model": "gpt-5.6-terra",
-              "prompt": "253daf5906",
-              "system": null,
-              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.\n\nDecision: {\"action\": \"cancel\", \"policy_id\": \"CANCEL-04\", \"amount\": 249.0, \"reason\": \"Order A1006 is processing and can be cancelled for a full refund.\"}\n\nOrder record: {\"order_id\": \"A1006\", \"item\": \"Desk chair\", \"price\": 249.0, \"status\": \"processing\"}",
-              "output": "Order A1006 has been canceled. A full refund of $249.00 will be returned to your original payment method within 5\u20137 business days. We\u2019re sorry for the frustration.\n\nThe Support Team",
-              "added": [],
-              "removed": []
-            },
-            "tone": {
-              "model": "gpt-5.6-terra",
-              "prompt": "6ab68ae579",
-              "system": null,
-              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.\n\nDecision: {\"action\": \"cancel\", \"policy_id\": \"CANCEL-04\", \"amount\": 249.0, \"reason\": \"Order A1006 is processing and can be cancelled for a full refund.\"}\n\nDraft reply:\nOrder A1006 has been canceled. A full refund of $249.00 will be returned to your original payment method within 5\u20137 business days. We\u2019re sorry for the frustration.\n\nThe Support Team",
-              "output": "{\"verdict\":\"PASS\",\"issues\":[],\"final_reply\":null}",
-              "added": [],
-              "removed": []
-            }
-          },
-          "new": {
-            "classify": {
-              "model": "gpt-5.6-terra",
-              "prompt": "805482f501",
-              "system": null,
-              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.",
-              "output": "{\"category\":\"cancel\",\"order_id\":\"A1006\"}",
-              "added": [
-                4
-              ],
-              "removed": []
-            },
-            "decide": {
-              "model": "gpt-5.6-terra",
-              "prompt": "8d38de68da",
-              "system": null,
-              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.\n\nCategory: cancel\n\nPolicy CANCEL-04:\nOrders with status 'processing' can be cancelled for a full refund. Orders already shipped cannot be cancelled; the customer may return the item after delivery (action: deny). Without an order ID, ask for it.\n\nOrder record: {\"order_id\": \"A1006\", \"item\": \"Desk chair\", \"price\": 249.0, \"status\": \"processing\"}",
-              "output": "{\"action\":\"cancel\",\"policy_id\":\"CANCEL-04\",\"amount\":249.0,\"reason\":\"The order is still processing and can be cancelled for a full refund.\"}",
-              "added": [],
-              "removed": []
-            },
-            "draft": {
-              "model": "gpt-5.6-terra",
-              "prompt": "253daf5906",
-              "system": null,
-              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.\n\nDecision: {\"action\": \"cancel\", \"policy_id\": \"CANCEL-04\", \"amount\": 249.0, \"reason\": \"The order is still processing and can be cancelled for a full refund.\"}\n\nOrder record: {\"order_id\": \"A1006\", \"item\": \"Desk chair\", \"price\": 249.0, \"status\": \"processing\"}",
-              "output": "Your order A1006 has been canceled. A full refund of $249.00 will be returned to your original payment method within 5\u20137 business days.\n\nThe Support Team",
-              "added": [],
-              "removed": []
-            },
-            "tone": {
-              "model": "gpt-5.6-terra",
-              "prompt": "6ab68ae579",
-              "system": null,
-              "user": "Ticket:\nCancel A1006. Your site is a mess and I shouldn't have to email you for this.\n\nDecision: {\"action\": \"cancel\", \"policy_id\": \"CANCEL-04\", \"amount\": 249.0, \"reason\": \"The order is still processing and can be cancelled for a full refund.\"}\n\nDraft reply:\nYour order A1006 has been canceled. A full refund of $249.00 will be returned to your original payment method within 5\u20137 business days.\n\nThe Support Team",
-              "output": "{\"verdict\":\"PASS\",\"issues\":[],\"final_reply\":null}",
-              "added": [],
-              "removed": []
-            }
-          },
-          "fixed": {}
-        },
-        "expected": {
-          "classify": "category: cancel \u00b7 order A1006",
-          "decide": "action: cancel",
-          "draft": "A reply that states the cancel decision. Must mention: \"A1006\", \"$249.00\". Must not say: (nothing specific).",
-          "tone": "PASS, or a rewrite that keeps every fact (order ID, amounts, timelines)."
-        },
-        "first_divergence": null,
-        "causal_steps": [],
-        "status": null,
-        "experiments": [],
-        "outputs": {
-          "old": "cancel/cancel",
-          "new": "cancel/cancel",
           "fixed": null
         }
       }

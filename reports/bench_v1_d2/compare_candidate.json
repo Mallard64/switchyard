@@ -4,10 +4,10 @@
   "baseline_file": "agent__gpt-5.6-terra.jsonl",
   "inputs_compared": 24,
   "verdict_counts": {
-    "REGRESSED": 3,
+    "REGRESSED": 6,
     "IMPROVED": 0,
     "CHANGED": 0,
-    "SAME": 21
+    "SAME": 18
   },
   "ready_to_merge": false,
   "baseline": {
@@ -16,7 +16,7 @@
       "gpt-5.6-terra"
     ],
     "outputs": 72,
-    "passed_all": 1.0,
+    "passed_all": 0.8611,
     "checks": {
       "classify.json_only": 1.0,
       "classify.valid_category": 1.0,
@@ -25,6 +25,7 @@
       "decide.amount_matches": 1.0,
       "draft.mentions_order_id": 1.0,
       "draft.states_amount": 1.0,
+      "draft.states_timeline": 0.8611,
       "draft.word_limit": 1.0,
       "draft.no_placeholder": 1.0,
       "tone.json_only": 1.0,
@@ -44,7 +45,7 @@
       "gpt-5.6-sol"
     ],
     "outputs": 72,
-    "passed_all": 1.0,
+    "passed_all": 0.6944,
     "checks": {
       "classify.json_only": 1.0,
       "classify.valid_category": 1.0,
@@ -53,6 +54,7 @@
       "decide.amount_matches": 1.0,
       "draft.mentions_order_id": 1.0,
       "draft.states_amount": 1.0,
+      "draft.states_timeline": 0.6944,
       "draft.word_limit": 1.0,
       "draft.no_placeholder": 1.0,
       "tone.json_only": 1.0,
@@ -66,15 +68,25 @@
     "latency_p95_s": 9.964,
     "cost_per_1k_calls_usd": 12.64
   },
-  "instructions_implicated": {},
+  "instructions_implicated": {
+    "draft.states_timeline": 5
+  },
   "items": [
     {
       "intermittent_failures": [],
       "input_id": "t01",
       "text": "Hi, I bought the wireless earbuds (order A1001) but I've changed my mind, they're still in the box. Can I get my money back?",
       "tricky": false,
-      "verdict": "SAME",
-      "regressions": [],
+      "verdict": "REGRESSED",
+      "regressions": [
+        {
+          "kind": "hard_check",
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "baseline_fail": "0/3",
+          "candidate_fail": "3/3"
+        }
+      ],
       "improvements": [],
       "baseline": {
         "output": "refund/refund",
@@ -95,7 +107,7 @@
         ],
         "errors": [],
         "stable": true,
-        "failing_raw_output": null
+        "failing_raw_output": "Your full refund of $79.00 for order A1001 has been approved. The unused earbuds are eligible because the return was requested within 30 days of delivery.\n\nThe Support Team"
       }
     },
     {
@@ -159,7 +171,26 @@
       }
     },
     {
-      "intermittent_failures": [],
+      "intermittent_failures": [
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 3,
+          "raw_output": "Your return request for order A1007 is approved. Since the backpack is unused and the request was made within 30 days of delivery, you\u2019ll receive a full refund of $65.00.\n\nThe Support Team"
+        },
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 1,
+          "raw_output": "Your return request for order A1007 is approved. Because the backpack is unused and the request was made on day 30 after delivery, you\u2019ll receive a full refund of $65.00.\n\nThe Support Team"
+        },
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 2,
+          "raw_output": "Your return request for order A1007 is approved. Since the backpack is unused and the request was made on day 30 after delivery, you\u2019ll receive a full refund of $65.00.\n\nThe Support Team"
+        }
+      ],
       "input_id": "t04",
       "text": "Return request for my backpack, order A1007. Never used it.",
       "tricky": true,
@@ -185,7 +216,7 @@
         ],
         "errors": [],
         "stable": true,
-        "failing_raw_output": null
+        "failing_raw_output": "Your return request for order A1007 is approved. Since the backpack is unused and the request was made within 30 days of delivery, you\u2019ll receive a full refund of $65.00.\n\nThe Support Team"
       }
     },
     {
@@ -225,6 +256,13 @@
       "tricky": false,
       "verdict": "REGRESSED",
       "regressions": [
+        {
+          "kind": "hard_check",
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "baseline_fail": "0/3",
+          "candidate_fail": "3/3"
+        },
         {
           "kind": "accuracy",
           "baseline": [
@@ -266,7 +304,7 @@
           }
         ],
         "stable": true,
-        "failing_raw_output": null
+        "failing_raw_output": "We\u2019re sorry your mug set arrived damaged. We\u2019ll refund $42.00 for order A1005 because the damage was reported within 30 days of delivery.\n\nThe Support Team"
       }
     },
     {
@@ -412,8 +450,16 @@
       "input_id": "t11",
       "text": "Please cancel order A1006, I ordered the wrong chair.",
       "tricky": false,
-      "verdict": "SAME",
-      "regressions": [],
+      "verdict": "REGRESSED",
+      "regressions": [
+        {
+          "kind": "hard_check",
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "baseline_fail": "1/3",
+          "candidate_fail": "3/3"
+        }
+      ],
       "improvements": [],
       "baseline": {
         "output": "cancel/cancel",
@@ -434,7 +480,7 @@
         ],
         "errors": [],
         "stable": true,
-        "failing_raw_output": null
+        "failing_raw_output": "Order A1006 has been cancelled because it was still processing. A full refund of $249.00 will be issued.\n\nThe Support Team"
       }
     },
     {
@@ -685,6 +731,13 @@
       "verdict": "REGRESSED",
       "regressions": [
         {
+          "kind": "hard_check",
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "baseline_fail": "0/3",
+          "candidate_fail": "2/3"
+        },
+        {
           "kind": "accuracy",
           "baseline": [
             1.0,
@@ -725,7 +778,7 @@
           }
         ],
         "stable": true,
-        "failing_raw_output": null
+        "failing_raw_output": "We\u2019re sorry the shoes were defective. Since the issue was reported within 30 days of delivery, we\u2019ll refund $110.00 for order A1009.\n\nThe Support Team"
       }
     },
     {
@@ -733,8 +786,16 @@
       "input_id": "t21",
       "text": "Hello, the scarf from order A1011 was a gift and they already have one. Unopened. Can I return it?",
       "tricky": false,
-      "verdict": "SAME",
-      "regressions": [],
+      "verdict": "REGRESSED",
+      "regressions": [
+        {
+          "kind": "hard_check",
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "baseline_fail": "1/3",
+          "candidate_fail": "3/3"
+        }
+      ],
       "improvements": [],
       "baseline": {
         "output": "refund/refund",
@@ -755,11 +816,30 @@
         ],
         "errors": [],
         "stable": true,
-        "failing_raw_output": null
+        "failing_raw_output": "Hello,\n\nYes, you can return the unopened scarf from order A1011 because it is unused and within 30 days of delivery. Once returned, you\u2019ll receive a full refund of $54.50.\n\nThe Support Team"
       }
     },
     {
-      "intermittent_failures": [],
+      "intermittent_failures": [
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 2,
+          "raw_output": "Hola:\n\nAprobamos el reembolso completo de $79.00 del pedido A1001 porque los auriculares no se han usado y la devoluci\u00f3n se solicit\u00f3 dentro de los 30 d\u00edas posteriores a la entrega.\n\nEl equipo de soporte"
+        },
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 1,
+          "raw_output": "Hola:\n\nAprobamos el reembolso completo de **$79.00** para el pedido **A1001**. Los auriculares sin usar cumplen los requisitos porque solicit\u00f3 la devoluci\u00f3n dentro de los 30 d\u00edas posteriores a la entrega.\n\nThe Support Team"
+        },
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 3,
+          "raw_output": "Hola:\n\nAprobamos el reembolso completo de $79.00 del pedido A1001 porque los auriculares no se han usado y la devoluci\u00f3n se solicit\u00f3 dentro de los 30 d\u00edas posteriores a la entrega.\n\nEl equipo de soporte"
+        }
+      ],
       "input_id": "t22",
       "text": "Hola, quiero devolver los auriculares del pedido A1001. No los he usado. \u00bfMe pueden reembolsar?",
       "tricky": true,
@@ -785,7 +865,7 @@
         ],
         "errors": [],
         "stable": true,
-        "failing_raw_output": null
+        "failing_raw_output": "Hola:\n\nAprobamos el reembolso completo de $79.00 del pedido A1001 porque los auriculares no se han usado y la devoluci\u00f3n se solicit\u00f3 dentro de los 30 d\u00edas posteriores a la entrega.\n\nEl equipo de soporte"
       }
     },
     {
@@ -819,7 +899,20 @@
       }
     },
     {
-      "intermittent_failures": [],
+      "intermittent_failures": [
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 1,
+          "raw_output": "Order A1006 has been cancelled because it was still processing. A full refund of $249.00 will be issued.\n\nWe\u2019re sorry the cancellation process was frustrating.\n\nThe Support Team"
+        },
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 3,
+          "raw_output": "Order A1006 has been canceled because it is still processing and eligible for cancellation. A full refund of $249.00 will be issued.\n\nThe Support Team"
+        }
+      ],
       "input_id": "t24",
       "text": "Cancel A1006. Your site is a mess and I shouldn't have to email you for this.",
       "tricky": true,
@@ -845,7 +938,7 @@
         ],
         "errors": [],
         "stable": true,
-        "failing_raw_output": null
+        "failing_raw_output": "Order A1006 has been cancelled because it was still processing. A full refund of $249.00 will be issued.\n\nWe\u2019re sorry the cancellation process was frustrating.\n\nThe Support Team"
       }
     }
   ]

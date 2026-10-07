@@ -16,7 +16,7 @@
       "gpt-5.6-terra"
     ],
     "outputs": 72,
-    "passed_all": 1.0,
+    "passed_all": 0.8611,
     "checks": {
       "classify.json_only": 1.0,
       "classify.valid_category": 1.0,
@@ -25,6 +25,7 @@
       "decide.amount_matches": 1.0,
       "draft.mentions_order_id": 1.0,
       "draft.states_amount": 1.0,
+      "draft.states_timeline": 0.8611,
       "draft.word_limit": 1.0,
       "draft.no_placeholder": 1.0,
       "tone.json_only": 1.0,
@@ -53,6 +54,7 @@
       "decide.amount_matches": 1.0,
       "draft.mentions_order_id": 1.0,
       "draft.states_amount": 1.0,
+      "draft.states_timeline": 0.7639,
       "draft.word_limit": 1.0,
       "draft.no_placeholder": 1.0,
       "tone.json_only": 0.0,
@@ -67,6 +69,7 @@
     "cost_per_1k_calls_usd": 12.4
   },
   "instructions_implicated": {
+    "draft.states_timeline": 3,
     "tone.json_only": 24
   },
   "items": [
@@ -77,6 +80,13 @@
       "tricky": false,
       "verdict": "REGRESSED",
       "regressions": [
+        {
+          "kind": "hard_check",
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "baseline_fail": "0/3",
+          "candidate_fail": "2/3"
+        },
         {
           "kind": "hard_check",
           "check": "tone.json_only",
@@ -185,7 +195,26 @@
       }
     },
     {
-      "intermittent_failures": [],
+      "intermittent_failures": [
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 3,
+          "raw_output": "Your refund for order A1007 has been approved. The unused backpack is eligible for a full refund because your request was made on day 30 after delivery.\n\nThe exact refund amount is $65.00.\n\nThe Support Team"
+        },
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 2,
+          "raw_output": "Your refund for order A1007 has been approved. The unused backpack is eligible for a full refund of $65.00 because the request was made on day 30 after delivery.\n\nThe Support Team"
+        },
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 1,
+          "raw_output": "Your refund for order A1007 has been approved. The unused backpack is eligible for a full refund because the request was made on day 30 after delivery.\n\nThe refund amount is $65.00.\n\nThe Support Team"
+        }
+      ],
       "input_id": "t04",
       "text": "Return request for my backpack, order A1007. Never used it.",
       "tricky": true,
@@ -474,6 +503,13 @@
       "tricky": false,
       "verdict": "REGRESSED",
       "regressions": [
+        {
+          "kind": "hard_check",
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "baseline_fail": "1/3",
+          "candidate_fail": "3/3"
+        },
         {
           "kind": "hard_check",
           "check": "tone.json_only",
@@ -856,6 +892,13 @@
       "regressions": [
         {
           "kind": "hard_check",
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "baseline_fail": "1/3",
+          "candidate_fail": "3/3"
+        },
+        {
+          "kind": "hard_check",
           "check": "tone.json_only",
           "instruction": "Respond with only a JSON object: {\"verdict\": ...",
           "baseline_fail": "0/3",
@@ -886,7 +929,26 @@
       }
     },
     {
-      "intermittent_failures": [],
+      "intermittent_failures": [
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 1,
+          "raw_output": "Hola:\n\nHemos aprobado el reembolso completo de $79.00 para el pedido A1001. Los auriculares sin usar cumplen los requisitos porque la devoluci\u00f3n se solicit\u00f3 dentro de los 30 d\u00edas posteriores a la entrega.\n\nEl reembolso se realizar\u00e1 al m\u00e9todo de pago original.\n\nEl equipo de soporte"
+        },
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 3,
+          "raw_output": "Hemos aprobado el reembolso de 79,00 USD del pedido A1001 porque los auriculares no se han usado y la devoluci\u00f3n se solicit\u00f3 dentro de los 30 d\u00edas posteriores a la entrega.\n\nEl equipo de soporte"
+        },
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 2,
+          "raw_output": "Hola:\n\nHemos aprobado el reembolso de $79.00 del pedido A1001 porque los auriculares no se han usado y la devoluci\u00f3n se solicit\u00f3 dentro de los 30 d\u00edas posteriores a la entrega.\n\nThe Support Team"
+        }
+      ],
       "input_id": "t22",
       "text": "Hola, quiero devolver los auriculares del pedido A1001. No los he usado. \u00bfMe pueden reembolsar?",
       "tricky": true,
@@ -962,7 +1024,26 @@
       }
     },
     {
-      "intermittent_failures": [],
+      "intermittent_failures": [
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 1,
+          "raw_output": "Order A1006 has been canceled because it was still processing and eligible for cancellation. A full refund of $249.00 will be issued.\n\nWe\u2019re sorry for the frustration.\n\nThe Support Team"
+        },
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 2,
+          "raw_output": "Order A1006 has been canceled because it was still processing and eligible for cancellation. A full refund of $249.00 will be issued.\n\nWe\u2019re sorry for the frustration you experienced with our site.\n\nThe Support Team"
+        },
+        {
+          "check": "draft.states_timeline",
+          "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+          "run": 3,
+          "raw_output": "Order A1006 has been canceled because it was still processing and eligible for cancellation. A full refund of $249.00 will be returned to your original payment method.\n\nWe\u2019re sorry the cancellation process was frustrating.\n\nThe Support Team"
+        }
+      ],
       "input_id": "t24",
       "text": "Cancel A1006. Your site is a mess and I shouldn't have to email you for this.",
       "tricky": true,
