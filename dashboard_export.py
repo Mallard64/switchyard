@@ -48,7 +48,8 @@ def pipeline_section(m, cand_rep, fix_reports, results=HERE / "results"):
     pipeline, the new one and the new one with the (first) fix; the step-swap experiments; the prompt
     lines tested; and the fix tally."""
     from compare import load
-    from pipeline_view import STEP_INFO, STEPS, first_divergence, trace
+    from pipeline_view import STEP_INFO, STEPS, cell, expected, first_divergence, trace
+    gold = {t["id"]: t for t in (json.loads(l) for l in open(HERE / "inputs" / "agent.jsonl") if l.strip())}
     rows = lambda f: load([results / x.strip() for x in f.split(" + ")] if " + " in f else results / f)
     base, cand = rows(cand_rep["baseline_file"]), rows(cand_rep["candidate_file"])
     fix = m["fixes"][0] if m["fixes"] else None
@@ -58,7 +59,13 @@ def pipeline_section(m, cand_rep, fix_reports, results=HERE / "results"):
         tid = cs["input_id"]
         old = trace(base[tid][0]) if base.get(tid) else {}
         new = trace(cand[tid][0]) if cand.get(tid) else {}
-        tickets.append({"id": tid, "text": cs["text"], "old": old, "new": new,
+        recs = lambda rows_: {s["step"]: s for s in rows_[tid][0]["steps"]} if rows_.get(tid) else {}
+        o, n, fx = recs(base), recs(cand), recs(fixed)
+        cells = {"old": {st: cell(o[st]) for st in o},
+                 "new": {st: cell(n[st], o.get(st)) for st in n},
+                 "fixed": {st: cell(fx[st], o.get(st)) for st in fx}}
+        tickets.append({"id": tid, "text": cs["text"], "old": old, "new": new, "cells": cells,
+                        "expected": {st: expected(st, gold[tid]) for st in STEPS} if tid in gold else {},
                         "fixed": trace(fixed[tid][0]) if fixed.get(tid) else None,
                         "first_divergence": first_divergence(old, new), "causal_steps": cs.get("causal_steps", []),
                         "status": cs["status"], "experiments": cs.get("experiments", []),

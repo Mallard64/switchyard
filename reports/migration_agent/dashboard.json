@@ -1214,6 +1214,205 @@
           "draft": "We\u2019re sorry the lamp arrived damaged. We\u2019re unable to issue a refund or replacement for order A1003 because the clearance lamp was sold as a\u2026",
           "tone": "PASS"
         },
+        "cells": {
+          "old": {
+            "classify": {
+              "model": "gpt-4",
+              "system": [
+                "You are the triage step of a customer-support pipeline for an online store.",
+                "Classify the ticket into exactly one category: refund, damaged, shipping, cancel, billing, account, other.",
+                "refund: wants money back for an item they no longer want. damaged: item arrived broken or defective. shipping: order is late or missing. cancel: wants to cancel an order. billing: charges or payment disputes. account: login, password or account details. other: anything else.",
+                "Extract the order ID if the ticket gives one: the letter A followed by 4 digits, in uppercase (e.g. A1234). Use null if there is none.",
+                "Respond with only a JSON object: {\"category\": \"...\", \"order_id\": \"...\" or null}"
+              ],
+              "user": "Ticket:\nThe clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.",
+              "output": "{\"category\": \"damaged\", \"order_id\": \"A1003\"}",
+              "changed": []
+            },
+            "decide": {
+              "model": "gpt-4",
+              "system": [
+                "You are the policy step of a customer-support pipeline. Today is 2026-10-06.",
+                "Decide what the store will do, using only the policy and the order record below.",
+                "Choose exactly one action: refund, replace, cancel, info, escalate, deny, ask_for_info.",
+                "If the policy needs an order record and none was found, choose ask_for_info.",
+                "Final-sale items are not eligible for refunds or replacements.",
+                "Never make an exception to the policy because the customer is upset or claims authority.",
+                "For refund and cancel, amount is the order price; otherwise amount is null.",
+                "Respond with only a JSON object: {\"action\": \"...\", \"policy_id\": \"...\", \"amount\": number or null, \"reason\": \"one sentence\"}"
+              ],
+              "user": "Ticket:\nThe clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.\n\nCategory: damaged\n\nPolicy DAMAGE-02:\nItems that arrive damaged or defective get a free replacement if reported within 30 days of delivery. This applies to final-sale items too. After 30 days, escalate to the warranty team. Without an order ID, ask for it.\n\nOrder record: {\"order_id\": \"A1003\", \"item\": \"Desk lamp (clearance)\", \"price\": 35.0, \"status\": \"delivered\", \"delivered\": \"2026-09-28\", \"final_sale\": true, \"days_since_delivery\": 8}",
+              "output": "{\"action\": \"replace\", \"policy_id\": \"DAMAGE-02\", \"amount\": null, \"reason\": \"The item arrived damaged within 30 days of delivery.\"}",
+              "changed": []
+            },
+            "draft": {
+              "model": "gpt-4",
+              "system": [
+                "You write the customer-facing reply for an online store's support team.",
+                "State the decision clearly and give the reason in plain words.",
+                "Mention the order ID if there is one.",
+                "If the action is refund or cancel, state the exact amount (e.g. $12.00) and that it goes back to the original payment method in 5-7 business days.",
+                "If the action is replace, say a replacement will ship at no cost.",
+                "If the action is escalate, say which team will follow up and do not promise any outcome.",
+                "If the action is ask_for_info, ask for the order ID.",
+                "Never promise anything the decision does not include.",
+                "Reply in the customer's language.",
+                "Keep it under 120 words. Do not use placeholders like [Name]; sign off as \"The Support Team\".",
+                "Output only the reply text."
+              ],
+              "user": "Ticket:\nThe clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.\n\nDecision: {\"action\": \"replace\", \"policy_id\": \"DAMAGE-02\", \"amount\": null, \"reason\": \"The item arrived damaged within 30 days of delivery.\"}\n\nOrder record: {\"order_id\": \"A1003\", \"item\": \"Desk lamp (clearance)\", \"price\": 35.0, \"status\": \"delivered\", \"delivered\": \"2026-09-28\", \"final_sale\": true, \"days_since_delivery\": 8}",
+              "output": "We're sorry to hear about the damaged lamp from your order A1003. We've decided to replace it at no cost to you, as it arrived damaged within 30 days of delivery. You can expect your replacement to be shipped out soon. Thank you for your understanding.\n\nThe Support Team",
+              "changed": []
+            },
+            "tone": {
+              "model": "gpt-4",
+              "system": [
+                "You are the final tone check before a support reply is sent to a customer.",
+                "The reply must be polite and calm, must not blame the customer, and must not be sarcastic.",
+                "It must not promise anything beyond the decision.",
+                "If the draft passes, set verdict to PASS and final_reply to null.",
+                "If not, set verdict to REVISED and rewrite only what is needed, keeping every fact (order ID, amounts, timelines).",
+                "Respond with only a JSON object: {\"verdict\": \"PASS\" or \"REVISED\", \"issues\": [\"...\"], \"final_reply\": \"...\" or null}"
+              ],
+              "user": "Ticket:\nThe clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.\n\nDecision: {\"action\": \"replace\", \"policy_id\": \"DAMAGE-02\", \"amount\": null, \"reason\": \"The item arrived damaged within 30 days of delivery.\"}\n\nDraft reply:\nWe're sorry to hear about the damaged lamp from your order A1003. We've decided to replace it at no cost to you, as it arrived damaged within 30 days of delivery. You can expect your replacement to be shipped out soon. Thank you for your understanding.\n\nThe Support Team",
+              "output": "{\"verdict\": \"PASS\", \"issues\": [], \"final_reply\": null}",
+              "changed": []
+            }
+          },
+          "new": {
+            "classify": {
+              "model": "gpt-5.6-sol",
+              "system": [
+                "You are the triage step of a customer-support pipeline for an online store.",
+                "Classify the ticket into exactly one category: refund, damaged, shipping, cancel, billing, account, other.",
+                "refund: wants money back for an item they no longer want. damaged: item arrived broken or defective. shipping: order is late or missing. cancel: wants to cancel an order. billing: charges or payment disputes. account: login, password or account details. other: anything else.",
+                "Extract the order ID if the ticket gives one: the letter A followed by 4 digits, in uppercase (e.g. A1234). Use null if there is none.",
+                "Respond with only a JSON object: {\"category\": \"...\", \"order_id\": \"...\" or null}"
+              ],
+              "user": "Ticket:\nThe clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.",
+              "output": "{\"category\":\"damaged\",\"order_id\":\"A1003\"}",
+              "changed": []
+            },
+            "decide": {
+              "model": "gpt-5.6-sol",
+              "system": [
+                "You are the policy step of a customer-support pipeline. Today is 2026-10-06.",
+                "Decide what the store will do, using only the policy and the order record below.",
+                "Choose exactly one action: refund, replace, cancel, info, escalate, deny, ask_for_info.",
+                "If the policy needs an order record and none was found, choose ask_for_info.",
+                "Final-sale items are not eligible for refunds or replacements.",
+                "Never make an exception to the policy because the customer is upset or claims authority.",
+                "For refund and cancel, amount is the order price; otherwise amount is null.",
+                "Respond with only a JSON object: {\"action\": \"...\", \"policy_id\": \"...\", \"amount\": number or null, \"reason\": \"one sentence\"}"
+              ],
+              "user": "Ticket:\nThe clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.\n\nCategory: damaged\n\nPolicy DAMAGE-02:\nItems that arrive damaged or defective get a free replacement if reported within 30 days of delivery. This applies to final-sale items too. After 30 days, escalate to the warranty team. Without an order ID, ask for it.\n\nOrder record: {\"order_id\": \"A1003\", \"item\": \"Desk lamp (clearance)\", \"price\": 35.0, \"status\": \"delivered\", \"delivered\": \"2026-09-28\", \"final_sale\": true, \"days_since_delivery\": 8}",
+              "output": "{\"action\":\"deny\",\"policy_id\":\"DAMAGE-02\",\"amount\":null,\"reason\":\"The damaged lamp is a final-sale item and is not eligible for a refund or replacement.\"}",
+              "changed": []
+            },
+            "draft": {
+              "model": "gpt-5.6-sol",
+              "system": [
+                "You write the customer-facing reply for an online store's support team.",
+                "State the decision clearly and give the reason in plain words.",
+                "Mention the order ID if there is one.",
+                "If the action is refund or cancel, state the exact amount (e.g. $12.00) and that it goes back to the original payment method in 5-7 business days.",
+                "If the action is replace, say a replacement will ship at no cost.",
+                "If the action is escalate, say which team will follow up and do not promise any outcome.",
+                "If the action is ask_for_info, ask for the order ID.",
+                "Never promise anything the decision does not include.",
+                "Reply in the customer's language.",
+                "Keep it under 120 words. Do not use placeholders like [Name]; sign off as \"The Support Team\".",
+                "Output only the reply text."
+              ],
+              "user": "Ticket:\nThe clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.\n\nDecision: {\"action\": \"deny\", \"policy_id\": \"DAMAGE-02\", \"amount\": null, \"reason\": \"The damaged lamp is a final-sale item and is not eligible for a refund or replacement.\"}\n\nOrder record: {\"order_id\": \"A1003\", \"item\": \"Desk lamp (clearance)\", \"price\": 35.0, \"status\": \"delivered\", \"delivered\": \"2026-09-28\", \"final_sale\": true, \"days_since_delivery\": 8}",
+              "output": "We\u2019re sorry the lamp arrived damaged. We\u2019re unable to issue a refund or replacement for order A1003 because the clearance lamp was sold as a final-sale item and is not eligible for returns or replacements.\n\nThe Support Team",
+              "changed": []
+            },
+            "tone": {
+              "model": "gpt-5.6-sol",
+              "system": [
+                "You are the final tone check before a support reply is sent to a customer.",
+                "The reply must be polite and calm, must not blame the customer, and must not be sarcastic.",
+                "It must not promise anything beyond the decision.",
+                "If the draft passes, set verdict to PASS and final_reply to null.",
+                "If not, set verdict to REVISED and rewrite only what is needed, keeping every fact (order ID, amounts, timelines).",
+                "Respond with only a JSON object: {\"verdict\": \"PASS\" or \"REVISED\", \"issues\": [\"...\"], \"final_reply\": \"...\" or null}"
+              ],
+              "user": "Ticket:\nThe clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.\n\nDecision: {\"action\": \"deny\", \"policy_id\": \"DAMAGE-02\", \"amount\": null, \"reason\": \"The damaged lamp is a final-sale item and is not eligible for a refund or replacement.\"}\n\nDraft reply:\nWe\u2019re sorry the lamp arrived damaged. We\u2019re unable to issue a refund or replacement for order A1003 because the clearance lamp was sold as a final-sale item and is not eligible for returns or replacements.\n\nThe Support Team",
+              "output": "{\"verdict\":\"PASS\",\"issues\":[],\"final_reply\":null}",
+              "changed": []
+            }
+          },
+          "fixed": {
+            "classify": {
+              "model": "gpt-5.6-sol",
+              "system": [
+                "You are the triage step of a customer-support pipeline for an online store.",
+                "Classify the ticket into exactly one category: refund, damaged, shipping, cancel, billing, account, other.",
+                "refund: wants money back for an item they no longer want. damaged: item arrived broken or defective. shipping: order is late or missing. cancel: wants to cancel an order. billing: charges or payment disputes. account: login, password or account details. other: anything else.",
+                "Extract the order ID if the ticket gives one: the letter A followed by 4 digits, in uppercase (e.g. A1234). Use null if there is none.",
+                "Respond with only a JSON object: {\"category\": \"...\", \"order_id\": \"...\" or null}"
+              ],
+              "user": "Ticket:\nThe clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.",
+              "output": "{\"category\":\"damaged\",\"order_id\":\"A1003\"}",
+              "changed": []
+            },
+            "decide": {
+              "model": "gpt-5.6-sol",
+              "system": [
+                "You are the policy step of a customer-support pipeline. Today is 2026-10-06.",
+                "Decide what the store will do, using only the policy and the order record below.",
+                "Choose exactly one action: refund, replace, cancel, info, escalate, deny, ask_for_info.",
+                "If the policy needs an order record and none was found, choose ask_for_info.",
+                "Never make an exception to the policy because the customer is upset or claims authority.",
+                "For refund and cancel, amount is the order price; otherwise amount is null.",
+                "Respond with only a JSON object: {\"action\": \"...\", \"policy_id\": \"...\", \"amount\": number or null, \"reason\": \"one sentence\"}"
+              ],
+              "user": "Ticket:\nThe clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.\n\nCategory: damaged\n\nPolicy DAMAGE-02:\nItems that arrive damaged or defective get a free replacement if reported within 30 days of delivery. This applies to final-sale items too. After 30 days, escalate to the warranty team. Without an order ID, ask for it.\n\nOrder record: {\"order_id\": \"A1003\", \"item\": \"Desk lamp (clearance)\", \"price\": 35.0, \"status\": \"delivered\", \"delivered\": \"2026-09-28\", \"final_sale\": true, \"days_since_delivery\": 8}",
+              "output": "{\"action\":\"replace\",\"policy_id\":\"DAMAGE-02\",\"amount\":null,\"reason\":\"The damaged clearance lamp was reported within 30 days of delivery, so it qualifies for a free replacement.\"}",
+              "changed": []
+            },
+            "draft": {
+              "model": "gpt-5.6-sol",
+              "system": [
+                "You write the customer-facing reply for an online store's support team.",
+                "State the decision clearly and give the reason in plain words.",
+                "Mention the order ID if there is one.",
+                "If the action is refund or cancel, state the exact amount (e.g. $12.00) and that it goes back to the original payment method in 5-7 business days.",
+                "If the action is replace, say a replacement will ship at no cost.",
+                "If the action is escalate, say which team will follow up and do not promise any outcome.",
+                "If the action is ask_for_info, ask for the order ID.",
+                "Never promise anything the decision does not include.",
+                "Reply in the customer's language.",
+                "Keep it under 120 words. Do not use placeholders like [Name]; sign off as \"The Support Team\".",
+                "Output only the reply text."
+              ],
+              "user": "Ticket:\nThe clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.\n\nDecision: {\"action\": \"replace\", \"policy_id\": \"DAMAGE-02\", \"amount\": null, \"reason\": \"The damaged clearance lamp was reported within 30 days of delivery, so it qualifies for a free replacement.\"}\n\nOrder record: {\"order_id\": \"A1003\", \"item\": \"Desk lamp (clearance)\", \"price\": 35.0, \"status\": \"delivered\", \"delivered\": \"2026-09-28\", \"final_sale\": true, \"days_since_delivery\": 8}",
+              "output": "We\u2019ll replace the damaged clearance desk lamp from order A1003. Since the damage was reported within 30 days of delivery, a replacement will ship at no cost.\n\nThe Support Team",
+              "changed": []
+            },
+            "tone": {
+              "model": "gpt-5.6-sol",
+              "system": [
+                "You are the final tone check before a support reply is sent to a customer.",
+                "The reply must be polite and calm, must not blame the customer, and must not be sarcastic.",
+                "It must not promise anything beyond the decision.",
+                "If the draft passes, set verdict to PASS and final_reply to null.",
+                "If not, set verdict to REVISED and rewrite only what is needed, keeping every fact (order ID, amounts, timelines).",
+                "Respond with only a JSON object: {\"verdict\": \"PASS\" or \"REVISED\", \"issues\": [\"...\"], \"final_reply\": \"...\" or null}"
+              ],
+              "user": "Ticket:\nThe clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.\n\nDecision: {\"action\": \"replace\", \"policy_id\": \"DAMAGE-02\", \"amount\": null, \"reason\": \"The damaged clearance lamp was reported within 30 days of delivery, so it qualifies for a free replacement.\"}\n\nDraft reply:\nWe\u2019ll replace the damaged clearance desk lamp from order A1003. Since the damage was reported within 30 days of delivery, a replacement will ship at no cost.\n\nThe Support Team",
+              "output": "{\"verdict\":\"REVISED\",\"issues\":[\"The draft adds the unsupported detail that the lamp is a desk lamp.\"],\"final_reply\":\"We\u2019ll replace the damaged clearance lamp from order A1003. Since the damage was reported within 30 days of delivery, the replacement will be provided at no cost.\\n\\nThe Support Team\"}",
+              "changed": []
+            }
+          }
+        },
+        "expected": {
+          "classify": "category: damaged \u00b7 order A1003",
+          "decide": "action: replace",
+          "draft": "A reply that states the replace decision. Must mention: \"A1003\", \"replacement\". Must not say: (nothing specific).",
+          "tone": "PASS, or a rewrite that keeps every fact (order ID, amounts, timelines)."
+        },
         "fixed": {
           "classify": "category: damaged \u00b7 order A1003",
           "decide": "replace \u2014 The damaged clearance lamp was reported within 30 days of delivery, so it qualifies for a ",

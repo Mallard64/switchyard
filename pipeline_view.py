@@ -70,3 +70,39 @@ def matrix_markdown(rows):
         cells = " | ".join("● new" if r["models"][s] == "new" else "○ old" for s in STEPS)
         out.append(f"| {r['label']} | {cells} | {'✓' if r['ok'] else '✗'} {r['output']} |")
     return out
+
+
+def readable(pattern):
+    """A must_include regex as plain words: "order (number|id)" -> "order number/id", "\\$79\\.00" -> "$79.00"."""
+    import re
+    text = re.sub(r"\[([^\]])[^\]]*\]", r"\1", pattern)                 # [.,] -> .
+    text = re.sub(r"\(([^)]*)\)", lambda m: m.group(1).replace("|", "/"), text)
+    return f"\"{text.replace(chr(92), '')}\""
+
+
+def expected(step, ticket):
+    """What a step should produce for this ticket, from its gold labels."""
+    g = ticket["gold"]
+    if step == "classify":
+        return f"category: {g['category']} · order {g['order_id'] or 'none'}"
+    if step == "decide":
+        return f"action: {g['action']}"
+    if step == "draft":
+        must = ", ".join(map(readable, ticket.get("must_include") or [])) or "(nothing specific)"
+        never = ", ".join(map(readable, ticket.get("must_not_include") or [])) or "(nothing specific)"
+        return f"A reply that states the {g['action']} decision. Must mention: {must}. Must not say: {never}."
+    return "PASS, or a rewrite that keeps every fact (order ID, amounts, timelines)."
+
+
+def cell(rec, old_rec=None):
+    """Hover detail for one step of one run: the prompt it got, its raw output, and which system-prompt
+    lines differ from the old pipeline's prompt for the same step."""
+    msgs = rec.get("messages") or []
+    system = next((m["content"] for m in msgs if m["role"] == "system"), "")
+    user = next((m["content"] for m in msgs if m["role"] == "user"), "")
+    old_lines = set()
+    if old_rec:
+        old_lines = set(next((m["content"] for m in old_rec.get("messages") or [] if m["role"] == "system"), "").split("\n"))
+    lines = system.split("\n")
+    return {"model": rec.get("model"), "system": lines, "user": user, "output": rec.get("raw") or "",
+            "changed": [i for i, l in enumerate(lines) if old_rec and l not in old_lines]}
