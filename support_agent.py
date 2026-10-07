@@ -226,12 +226,25 @@ AGENT_CHECKS = {
     "decide.amount_matches": ("decide", "For refund and cancel, amount is the order price; otherwise null."),
     "draft.mentions_order_id": ("draft", "Mention the order ID if there is one."),
     "draft.states_amount": ("draft", "If the action is refund or cancel, state the exact amount ..."),
+    # Added Oct 7 after reading sol's t36 replies: the same instruction's second half was never checked.
+    "draft.states_timeline": ("draft", "... and that it goes back to the original payment method in 5-7 business days."),
     "draft.word_limit": ("draft", "Keep it under 120 words."),
     "draft.no_placeholder": ("draft", "Do not use placeholders like [Name]"),
     "tone.json_only": ("tone", 'Respond with only a JSON object: {"verdict": ...'),
     "tone.valid_verdict": ("tone", 'verdict: "PASS" or "REVISED"'),
     "tone.keeps_facts": ("tone", "keeping every fact (order ID, amounts, timelines)"),
 }
+
+
+TIMELINE = re.compile(r"5\s*(?:-|–|—|to)\s*7\s*(?:business|working)?\s*days", re.I)
+
+
+def recheck(row):
+    """Recompute a cached row's hard checks with the current checks (no model calls)."""
+    steps = {s["step"]: s["raw"] for s in row["steps"]}
+    ctx = {"category": row.get("category"), "order_id": row.get("order_id"), "order": lookup_order(row.get("order_id")),
+           "decision": row.get("decision"), "draft": (steps.get("draft") or "").strip(), "final_reply": row.get("final_reply")}
+    return check_row(ctx, steps)
 
 
 def _money(x):
@@ -261,6 +274,7 @@ def check_row(ctx, raws):
         # Reply checks run on what the customer actually receives (after the tone step).
         "draft.mentions_order_id": oid is None or oid in final,
         "draft.states_amount": not needs_amount or money_in(final),
+        "draft.states_timeline": action not in ("refund", "cancel") or bool(TIMELINE.search(final)),
         "draft.word_limit": len(final.split()) < 120,
         "draft.no_placeholder": not re.search(r"\[[A-Z][A-Za-z ]*\]", final),
         "tone.json_only": ok4,

@@ -57,6 +57,8 @@ def load(path):
                 if r.get("cost_usd") is None:
                     r["cost_usd"] = cost(r.get("model"), r.get("usage"))
             else:  # agent: checks span all steps; flatten per-step fields to the row
+                from support_agent import recheck
+                r["checks"] = recheck(r)
                 r["raw_output"] = r["final_reply"]
                 r["latency_s"] = round(sum(s.get("latency_s") or 0 for s in r["steps"]), 3)
                 costs = [s["cost_usd"] if s.get("cost_usd") is not None else cost(s["model"], s.get("usage"))
