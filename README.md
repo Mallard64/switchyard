@@ -37,6 +37,23 @@ The app loads `results.json` when the page opens. Replace that file with a compa
 
 The frontend supports the full migration schema, flat NER comparison schema, and original dashboard schema. See [the handoff guide](docs/HANDOFF.md) for data mapping and integration notes.
 
+### Live backend (samegrade)
+
+When the `samegrade` repo sits next to this folder (or `SAMEGRADE_DIR=/path/to/samegrade npm start`), the server also
+reads the migration backend. Nothing is written to it.
+
+| Endpoint | What it returns |
+| --- | --- |
+| `/api/reports` | Reports the backend has produced: `reports/<name>/dashboard.json` (agent migrations, exported by `dashboard_export.py`) and `reports/migration_ner/migration.json` |
+| `/api/report?id=<name>` | One of those reports (ids are whitelisted from the list; no file paths) |
+| `/api/live` | Server-Sent Events: every row a run appends to `samegrade/results/*.jsonl` after the server starts |
+
+The page then shows a **report picker** in the header and a **Live** button. The button reads "Live · N runs active"
+while runs are writing results; clicking it shows each run's progress (rows, hard checks passed/failed, errors) and the
+latest rows. Start a run in samegrade, for example `python demo_e2e.py --break u3`, and tickets appear as they finish.
+"Reload report" re-reads the report once a run has rewritten it. Without the backend, the page falls back to
+`results.json` exactly as before.
+
 **This version displays recorded results.** Replay controls animate those results; they do not call models, run evaluations, apply real code changes, or create GitHub pull requests. Model names, dates, scores and recommendations come from the supplied fixtures, not live provider information.
 
 Initial candidate results and final post-repair results are distinct. Unknown costs are not treated as zero, and a report with no regressions can still contain changed or unstable outputs.

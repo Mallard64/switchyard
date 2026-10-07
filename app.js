@@ -52,8 +52,8 @@ function renderVisualDashboard() {
  app.innerHTML=`<div class="dashboard-heading"><div><p class="eyebrow">MIGRATION OVERVIEW / ${esc(m.pr?.target_repo||m.task)}</p><h1>New model. Same expectations.</h1><p>Find what changed. See what’s ready to ship.</p></div><div class="heading-actions"><span class="ready-badge"><i></i>${m.final.ready_to_merge?'Ready for review':'Needs review'}</span><button class="text-button" id="full-report">Full report ↗</button></div></div>
  <div class="migration-route"><span class="route-caption">MODEL UPGRADE</span><strong>${esc(m.baseline.model)}</strong><span class="route-line"><i></i>→</span><strong>${esc(m.chosen)}</strong><span class="route-tag">Prompt repaired</span><span class="route-note">Recorded evaluation</span></div>
  <div class="visual-grid"><section class="viz-card model-chart comparison-table-card"><div class="viz-title"><div><p class="eyebrow">MODEL COMPARISON</p><h2>The trade-offs, side by side.</h2></div><span class="table-stage">Before prompt repair</span></div><div class="comparison-scroll"><table class="comparison-table"><caption class="sr-only">Baseline and candidate metrics before prompt repair. Missing values retain their column positions.</caption><thead><tr><th scope="col">Model<span>Baseline & candidates</span></th><th scope="col">Quality <em>↑</em><span>Entity F1 · higher is better</span></th><th scope="col">Cost <em>↓</em><span>USD / 1,000 calls</span></th><th scope="col">Speed <em>↓</em><span>Median response · seconds</span></th><th scope="col">Tail latency <em>↓</em><span>p95 · seconds</span></th><th scope="col">Regressions <em>↓</em><span>Inputs worse than baseline</span></th></tr></thead><tbody>${rows.map(r=>`<tr class="${r.isBaseline?'baseline-row':r.model===selectedModel?'focused-row':''}"><th scope="row">${r.isBaseline?`<strong>${esc(r.model)}</strong>`:`<button class="model-select" data-model="${esc(r.model)}" aria-pressed="${r.model===selectedModel}">${esc(r.model)}</button>`}<span class="model-tag ${r.model===m.chosen?'chosen-tag':''}">${r.isBaseline?'Current model':r.model===m.chosen?'Selected for migration':'Alternative'}</span></th><td>${cell(r.accuracy,percent,1,'quality-bar')}</td><td>${cell(r.cost_per_1k_calls_usd,money,maximum('cost_per_1k_calls_usd'),'cost-bar')}</td><td>${cell(r.latency_p50_s,v=>v.toFixed(3),maximum('latency_p50_s'),'speed-bar')}</td><td>${cell(r.latency_p95_s,v=>v.toFixed(3),maximum('latency_p95_s'),'tail-bar')}</td><td>${r.isBaseline?'<span class="baseline-reference">Reference</span>':numeric(r.regressed)?`<span class="regression-pill ${r.regressed?'has-regressions':''}">${esc(r.regressed)} ${r.regressed===1?'input':'inputs'}</span>`:'<span class="baseline-reference">—<br>Not available</span>'}</td></tr>`).join('')}</tbody></table></div><div class="comparison-foot"><span>Bars share a scale within each column. Shorter cost and latency bars are better.</span><span>— Not supplied · space reserved</span></div></section>
- <section class="viz-card repair-chart"><div class="viz-title"><div><p class="eyebrow">REPAIR IMPACT</p><h2>One fix. The regression is gone.</h2></div><span class="repair-symbol">↗</span></div><div class="impact-number"><span>${esc(initial?.regressed??'—')}</span><span class="impact-arrow">→</span><strong>${esc(m.final.verdict_counts.REGRESSED)}</strong><small>regressions</small></div><div class="stack-row"><span>Before</span><div class="stack" aria-label="Before repair: ${esc(initial?.regressed)} regressions">${stack(initial?.verdict_counts)}</div></div><div class="stack-row"><span>After</span><div class="stack" aria-label="After repair: ${esc(m.final.verdict_counts.REGRESSED)} regressions">${stack(m.final.verdict_counts)}</div></div><div class="stack-legend"><span><i class="same"></i>Same</span><span><i class="improved"></i>Improved</span><span><i class="changed"></i>Changed</span><span><i class="regressed"></i>Regressed</span></div></section>
- <section class="viz-card evidence-card"><div class="viz-title"><div><p class="eyebrow">WHAT SWITCHYARD CAUGHT</p><h2>A small word. A wrong label.</h2></div><span class="pill">${esc(cause?.input_id||'Evidence')}</span></div><p class="evidence-quote">“${esc(cause?.text||'No input evidence supplied.')}”</p><div class="evidence-flow"><div><span class="demo-label">Before repair</span><div class="entity-list">${(cause?.candidate_output||[]).map(v=>`<span class="entity ${cause.baseline_output.includes(v)?'':'entity-bad'}">${esc(v)}</span>`).join('')}</div></div><span class="flow-arrow">→</span><div><span class="demo-label">After repair</span><div class="entity-list">${(m.comparison.items.find(i=>i.input_id===cause?.input_id)?.candidate.output||[]).map(v=>`<span class="entity">${esc(v)}</span>`).join('')}</div></div></div><details class="inline-details"><summary>What changed in the prompt?</summary><p>${esc(edit?.rationale||'No edit recorded.')}</p><div class="diff"><div class="removed">− ${esc(edit?.old_text)}</div><div class="added">+ ${esc(edit?.new_text)}</div></div></details></section>
+ <section class="viz-card repair-chart"><div class="viz-title"><div><p class="eyebrow">REPAIR IMPACT</p><h2>${m.final.verdict_counts.REGRESSED===0?(initial?.regressed?'One fix. The regression is gone.':'No regressions to fix.'):m.fix_attempts?.length?'A fix is proposed. Awaiting review.':'Regressions remain.'}</h2></div><span class="repair-symbol">↗</span></div><div class="impact-number"><span>${esc(initial?.regressed??'—')}</span><span class="impact-arrow">→</span><strong>${esc(m.final.verdict_counts.REGRESSED)}</strong><small>regressions</small></div><div class="stack-row"><span>Before</span><div class="stack" aria-label="Before repair: ${esc(initial?.regressed)} regressions">${stack(initial?.verdict_counts)}</div></div><div class="stack-row"><span>After</span><div class="stack" aria-label="After repair: ${esc(m.final.verdict_counts.REGRESSED)} regressions">${stack(m.final.verdict_counts)}</div></div><div class="stack-legend"><span><i class="same"></i>Same</span><span><i class="improved"></i>Improved</span><span><i class="changed"></i>Changed</span><span><i class="regressed"></i>Regressed</span></div></section>
+ <section class="viz-card evidence-card"><div class="viz-title"><div><p class="eyebrow">WHAT SWITCHYARD CAUGHT</p><h2>${m.task==='agent'?'One step. One line. A wrong decision.':'A small word. A wrong label.'}</h2></div><span class="pill">${esc(cause?.input_id||'Evidence')}</span></div><p class="evidence-quote">“${esc(cause?.text||'No input evidence supplied.')}”</p><div class="evidence-flow"><div><span class="demo-label">Before repair</span><div class="entity-list">${(cause?.candidate_output||[]).map(v=>`<span class="entity ${cause.baseline_output.includes(v)?'':'entity-bad'}">${esc(v)}</span>`).join('')}</div></div><span class="flow-arrow">→</span><div><span class="demo-label">After repair</span><div class="entity-list">${(m.comparison.items.find(i=>i.input_id===cause?.input_id)?.candidate.output||[]).map(v=>`<span class="entity">${esc(v)}</span>`).join('')}</div></div></div><details class="inline-details"><summary>What changed in the prompt?</summary><p>${esc(edit?.rationale||'No edit recorded.')}</p><div class="diff"><div class="removed">− ${esc(edit?.old_text)}</div><div class="added">+ ${esc(edit?.new_text)}</div></div></details></section>
  <section class="viz-card checks-card"><div class="viz-title"><div><p class="eyebrow">FINAL EVALUATION</p><h2>Every input, at a glance.</h2></div><span class="chart-unit">${total} inputs</span></div><div class="result-mosaic">${data.candidates[0].results.map((r,i)=>`<button class="mosaic-cell ${r.status}" data-result="${i}" aria-label="Input ${i+1}: ${esc(r.ner_item.verdict)}" title="${esc(r.input_id)} · ${esc(r.ner_item.verdict)}">${r.status==='changed'?'≈':r.status==='improved'?'↑':r.status==='regressed'?'!':'·'}</button>`).join('')}</div><p class="mosaic-caption">${esc(m.final.verdict_counts.REGRESSED)} regressed · ${esc(m.final.verdict_counts.IMPROVED)} improved · ${esc(m.final.verdict_counts.CHANGED)} changed</p><p class="chart-caption">Click any square to inspect its output. Same means unchanged, not necessarily error-free.</p><div class="quality-summary"><span>Final extraction quality</span><strong>${percent(final.accuracy)}</strong><span class="quality-delta">${((final.accuracy-m.baseline.accuracy)*100).toFixed(1)} pp above baseline</span></div></section></div>
  <section class="delivery-strip"><div class="delivery-icon">⑂</div><div><h2>${m.final.ready_to_merge?'Migration ready for your review':'Migration needs review'}</h2><p>Model upgrade + prompt repair in one proposed code change.</p></div><button class="button primary" id="view-diff">Review code change ↗</button></section><div class="dashboard-foot"><span>Trade-off: ${final.latency_p50_s>m.baseline.latency_p50_s?'slower':'faster'} median response · ${final.cost_per_1k_calls_usd==null?'candidate cost unavailable':'cost in full report'} · ${final.unstable_inputs} unstable inputs</span><span>Recorded results · no live calls or published PR</span></div>`;
  app.querySelectorAll('[data-model]').forEach(b=>b.onclick=()=>{selectedModel=b.dataset.model;render();});
@@ -163,4 +163,69 @@ function drawDetail(){
 }
 function applyFix(id){if(phase!=='complete'||fixing.has(id)||fixed.has(id))return;fixing.add(id);render();drawDetail();const handle=setTimeout(()=>{fixTimers.delete(handle);fixing.delete(id);fixed.add(id);render();drawDetail();},900);fixTimers.add(handle);}
 dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
-try{const response=await fetch('./results.json',{cache:'no-store'});if(!response.ok)throw Error(`Could not load results.json (${response.status}).`);const raw=await response.json();data=raw?.comparison && Array.isArray(raw.candidates)?normalizeMigration(raw):raw?.task==='ner'?normalizeNER(raw):raw;validate(data);entries=data.candidates.flatMap((c,ci)=>c.results.map((r,ri)=>({r,ci,ri})));render();}catch(error){app.innerHTML=`<section class="error"><h1>Couldn’t open this report</h1><p>${esc(error.message)}</p><p>Serve this folder with a local web server and include a valid results.json. Opening index.html directly from Finder may prevent the browser from reading the JSON.</p></section>`;}
+// ---- Reports from the samegrade backend (server.mjs /api/*); falls back to ./results.json ----------
+let reports = [], currentReport = null;
+const reportURL = id => `/api/report?id=${encodeURIComponent(id)}`;
+function showError(error){app.innerHTML=`<section class="error"><h1>Couldn’t open this report</h1><p>${esc(error.message)}</p><p>Serve this folder with a local web server and include a valid results.json. Opening index.html directly from Finder may prevent the browser from reading the JSON.</p></section>`;}
+async function loadReport(url){
+ clearTimers();phase='idle';completed=0;fixed.clear();fixing.clear();selected=null;reportView=false;selectedModel=null;if(dialog.open)dialog.close();
+ const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error(`Could not load the report (${response.status}).`);
+ const raw=await response.json();data=raw?.comparison && Array.isArray(raw.candidates)?normalizeMigration(raw):raw?.task==='ner'?normalizeNER(raw):raw;validate(data);entries=data.candidates.flatMap((c,ci)=>c.results.map((r,ri)=>({r,ci,ri})));render();
+}
+function installReportPicker(){
+ const select=document.createElement('select');select.className='report-picker';select.setAttribute('aria-label','Report');
+ select.innerHTML=reports.map(r=>`<option value="${esc(r.id)}">${esc(r.id.replaceAll('_',' '))}</option>`).join('');
+ select.onchange=async()=>{try{await loadReport(reportURL(select.value));currentReport=select.value;}catch(e){showError(e);}};
+ document.querySelector('.mast-meta').prepend(select);
+}
+
+// ---- Live results: rows streamed from samegrade/results/*.jsonl while runs are going ---------------
+const liveDialog=document.querySelector('#live');
+const live={rows:[],files:new Map(),connected:false};
+const ACTIVE_MS=60000;
+function addLiveRow(ev){
+ live.rows.push(ev);if(live.rows.length>300)live.rows.shift();
+ const f=live.files.get(ev.file)||{file:ev.file,rows:0,passed:0,failed:0,errors:0,last:0};
+ f.rows++;if(ev.error)f.errors++;else if(ev.passed===true)f.passed++;else if(ev.passed===false)f.failed++;
+ f.last=ev.at;live.files.set(ev.file,f);
+}
+function drawLive(){
+ const files=[...live.files.values()].sort((a,b)=>b.last-a.last);
+ const ago=t=>{const s=Math.round((Date.now()-t)/1000);return s<60?`${s}s ago`:`${Math.round(s/60)} min ago`;};
+ const name=f=>esc(f.replace(/\.jsonl$/,''));
+ const checks=r=>r.error?'<span class="pill warn">error</span>':r.passed===true?'<span class="pill">pass</span>':r.passed===false?'<span class="pill warn">fail</span>':'—';
+ liveDialog.innerHTML=`<div class="detail-head"><div><p class="eyebrow">Live results</p><h2 id="live-title">Runs writing to samegrade/results</h2></div><button class="close" aria-label="Close">×</button></div>
+ <div class="detail-body">
+ ${live.connected?'':'<p>Not connected to the live feed. Run <code>npm start</code> from this folder with the samegrade folder next to it (or set <code>SAMEGRADE_DIR</code>).</p>'}
+ ${files.length?`<table class="live-table"><thead><tr><th>Run</th><th>Rows</th><th>Hard checks passed</th><th>Failed</th><th>Errors</th><th>Last row</th></tr></thead><tbody>${files.map(f=>`<tr class="${Date.now()-f.last<ACTIVE_MS?'live-active':''}"><td>${name(f.file)}</td><td>${f.rows}</td><td>${f.passed}</td><td>${f.failed}</td><td>${f.errors}</td><td>${ago(f.last)}</td></tr>`).join('')}</tbody></table>`
+  :'<p>No new rows yet. Start a run in samegrade (for example <code>python demo_e2e.py --break u3</code>); each ticket appears here as soon as it finishes.</p>'}
+ ${live.rows.length?`<h3>Latest rows</h3><table class="live-table"><thead><tr><th>Input</th><th>Run</th><th>Result</th><th>Hard checks</th><th>Score</th><th>File</th></tr></thead><tbody>${live.rows.slice(-40).reverse().map(r=>`<tr><td>${esc(r.input_id??'')}</td><td>${esc(r.run??'')}</td><td>${esc(r.error?`error: ${r.error}`:r.label??'')}</td><td>${checks(r)}</td><td>${typeof r.score==='number'?r.score.toFixed(2):'—'}</td><td>${name(r.file)}</td></tr>`).join('')}</tbody></table>`:''}
+ ${currentReport?'<p class="provider">Reports change only when a run finishes writing them. <button class="button" id="reload-report">Reload report</button></p>':''}
+ </div>`;
+ liveDialog.querySelector('.close').onclick=()=>liveDialog.close();
+ const reload=liveDialog.querySelector('#reload-report');
+ if(reload)reload.onclick=async()=>{liveDialog.close();try{await loadReport(reportURL(currentReport));}catch(e){showError(e);}};
+}
+function installLive(){
+ const label=document.querySelector('.connection');if(!label)return;
+ const button=document.createElement('button');button.type='button';button.className='live-button';label.replaceWith(button);
+ const paint=()=>{
+  const active=[...live.files.values()].filter(f=>Date.now()-f.last<ACTIVE_MS).length;
+  button.innerHTML=live.connected?`<span class="live-dot ${active?'on':''}"></span>Live · ${active?`${active} run${active>1?'s':''} active`:'idle'}`:'● Local replay';
+  if(liveDialog.open)drawLive();
+ };
+ button.onclick=()=>{drawLive();if(!liveDialog.open)liveDialog.showModal();};
+ liveDialog.addEventListener('click',e=>{if(e.target===liveDialog)liveDialog.close();});
+ if(window.EventSource){
+  const source=new EventSource('/api/live');
+  source.addEventListener('hello',e=>{live.connected=true;JSON.parse(e.data).recent.forEach(addLiveRow);paint();});
+  source.addEventListener('row',e=>{addLiveRow(JSON.parse(e.data));paint();});
+  source.onerror=()=>{live.connected=false;paint();};
+ }
+ setInterval(paint,5000);paint();
+}
+
+try{const r=await fetch('/api/reports',{cache:'no-store'});if(r.ok)reports=await r.json();}catch{reports=[];}
+if(reports.length)installReportPicker();
+try{await loadReport(reports.length?reportURL(reports[0].id):'./results.json');currentReport=reports[0]?.id??null;}catch(error){showError(error);}
+installLive();
