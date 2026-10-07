@@ -1,0 +1,707 @@
+{
+  "schema_version": 1,
+  "_note": "SAMPLE DATA. Shape is final; values are fake until the Thu Oct 8 run.",
+  "run_id": "2026-10-08T14:02:00Z",
+  "repo": {
+    "name": "example/ticket-summarizer",
+    "call_site": "app/summarize.py:42"
+  },
+  "baseline": {
+    "model": "gpt-4-turbo",
+    "provider": "OpenAI",
+    "retires_on": "2026-10-23",
+    "runs_per_input": 3,
+    "noise_rate": 0.05,
+    "cost_per_1k_calls_usd": 4.1,
+    "latency_p50_ms": 1840
+  },
+  "prompt": {
+    "file": "app/prompts/summarize.txt",
+    "lines": [
+      "You are a support assistant for a software company.",
+      "Summarize the customer ticket for the on-call engineer.",
+      "Keep it brief.",
+      "Mention priority if relevant.",
+      "Never include the customer's email address."
+    ]
+  },
+  "inputs": [
+    {
+      "id": "in_01",
+      "text": "Password reset emails never arrive; whole Enterprise team locked out of the dashboard."
+    },
+    {
+      "id": "in_02",
+      "text": "CSV export times out for workspaces with more than 10k rows."
+    },
+    {
+      "id": "in_03",
+      "text": "Hi, I've tried resetting my password three times today and the reset email never shows up, not even in spam. We're on the Enterprise plan and my whole team is locked out of the dashboard."
+    },
+    {
+      "id": "in_04",
+      "text": "Billing page shows last month's invoice twice."
+    },
+    {
+      "id": "in_05",
+      "text": "SSO login loops back to the sign-in page on Safari only."
+    },
+    {
+      "id": "in_06",
+      "text": "Webhook deliveries delayed by about 20 minutes since yesterday."
+    },
+    {
+      "id": "in_07",
+      "text": "Dark mode toggle doesn't persist after logout."
+    },
+    {
+      "id": "in_08",
+      "text": "Since about 9am every checkout from our EU store fails with an error 500. US checkout looks fine."
+    },
+    {
+      "id": "in_09",
+      "text": "API returns 429 even though we're under our plan's rate limit."
+    },
+    {
+      "id": "in_10",
+      "text": "Mobile app crashes when opening an attachment over 25 MB."
+    },
+    {
+      "id": "in_11",
+      "text": "Search results don't include documents uploaded in the last hour."
+    },
+    {
+      "id": "in_12",
+      "text": "Our admin can't remove a user who left the company; the button is greyed out."
+    },
+    {
+      "id": "in_13",
+      "text": "Two-factor codes from SMS arrive after they've expired."
+    },
+    {
+      "id": "in_14",
+      "text": "Slack integration posts every notification twice."
+    },
+    {
+      "id": "in_15",
+      "text": "Customer asks whether we support SAML group mapping; sales promised it."
+    },
+    {
+      "id": "in_16",
+      "text": "Dashboard charts show UTC instead of our account time zone."
+    },
+    {
+      "id": "in_17",
+      "text": "Invoice PDF is missing our VAT number."
+    },
+    {
+      "id": "in_18",
+      "text": "Bulk import silently skips rows with accented names."
+    },
+    {
+      "id": "in_19",
+      "text": "Audit log stops at Sept 30; nothing after that."
+    },
+    {
+      "id": "in_20",
+      "text": "Trial extended by sales but the app still shows 'trial expired'."
+    }
+  ],
+  "candidates": [
+    {
+      "model": "gpt-5.6-terra",
+      "provider": "OpenAI",
+      "summary": {
+        "passed": 16,
+        "total": 20,
+        "passed_after_fix": 20,
+        "cost_change_pct": -58,
+        "cost_per_1k_calls_usd": 1.72,
+        "latency_p50_ms": 876,
+        "speed_vs_baseline": 2.1,
+        "recommended": false
+      },
+      "results": [
+        {
+          "input_id": "in_01",
+          "status": "pass",
+          "score": 0.97,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_02",
+          "status": "pass",
+          "score": 0.95,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_03",
+          "status": "regressed",
+          "score": 0.42,
+          "runs": {
+            "passed": 0,
+            "total": 3
+          },
+          "baseline_output": "Enterprise team locked out of the dashboard: password reset emails never arrive (3 attempts, not in spam). Priority: High",
+          "output": "The customer reports that they have tried to reset their password three times today, but the reset email has not arrived in their inbox or spam folder. They note that they are on the Enterprise plan and that their entire team currently cannot access the dashboard. This may point to an email delivery problem, so it would be worth checking the outbound mail logs and any recent changes to the reset flow. Priority: High",
+          "cause_id": "A",
+          "after_fix_output": "Enterprise team locked out: password reset emails never arrive (3 attempts, not in spam). Priority: High"
+        },
+        {
+          "input_id": "in_04",
+          "status": "pass",
+          "score": 0.91,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_05",
+          "status": "pass",
+          "score": 0.98,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_06",
+          "status": "pass",
+          "score": 0.96,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_07",
+          "status": "pass",
+          "score": 0.94,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_08",
+          "status": "regressed",
+          "score": 0.42,
+          "runs": {
+            "passed": 0,
+            "total": 3
+          },
+          "baseline_output": "EU checkout failing with error 500 since ~9am; US unaffected. Priority: High",
+          "output": "EU checkout failing with error 500 since ~9am; US unaffected.",
+          "cause_id": "B",
+          "after_fix_output": "EU checkout failing with error 500 since ~9am; US unaffected. Priority: High"
+        },
+        {
+          "input_id": "in_09",
+          "status": "pass",
+          "score": 0.9,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_10",
+          "status": "pass",
+          "score": 0.97,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_11",
+          "status": "pass",
+          "score": 0.95,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_12",
+          "status": "regressed",
+          "score": 0.42,
+          "runs": {
+            "passed": 0,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": "A",
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_13",
+          "status": "pass",
+          "score": 0.91,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_14",
+          "status": "pass",
+          "score": 0.98,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_15",
+          "status": "regressed",
+          "score": 0.42,
+          "runs": {
+            "passed": 0,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": "A",
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_16",
+          "status": "pass",
+          "score": 0.94,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_17",
+          "status": "pass",
+          "score": 0.92,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_18",
+          "status": "pass",
+          "score": 0.9,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_19",
+          "status": "pass",
+          "score": 0.97,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_20",
+          "status": "pass",
+          "score": 0.95,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        }
+      ]
+    },
+    {
+      "model": "claude-haiku-4.5",
+      "provider": "Anthropic",
+      "summary": {
+        "passed": 18,
+        "total": 20,
+        "passed_after_fix": 20,
+        "cost_change_pct": -71,
+        "cost_per_1k_calls_usd": 1.19,
+        "latency_p50_ms": 708,
+        "speed_vs_baseline": 2.6,
+        "recommended": true
+      },
+      "results": [
+        {
+          "input_id": "in_01",
+          "status": "pass",
+          "score": 0.97,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_02",
+          "status": "pass",
+          "score": 0.95,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_03",
+          "status": "pass",
+          "score": 0.93,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "Enterprise team locked out of the dashboard: password reset emails never arrive (3 attempts, not in spam). Priority: High",
+          "output": "The customer reports that they have tried to reset their password three times today, but the reset email has not arrived in their inbox or spam folder. They note that they are on the Enterprise plan and that their entire team currently cannot access the dashboard. This may point to an email delivery problem, so it would be worth checking the outbound mail logs and any recent changes to the reset flow. Priority: High",
+          "cause_id": null,
+          "after_fix_output": "Enterprise team locked out: password reset emails never arrive (3 attempts, not in spam). Priority: High"
+        },
+        {
+          "input_id": "in_04",
+          "status": "pass",
+          "score": 0.91,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_05",
+          "status": "pass",
+          "score": 0.98,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_06",
+          "status": "pass",
+          "score": 0.96,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_07",
+          "status": "pass",
+          "score": 0.94,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_08",
+          "status": "regressed",
+          "score": 0.42,
+          "runs": {
+            "passed": 0,
+            "total": 3
+          },
+          "baseline_output": "EU checkout failing with error 500 since ~9am; US unaffected. Priority: High",
+          "output": "EU checkout failing with error 500 since ~9am; US unaffected.",
+          "cause_id": "B",
+          "after_fix_output": "EU checkout failing with error 500 since ~9am; US unaffected. Priority: High"
+        },
+        {
+          "input_id": "in_09",
+          "status": "pass",
+          "score": 0.9,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_10",
+          "status": "pass",
+          "score": 0.97,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_11",
+          "status": "pass",
+          "score": 0.95,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_12",
+          "status": "pass",
+          "score": 0.93,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_13",
+          "status": "pass",
+          "score": 0.91,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_14",
+          "status": "pass",
+          "score": 0.98,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_15",
+          "status": "pass",
+          "score": 0.96,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_16",
+          "status": "pass",
+          "score": 0.94,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_17",
+          "status": "pass",
+          "score": 0.92,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_18",
+          "status": "regressed",
+          "score": 0.42,
+          "runs": {
+            "passed": 0,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": "A",
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_19",
+          "status": "pass",
+          "score": 0.97,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        },
+        {
+          "input_id": "in_20",
+          "status": "pass",
+          "score": 0.95,
+          "runs": {
+            "passed": 3,
+            "total": 3
+          },
+          "baseline_output": "[gpt-4-turbo output]",
+          "output": "[candidate output]",
+          "cause_id": null,
+          "after_fix_output": null
+        }
+      ]
+    }
+  ],
+  "causes": [
+    {
+      "id": "A",
+      "line": 3,
+      "title": "The summary got 3x longer",
+      "fixed_title": "Fixed: the summary is short again",
+      "reason": "The old model read 'Keep it brief' as one or two sentences. The new model writes a full paragraph, so the on-call engineer has to dig for the point.",
+      "check": "llm_judge",
+      "fix": {
+        "old_line": "Keep it brief.",
+        "new_line": "Write at most 2 sentences, under 40 words.",
+        "status": "none",
+        "retest": {
+          "passed": 5,
+          "total": 5
+        }
+      }
+    },
+    {
+      "id": "B",
+      "line": 4,
+      "title": "The priority label disappeared",
+      "fixed_title": "Fixed: the priority label is back",
+      "reason": "The old model always added a priority. The new model only adds one when it decides it matters, but the paging system needs it on every summary.",
+      "check": "hard_check: ends_with_priority",
+      "fix": {
+        "old_line": "Mention priority if relevant.",
+        "new_line": "Always end with one line: Priority: High, Medium, or Low.",
+        "status": "none",
+        "retest": {
+          "passed": 2,
+          "total": 2
+        }
+      }
+    }
+  ],
+  "pr": {
+    "status": "draft",
+    "title": "Switch ticket-summarizer from gpt-4-turbo to claude-haiku-4.5",
+    "url": null,
+    "branch": "migrate/claude-haiku-4.5",
+    "lines_changed": 2
+  }
+}
