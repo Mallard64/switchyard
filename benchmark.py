@@ -17,6 +17,7 @@ record_baseline.py's --patch/--tag, which keeps its own resumable cache.
 Everything lands in reports/benchmark_ner/.
 """
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -25,13 +26,39 @@ from pathlib import Path
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 from compare import build_report  # noqa: E402
+from record_baseline import cost  # noqa: E402
 from migrate import (editable_components, find_causes, call_llm, fixer_prompt, FIXER_SYSTEM,  # noqa: E402
                      parse_json, patch_from_edit, n_ok_rows)
 
-TASK, VARIANT, MODEL, RUNS = "ner", "gpt-4", "gpt-4", 3
+TASK, VARIANT, RUNS = "ner", "gpt-4", 3
 RESULTS = HERE / "results"
-OUT = HERE / "reports" / "benchmark_ner"
-BASELINE = RESULTS / f"{TASK}__{VARIANT}__{MODEL}.jsonl"
+# Set by configure(): the model the breaks run on. gpt-4 (default) reproduces the original benchmark;
+# a cheap model (e.g. gpt-5.6-terra) re-bases it: baseline = that model on the unbroken prompt.
+MODEL, MODEL_CONFIG, OUT, BASELINE = "gpt-4", None, HERE / "reports" / "benchmark_ner", None
+
+
+def configure(model, model_config, baseline_runs=3):
+    """baseline_runs=6 stacks the noise-floor re-run onto the baseline (worst of 6 runs, not 3);
+    false alarms are then measured on a separate, held-out re-run."""
+    global MODEL, MODEL_CONFIG, OUT, BASELINE, RERUN_TAG
+    MODEL, MODEL_CONFIG = model, model_config
+    OUT = HERE / "reports" / ("benchmark_ner" if model == "gpt-4" else f"benchmark_ner_{model}")
+    BASELINE = RESULTS / f"{TASK}__{VARIANT}__{model}.jsonl"
+    RERUN_TAG = "rerun"
+    if baseline_runs == 6:
+        BASELINE = [BASELINE, RESULTS / f"{TASK}__{VARIANT}__{model}__rerun.jsonl"]
+        OUT = OUT.with_name(OUT.name + "_base6")
+        RERUN_TAG = "rerun2"
+
+
+def model_args():
+    """record_baseline.py flags for the configured model (none for the original gpt-4 benchmark)."""
+    if MODEL == "gpt-4":
+        return []
+    return ["--name", MODEL] + (["--model-config", json.dumps(MODEL_CONFIG)] if MODEL_CONFIG is not None else [])
+
+
+configure("gpt-4", None)
 
 ORIG = editable_components(TASK)
 DESC, DISH, INGREDIENT, EQUIPMENT = (ORIG["description"], ORIG["label_definitions.DISH"],
@@ -61,7 +88,8 @@ BREAKS = [
     {"id": "break10", "component": "label_definitions.EQUIPMENT", "kind": "contradict",
      "new_text": EQUIPMENT + ", bowl, plate, cup"},
 ]
-CALLS_PER_RUN = 20 * RUNS  # 20 inputs
+N_INPUTS = sum(1 for l in open(HERE / "inputs" / f"{TASK}.jsonl") if l.strip())
+CALLS_PER_RUN = N_INPUTS * RUNS
 
 
 def patch_for(component, new_text):
@@ -77,9 +105,11 @@ def run_record(patch, tag):
     pfile.write_text(json.dumps(patch, indent=2))
     path = RESULTS / f"{TASK}__{VARIANT}__{MODEL}__{tag}.jsonl"
     cmd = [sys.executable, str(HERE / "record_baseline.py"), "--task", TASK, "--variant", VARIANT,
-           "--patch", str(pfile), "--tag", tag, "--runs", str(RUNS)]
+           "--patch", str(pfile), "--tag", tag, "--runs", str(RUNS)] + model_args()
     print(f"   $ record {tag}")
+    before = total_cost(path)
     proc = subprocess.run(cmd, capture_output=True, text=True)
+    NEW_SPEND[0] += total_cost(path) - before  # only calls made now, not cached rows
     tail = [l for l in proc.stdout.splitlines() if "ERROR" in l or "Could not build" in l]
     if tail:
         print("     " + "\n     ".join(tail[:3]))
@@ -95,66 +125,128 @@ def total_cost(path):
             r = json.loads(line)
         except json.JSONDecodeError:
             continue
-        c += r.get("cost_usd") or 0.0
+        c += r.get("cost_usd") or cost(r.get("model"), r.get("usage")) or 0.0
     return c
 
 
-def run_break(b, skip_fix, spend):
+ORIGINAL_IDS = {f"ner-{i:02d}" for i in range(1, 21)}  # the first 20 inputs (before the Oct 7 probes)
+
+
+PREV_EDITS, PREV_DIRS = {}, []
+NEW_SPEND = [0.0]  # USD of API calls actually made in this invocation
+
+
+def load_prev_edits():
+    """Fixer edits from earlier runs of this benchmark (this model), keyed by (break id, attempt)."""
+    global PREV_DIRS
+    dirs = [OUT, OUT.with_name(OUT.name.removesuffix("_base6"))]
+    PREV_DIRS = [d for d in dict.fromkeys(dirs) if d.exists()]
+    for d in PREV_DIRS:
+        f = d / "results.json"
+        if not f.exists():
+            continue
+        for r in json.loads(f.read_text()).get("breaks", []):
+            for a in r.get("fix_attempts") or []:
+                if a.get("edit"):
+                    PREV_EDITS.setdefault((r["id"], a["attempt"]), a["edit"])
+
+
+def subset(report, ids):
+    """The report restricted to these input ids (verdict counts recomputed)."""
+    items = [it for it in report["items"] if it["input_id"] in ids]
+    counts = {v: sum(it["verdict"] == v for it in items) for v in ["REGRESSED", "IMPROVED", "CHANGED", "SAME"]}
+    return {**report, "items": items, "verdict_counts": counts, "inputs_compared": len(items)}
+
+
+def cause_scores(report, component, comps):
+    caught = report["verdict_counts"]["REGRESSED"] > 0
+    causes = find_causes(report, comps) if caught else []
+    named = [s["component"] for c in causes for s in c["suspects"] if s["editable"]]
+    top = [c["suspects"][0]["component"] for c in causes if c["suspects"] and c["suspects"][0]["editable"]]
+    return {"caught": caught, "n_regressed": report["verdict_counts"]["REGRESSED"],
+            "regressed_ids": [it["input_id"] for it in report["items"] if it["verdict"] == "REGRESSED"],
+            "suspects_seen": sorted(set(named)), "component_named": component in named,
+            "component_top": component in top}, causes
+
+
+def run_break(b, skip_fix, spend, max_attempts=1):
     print(f"\n[{b['id']}] {b['component']} ({b['kind']})")
     patch = patch_for(b["component"], b["new_text"])
     path = run_record(patch, b["id"])
-    spend[0] += total_cost(path)
     if not n_ok_rows(path):
         return {**b, "caught": None, "error": "no successful rows"}
     report = build_report(BASELINE, path)
-    caught = report["verdict_counts"]["REGRESSED"] > 0
-    causes = find_causes(report, ORIG) if caught else []
-    named = [s["component"] for c in causes for s in c["suspects"] if s["editable"]]
-    top = [c["suspects"][0]["component"] for c in causes if c["suspects"] and c["suspects"][0]["editable"]]
-    component_named = b["component"] in named
-    component_top = b["component"] in top
-    print(f"   caught: {caught} ({report['verdict_counts']['REGRESSED']} regressed)  "
-         f"component_named: {component_named}  component_top: {component_top}")
-    result = {**b, "caught": caught, "n_regressed": report["verdict_counts"]["REGRESSED"],
-              "regressed_ids": [it["input_id"] for it in report["items"] if it["verdict"] == "REGRESSED"],
-              "suspects_seen": sorted(set(named)), "component_named": component_named,
-              "component_top": component_top, "fix_attempted": False, "fix_accepted": None, "fix_edit": None}
-    if not caught or skip_fix:
+    comps = {**ORIG, b["component"]: b["new_text"]}  # the prompt as it is now: broken
+    result, causes = cause_scores(report, b["component"], comps)
+    result["first20"] = cause_scores(subset(report, ORIGINAL_IDS), b["component"], comps)[0]
+    print(f"   caught: {result['caught']} ({result['n_regressed']} regressed: {result['regressed_ids']})  "
+          f"component_named: {result['component_named']}  component_top: {result['component_top']}   "
+          f"[first 20 only: caught {result['first20']['caught']}]")
+    result = {**b, **result, "fix_attempted": False, "fix_accepted": None, "fix_edit": None, "fix_attempts": []}
+    if not result["caught"] or skip_fix:
         return result
-    print(f"   fixer call ({MODEL}) ...")
-    try:
-        edit = parse_json(call_llm(MODEL, FIXER_SYSTEM, fixer_prompt(TASK, ORIG, causes, report, [])))
-        edit["old_text"] = ORIG.get(edit["component"])
-        fix_patch = patch_from_edit(edit)
-    except (ValueError, RuntimeError, KeyError) as e:
-        result.update(fix_attempted=True, fix_accepted=False, fix_edit={"error": str(e)})
-        print(f"   fixer error: {e}")
-        return result
-    fix_tag = f"{b['id']}_fix1"
-    fix_path = run_record(fix_patch, fix_tag)
-    spend[0] += total_cost(fix_path)
-    if not n_ok_rows(fix_path):
-        result.update(fix_attempted=True, fix_accepted=False, fix_edit=edit)
-        return result
-    fix_report = build_report(BASELINE, fix_path)
-    accepted = fix_report["verdict_counts"]["REGRESSED"] == 0
-    print(f"   fix edits {edit['component']}  ->  accepted: {accepted} "
-         f"({fix_report['verdict_counts']})")
-    result.update(fix_attempted=True, fix_accepted=accepted, fix_edit=edit,
-                  fix_verdict_counts=fix_report["verdict_counts"])
+    history = []
+    for n in range(1, max_attempts + 1):
+        cached = PREV_EDITS.get((b["id"], n))
+        print(f"   fixer call {n} ({MODEL}) ..." if not cached else f"   fix {n}: reusing cached edit (no fixer call)")
+        try:
+            if cached:
+                edit = cached
+            else:
+                # The fixer sees the broken prompt (what an engineer would have), not the original.
+                edit = parse_json(call_llm(MODEL, FIXER_SYSTEM, fixer_prompt(TASK, comps, causes, report, history)))
+                edit["old_text"] = comps.get(edit["component"])
+            fix_patch = patch_from_edit(edit)
+        except (ValueError, RuntimeError, KeyError) as e:
+            result["fix_attempts"].append({"attempt": n, "error": str(e)})
+            print(f"   fixer error: {e}")
+            continue
+        # The fix edits the *broken* prompt: keep the break, apply the edit on top.
+        full = json.loads(json.dumps(patch))
+        for k, v in fix_patch.items():
+            if k == "label_definitions":
+                full.setdefault("label_definitions", {}).update(v)
+            else:
+                full[k] = v
+        # Cache files are keyed by patch content, so a different edit never reuses another edit's rows.
+        tag = f"{b['id']}_fix{n}"
+        legacy = [d / "patches" / f"{tag}.json" for d in PREV_DIRS if (d / "patches" / f"{tag}.json").exists()]
+        if not (legacy and json.loads(legacy[0].read_text()) == full):
+            tag += "_" + hashlib.sha256(json.dumps(full, sort_keys=True).encode()).hexdigest()[:8]
+        fix_path = run_record(full, tag)
+        if not n_ok_rows(fix_path):
+            result["fix_attempts"].append({"attempt": n, "edit": edit, "error": "re-run produced no results"})
+            continue
+        fix_report = build_report(BASELINE, fix_path)
+        ok = fix_report["verdict_counts"]["REGRESSED"] == 0
+        still = [it["input_id"] for it in fix_report["items"] if it["verdict"] == "REGRESSED"]
+        print(f"   fix {n} edits {edit['component']} -> {fix_report['verdict_counts']} {'ACCEPTED' if ok else still}")
+        result["fix_attempts"].append({"attempt": n, "edit": edit, "verdict_counts": fix_report["verdict_counts"],
+                                       "still_regressed": still, "accepted": ok,
+                                       "accepted_first20": subset(fix_report, ORIGINAL_IDS)["verdict_counts"]["REGRESSED"] == 0})
+        if ok:
+            break
+        history.append({"component": edit["component"], "new_text": edit["new_text"],
+                        "outcome": f"still regressed {still}"})
+    good = [a for a in result["fix_attempts"] if a.get("accepted")]
+    result.update(fix_attempted=bool(result["fix_attempts"]), fix_accepted=bool(good),
+                  fix_first_attempt=bool(result["fix_attempts"]) and bool(result["fix_attempts"][0].get("accepted")),
+                  fix_edit=good[0]["edit"] if good else None,
+                  fix_targets_planted=bool(good) and good[0]["edit"]["component"] == b["component"])
     return result
 
 
 def false_alarm_check(spend):
-    print("\n[false-alarm] fresh gpt-4 re-run (no patch) vs. stored baseline")
+    print(f"\n[false-alarm] fresh {MODEL} re-run (no patch, tag {RERUN_TAG}) vs. stored baseline")
     pfile_cmd = [sys.executable, str(HERE / "record_baseline.py"), "--task", TASK, "--variant", VARIANT,
-                "--tag", "rerun", "--runs", str(RUNS)]
+                "--tag", RERUN_TAG, "--runs", str(RUNS)] + model_args()
+    before = total_cost(RESULTS / f"{TASK}__{VARIANT}__{MODEL}__{RERUN_TAG}.jsonl")
     proc = subprocess.run(pfile_cmd, capture_output=True, text=True)
+    NEW_SPEND[0] += total_cost(RESULTS / f"{TASK}__{VARIANT}__{MODEL}__{RERUN_TAG}.jsonl") - before
     tail = [l for l in proc.stdout.splitlines() if "ERROR" in l]
     if tail:
         print("     " + "\n     ".join(tail[:3]))
-    path = RESULTS / f"{TASK}__{VARIANT}__{MODEL}__rerun.jsonl"
-    spend[0] += total_cost(path)
+    path = RESULTS / f"{TASK}__{VARIANT}__{MODEL}__{RERUN_TAG}.jsonl"
     if not n_ok_rows(path):
         return {"error": "no successful rows"}
     report = build_report(BASELINE, path)
@@ -170,6 +262,26 @@ def planted_units(spec):
     return set(new) or None
 
 
+def rescore():
+    """Cause-ranking metrics from cached break runs (for comparing ranking changes at no cost)."""
+    rows = []
+    for b in BREAKS:
+        path = RESULTS / f"{TASK}__{VARIANT}__{MODEL}__{b['id']}.jsonl"
+        if not path.exists():
+            continue
+        report = build_report(BASELINE, path)
+        comps = {**ORIG, b["component"]: b["new_text"]}
+        full = cause_scores(report, b["component"], comps)[0]
+        sub = cause_scores(subset(report, ORIGINAL_IDS), b["component"], comps)[0]
+        rows.append((b["id"], full, sub))
+        print(f"  {b['id']}: all {full['caught']}/{full['component_named']}/{full['component_top']}   "
+              f"first20 {sub['caught']}/{sub['component_named']}/{sub['component_top']}   (caught/named/top)")
+    for name, k in (("all inputs", 1), ("first 20", 2)):
+        caught = [r[k] for r in rows if r[k]["caught"]]
+        print(f"{name}: caught {len(caught)}/{len(rows)}, named {sum(c['component_named'] for c in caught)}, "
+              f"top {sum(c['component_top'] for c in caught)}")
+
+
 def ablate_caught(spend):
     """Re-score cause-finding on the caught breaks: heuristic top suspect vs. ablation."""
     from ablation import ablate
@@ -182,10 +294,12 @@ def ablate_caught(spend):
         comps = {**ORIG, spec["component"]: spec["new_text"]}
         causes = find_causes(report, comps)
         heur_top = [c["suspects"][0]["component"] for c in causes if c["suspects"] and c["suspects"][0]["editable"]]
-        ablate(TASK, BASELINE, comps, causes, variant=VARIANT, base_patch=patch_for(spec["component"], spec["new_text"]),
+        abl_files = lambda: sum(total_cost(p) for p in RESULTS.glob(f"{TASK}__{VARIANT}__{MODEL}__{b['id']}_abl-*.jsonl"))
+        before = abl_files()
+        ablate(TASK, BASELINE, comps, causes, variant=VARIANT, name=None if MODEL == "gpt-4" else MODEL,
+               model_config=MODEL_CONFIG, base_patch=patch_for(spec["component"], spec["new_text"]),
                tag_prefix=f"{b['id']}_", runs=RUNS, results_dir=RESULTS, patch_dir=OUT / "patches")
-        for f in {l["file"] for c in causes for l in c["lines"] if l.get("file")}:
-            spend[0] += total_cost(RESULTS / f)
+        spend[0] += abl_files() - before  # only calls made now
         planted = planted_units(spec)
         abl_top = [c["confirmed_lines"][0]["component"] for c in causes if c["confirmed_lines"]]
         confirmed = [u for c in causes for u in c["confirmed_lines"]]
@@ -220,14 +334,26 @@ def main():
     ap.add_argument("--skip-false-alarm", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="show the plan and cost estimate; no calls")
     ap.add_argument("--ablate", action="store_true", help="line-level ablation on the caught breaks")
+    ap.add_argument("--max-fix-attempts", type=int, default=3)
+    ap.add_argument("--rescore", action="store_true",
+                    help="recompute catch / component / top-ranked from cached break runs only (no API calls)")
+    ap.add_argument("--model", default="gpt-4", help="model the breaks run on (default: the original gpt-4 benchmark)")
+    ap.add_argument("--model-config", type=json.loads, default=None, help="e.g. '{}' for gpt-5.6 models")
+    ap.add_argument("--baseline-runs", type=int, choices=[3, 6], default=3,
+                    help="6 = stack the noise-floor re-run onto the baseline (needs the 'rerun' file)")
     args = ap.parse_args()
+    configure(args.model, args.model_config, args.baseline_runs)
+    load_prev_edits()
     if args.ablate:
         return ablate_caught([0.0])
+    if args.rescore:
+        return rescore()
 
     breaks = [b for b in BREAKS if not args.only or b["id"] in args.only]
     if args.dry_run:
-        print(f"{len(breaks)} break(s), {RUNS} runs x 20 inputs = {CALLS_PER_RUN} calls each (record step).")
-        per_call = total_cost(BASELINE) / max(n_ok_rows(BASELINE), 1)
+        print(f"{len(breaks)} break(s), {RUNS} runs x {N_INPUTS} inputs = {CALLS_PER_RUN} calls each (record step).")
+        base0 = BASELINE[0] if isinstance(BASELINE, list) else BASELINE
+        per_call = total_cost(base0) / max(n_ok_rows(base0), 1)
         est_low = len(breaks) * CALLS_PER_RUN * per_call
         est_high = est_low * 2  # + one fix re-run each
         print(f"gpt-4 cost/call from stored baseline: ${per_call:.4f}")
@@ -238,34 +364,39 @@ def main():
             print(f"  {b['id']}: {b['component']} ({b['kind']})")
         return
 
-    if not n_ok_rows(BASELINE):
+    if not all(n_ok_rows(p) for p in (BASELINE if isinstance(BASELINE, list) else [BASELINE])):
         sys.exit(f"No baseline at {BASELINE}. Run record_baseline.py first.")
     OUT.mkdir(parents=True, exist_ok=True)
     spend = [0.0]
-    results = [run_break(b, args.skip_fix, spend) for b in breaks]
+    results = [run_break(b, args.skip_fix, spend, args.max_fix_attempts) for b in breaks]
     false_alarm = None if args.skip_false_alarm else false_alarm_check(spend)
 
+    def rates(rs, key=None):
+        get = (lambda r: r[key]) if key else (lambda r: r)
+        caught = [r for r in rs if get(r).get("caught")]
+        n = len(rs)
+        return {"n_breaks": n, "caught": len(caught), "catch_rate": len(caught) / n if n else None,
+                "right_component_rate": sum(get(r)["component_named"] for r in caught) / len(caught) if caught else None,
+                "top_component_rate": sum(get(r)["component_top"] for r in caught) / len(caught) if caught else None}
     caught = [r for r in results if r.get("caught")]
+    tried = [r for r in caught if r.get("fix_attempted")]
     summary = {
-        "breaks": results,
-        "false_alarm": false_alarm,
-        "n_breaks": len(results),
-        "catch_rate": sum(1 for r in results if r.get("caught")) / len(results) if results else None,
-        "right_component_rate": (sum(1 for r in caught if r["component_named"]) / len(caught)
-                                 if caught else None),
-        "top_component_rate": (sum(1 for r in caught if r["component_top"]) / len(caught)
-                               if caught else None),
-        "fix_rate": (sum(1 for r in caught if r.get("fix_accepted")) /
-                    sum(1 for r in caught if r.get("fix_attempted")) if any(r.get("fix_attempted") for r in caught)
-                    else None),
-        "spend_usd": round(spend[0], 4),
+        "model": MODEL, "model_config": MODEL_CONFIG, "n_inputs": N_INPUTS, "runs": RUNS,
+        "breaks": results, "false_alarm": false_alarm,
+        "all_inputs": rates(results), "first20": rates(results, "first20"),
+        "fix_rate_first_attempt": sum(r["fix_first_attempt"] for r in tried) / len(tried) if tried else None,
+        "fix_rate_within_attempts": sum(r["fix_accepted"] for r in tried) / len(tried) if tried else None,
+        "max_fix_attempts": args.max_fix_attempts,
+        "spend_usd": round(NEW_SPEND[0], 4),
     }
     (OUT / "results.json").write_text(json.dumps(summary, indent=2, default=list))
-    print(f"\n{len(results)} breaks: catch rate {summary['catch_rate']}, "
-         f"right-component rate {summary['right_component_rate']}, fix rate {summary['fix_rate']}")
+    for k in ("first20", "all_inputs"):
+        print(f"\n{k}: {summary[k]}")
+    print(f"fix rate: first attempt {summary['fix_rate_first_attempt']}, "
+          f"within {args.max_fix_attempts} {summary['fix_rate_within_attempts']}")
     if false_alarm:
         print(f"false alarms on a fresh baseline re-run: {false_alarm['false_alarms']}")
-    print(f"spend this run: ${spend[0]:.2f}  ->  {OUT / 'results.json'}")
+    print(f"new API spend this run: ${NEW_SPEND[0]:.2f}  ->  {OUT / 'results.json'}")
 
 
 if __name__ == "__main__":

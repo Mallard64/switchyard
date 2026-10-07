@@ -104,6 +104,30 @@ def rank_key(rep):
 # ---------------------------------------------------------------------------------------
 # cause
 # ---------------------------------------------------------------------------------------
+# Parts of speech the NER description explicitly rules out ("Adjectives, verbs, adverbs are not
+# entities. Pronouns are not entities."). A spurious span with one of these points at that rule in
+# the description, not at a label definition.
+NON_ENTITY_POS = {"VERB", "AUX", "ADV", "ADJ", "PRON"}
+_POS_NLP = []
+
+
+def span_pos(text, span):
+    """Coarse POS of a span's head word, or None if no tagger is installed (en_core_web_sm)."""
+    if not _POS_NLP:
+        try:
+            import spacy
+            _POS_NLP.append(spacy.load("en_core_web_sm", disable=["ner", "lemmatizer"]))
+        except (ImportError, OSError):
+            _POS_NLP.append(None)
+    nlp, i = _POS_NLP[0], text.lower().find(span.lower())
+    if nlp is None or i < 0:
+        return None
+    if i == 0:  # sentence-initial imperatives ("Sear the steak") get mis-tagged as proper nouns
+        text = text[0].lower() + text[1:]
+    sp = nlp(text).char_span(i, i + len(span), alignment_mode="expand")
+    return sp.root.pos_ if sp is not None else None
+
+
 def find_causes(report, components):
     causes = []
     for it in report["items"]:
@@ -119,9 +143,14 @@ def find_causes(report, components):
         for e in it["candidate"]["errors"]:
             if e["type"] in ("spurious", "wrong_label"):
                 label = e["pred"][1] if isinstance(e["pred"], (list, tuple)) else e["pred"]
-                suspects[f"label_definitions.{label}"] += 2
-                suspects["description"] += 1
-                evidence.append(f"{e['type']}: predicted {tuple(e['pred'])}"
+                pos = span_pos(it["text"], e["pred"][0]) if e["type"] == "spurious" else None
+                if pos in NON_ENTITY_POS:  # e.g. a verb tagged as INGREDIENT: the description's rule
+                    suspects["description"] += 3
+                    suspects[f"label_definitions.{label}"] += 1
+                else:
+                    suspects[f"label_definitions.{label}"] += 2
+                    suspects["description"] += 1
+                evidence.append(f"{e['type']}: predicted {tuple(e['pred'])}" + (f" (a {pos})" if pos else "")
                                 + (f", gold {tuple(e['gold'])}" if "gold" in e else ""))
             elif e["type"] == "missed":
                 suspects[f"label_definitions.{e['gold'][1]}"] += 2

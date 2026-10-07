@@ -31,6 +31,15 @@ INSTRUCTION = {**NER_CHECKS, **TEXTCAT_CHECKS, **{k: v[1] for k, v in AGENT_CHEC
 
 
 def load(path):
+    """Rows per input from one results file, or several (a list): runs are renumbered so files
+    stack, e.g. a protected baseline + an extension file, or a baseline + its noise-floor re-run."""
+    if isinstance(path, (list, tuple)):
+        merged = defaultdict(list)
+        for p in path:
+            for iid, rs in load(p).items():
+                for r in rs:
+                    merged[iid].append({**r, "run": len(merged[iid]) + 1})
+        return merged
     rows = {}
     for line in open(path):
         try:
@@ -225,7 +234,9 @@ def build_report(baseline_path, candidate_path):
     items = [compare_input(task, base[i], cand[i], gold[i]) for i in shared]
     counts = Counter(it["verdict"] for it in items)
     return {
-        "task": task, "baseline_file": Path(baseline_path).name, "candidate_file": Path(candidate_path).name,
+        "task": task, "candidate_file": Path(candidate_path).name,
+        "baseline_file": " + ".join(Path(p).name for p in baseline_path) if isinstance(baseline_path, (list, tuple))
+                         else Path(baseline_path).name,
         "inputs_compared": len(shared),
         "verdict_counts": {k: counts.get(k, 0) for k in ["REGRESSED", "IMPROVED", "CHANGED", "SAME"]},
         "ready_to_merge": counts.get("REGRESSED", 0) == 0,
