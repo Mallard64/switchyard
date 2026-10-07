@@ -10,7 +10,7 @@
 
 ## 1. Where it broke (step)
 
-For each regressed ticket, each step was swapped back to `gpt-4` one at a time (3 runs each, earlier steps replayed from the candidate's own run). A step is causal when swapping it alone makes the ticket stop regressing; it is then checked the other way round (only that step on `gpt-5.6-sol`).
+For each regressed ticket, each step was swapped back to `gpt-4` one at a time (3 runs each, earlier steps replayed from the candidate's own run). A step is causal when swapping it alone makes the ticket stop regressing; it is then checked the other way round (only that step on `gpt-5.6-sol`). How reliable this is: on 9 planted breaks (7 with an effect, 39 tickets), the step-finder named the planted step(s) exactly on 37/39, a correct subset of a two-step break on 2, and a wrong step on 0 (`reports/agent_bench/RESULTS.md`).
 
 | Step | Regressions it explains |
 |---|---|

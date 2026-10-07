@@ -43,7 +43,7 @@
         "pct": 0
       }
     },
-    "method": "For each regressed ticket, each step was swapped back to `gpt-4` one at a time (3 runs each, earlier steps replayed from the candidate's own run). A step is causal when swapping it alone makes the ticket stop regressing; it is then checked the other way round (only that step on `gpt-5.6-sol`)."
+    "method": "For each regressed ticket, each step was swapped back to `gpt-4` one at a time (3 runs each, earlier steps replayed from the candidate's own run). A step is causal when swapping it alone makes the ticket stop regressing; it is then checked the other way round (only that step on `gpt-5.6-sol`). How reliable this is: on 9 planted breaks (7 with an effect, 39 tickets), the step-finder named the planted step(s) exactly on 37/39, a correct subset of a two-step break on 2, and a wrong step on 0 (`reports/agent_bench/RESULTS.md`)."
   },
   "causes": [
     {
@@ -171,8 +171,8 @@
     "**The `decide` prompt line \"Final-sale items are not eligible for refunds or replacements.\" was planted** for this demo, chosen because it breaks only the new model (see `reports/agent/plant_probe.json`). Apart from it, this candidate showed no regressions.",
     "Line-level proof works when the new model over-applies a line that is present. It cannot find a missing instruction; those are proven at component level by the fix instead."
   ],
-  "started": "2026-10-07T07:50:24.098220+00:00",
-  "finished": "2026-10-07T07:50:24.203886+00:00",
+  "started": "2026-10-07T17:24:22.599831+00:00",
+  "finished": "2026-10-07T17:24:22.722378+00:00",
   "ready_to_merge": false,
   "comparison_file": "compare_gpt-5.6-sol.json"
 }

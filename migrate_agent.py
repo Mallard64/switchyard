@@ -61,6 +61,19 @@ def verification(rep, regressed_before, runs, report_file):
             "passes": rep["verdict_counts"]["REGRESSED"] == 0, "report_file": report_file}
 
 
+def bench_note():
+    """One sentence on how reliable the step-finder is, from the planted-break benchmark (if run)."""
+    f = HERE / "reports" / "agent_bench" / "results.json"
+    if not f.exists():
+        return ""
+    r = json.loads(f.read_text())
+    sf, n = r["stepfinder"], r["tickets_localized"]
+    return (f" How reliable this is: on {r['breaks']} planted breaks ({r['breaks_with_effect']} with an effect, {n} "
+            f"tickets), the step-finder named the planted step(s) exactly on {sf['correct']}/{n}, a correct subset "
+            f"of a two-step break on {sf['correct_subset']}, and a wrong step on {sf['wrong']} "
+            f"(`reports/agent_bench/RESULTS.md`).")
+
+
 def score_rows(rep, fixed):
     """Rows for the evidence table: baseline | candidate (swap only) | candidate + fix."""
     b, c = rep["baseline"], rep["candidate"]
@@ -214,7 +227,8 @@ def main():
                    "method": f"For each regressed ticket, each step was swapped back to `{args.old}` one at a time "
                              f"({args.runs} runs each, earlier steps replayed from the candidate's own run). A step is "
                              f"causal when swapping it alone makes the ticket stop regressing; it is then checked the "
-                             f"other way round (only that step on `{args.candidate}`)."} if sf else None),
+                             f"other way round (only that step on `{args.candidate}`)." + bench_note()}
+                  if sf else None),
         "causes": causes,
         "evidence": {"table": score_rows(rep, shown_rep),
                      "noise_floor": f"`{args.old}` made the same decision in all {args.runs} runs on "

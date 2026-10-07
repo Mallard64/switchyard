@@ -1,7 +1,7 @@
 {
   "task": "agent",
-  "baseline_file": "agent__gpt-4.jsonl",
   "candidate_file": "agent__gpt-5.6-sol.jsonl",
+  "baseline_file": "agent__gpt-4.jsonl",
   "inputs_compared": 24,
   "verdict_counts": {
     "REGRESSED": 1,
