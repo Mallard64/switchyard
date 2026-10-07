@@ -158,7 +158,8 @@ def main():
                   f"`{'`/`'.join(b['prompts'])}` line",
          "why": [f"Planted break for the demo: {b['desc']}. Old and new are both `{args.model}`; only the new side's "
                  "prompt changed, so the true cause is known."],
-         "comparison_file": "compare_candidate.json",
+         "comparison_file": "compare_candidate.json", "group": "Demos",
+         "label": f"end-to-end · {args.brk}" + (f" · {args.tag}" if args.tag else ""),
          "old_model": f"{args.model} (clean)", "new_model": new["label"], "n_inputs": rep["inputs_compared"],
          "model_change": [], "cli": f"python demo_e2e.py --break {args.brk}",
          "steps": {"names": A.STEPS, "summary": summary,

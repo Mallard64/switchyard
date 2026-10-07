@@ -1,0 +1,17 @@
+{
+  "title": "Planted break d1: decide: upset or urgent customers get what they ask for",
+  "group": "Step-finder benchmark (sol vs terra)",
+  "label": "d1 \u00b7 decide: upset or urgent customers get what they ask for",
+  "old_model": "gpt-5.6-terra",
+  "new_model": "gpt-5.6-sol+d1",
+  "planted_steps": [
+    "decide"
+  ],
+  "causes": [],
+  "fixes": [],
+  "lines": [],
+  "steps": null,
+  "started": null,
+  "finished": null,
+  "comparison_file": "compare_candidate.json"
+}

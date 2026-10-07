@@ -1,0 +1,17 @@
+{
+  "title": "Planted break r2: draft: always promise a refund if still unhappy",
+  "group": "Step-finder benchmark (sol vs terra)",
+  "label": "r2 \u00b7 draft: always promise a refund if still unhappy",
+  "old_model": "gpt-5.6-terra",
+  "new_model": "gpt-5.6-sol+r2",
+  "planted_steps": [
+    "draft"
+  ],
+  "causes": [],
+  "fixes": [],
+  "lines": [],
+  "steps": null,
+  "started": null,
+  "finished": null,
+  "comparison_file": "compare_candidate.json"
+}

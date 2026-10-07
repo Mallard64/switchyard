@@ -44,40 +44,48 @@ def proposed_diff(m):
 
 
 def pipeline_section(m, cand_rep, fix_reports, results=HERE / "results"):
-    """What the dashboard's pipeline view draws: per-step traces of each regressed ticket on the old
-    pipeline, the new one and the new one with the (first) fix; the step-swap experiments; the prompt
-    lines tested; and the fix tally."""
+    """What the dashboard's pipeline view draws, for every ticket that was tested: its verdict on the new
+    pipeline (and with the first fix), per-step traces old / new / fixed with hover detail (prompt,
+    input, output, expected answer), and for broken tickets the step-swap experiments. Plus the
+    prompt lines tested and the fix tally. Prompts are stored once in `prompts`, keyed by hash."""
     from compare import load
     from pipeline_view import STEP_INFO, STEPS, cell, expected, first_divergence, trace
     gold = {t["id"]: t for t in (json.loads(l) for l in open(HERE / "inputs" / "agent.jsonl") if l.strip())}
     rows = lambda f: load([results / x.strip() for x in f.split(" + ")] if " + " in f else results / f)
     base, cand = rows(cand_rep["baseline_file"]), rows(cand_rep["candidate_file"])
     fix = m["fixes"][0] if m["fixes"] else None
-    fixed = rows(fix_reports[fix["id"]]["candidate_file"]) if fix else {}
-    tickets = []
-    for cs in m["causes"]:
-        tid = cs["input_id"]
-        old = trace(base[tid][0]) if base.get(tid) else {}
-        new = trace(cand[tid][0]) if cand.get(tid) else {}
-        recs = lambda rows_: {s["step"]: s for s in rows_[tid][0]["steps"]} if rows_.get(tid) else {}
-        o, n, fx = recs(base), recs(cand), recs(fixed)
-        cells = {"old": {st: cell(o[st]) for st in o},
-                 "new": {st: cell(n[st], o.get(st)) for st in n},
-                 "fixed": {st: cell(fx[st], o.get(st)) for st in fx}}
-        tickets.append({"id": tid, "text": cs["text"], "old": old, "new": new, "cells": cells,
-                        "expected": {st: expected(st, gold[tid]) for st in STEPS} if tid in gold else {},
-                        "fixed": trace(fixed[tid][0]) if fixed.get(tid) else None,
-                        "first_divergence": first_divergence(old, new), "causal_steps": cs.get("causal_steps", []),
-                        "status": cs["status"], "experiments": cs.get("experiments", []),
-                        "outputs": {"old": cs["baseline_output"], "new": cs["candidate_output"],
-                                    "fixed": cs.get("fixed_output")}})
-    after = fix_reports[fix["id"]]["verdict_counts"]["REGRESSED"] if fix else None
+    fix_rep = fix_reports[fix["id"]] if fix else None
+    fixed = rows(fix_rep["candidate_file"]) if fix else {}
+    fixed_items = {it["input_id"]: it for it in (fix_rep or {}).get("items", [])}
+    causes = {c["input_id"]: c for c in m["causes"]}
+    prompts, tickets = {}, []
+    recs = lambda rows_, tid: {s["step"]: s for s in rows_[tid][0]["steps"]} if rows_.get(tid) else {}
+    for it in cand_rep["items"]:
+        tid, cs = it["input_id"], causes.get(it["input_id"], {})
+        o, n, fx = recs(base, tid), recs(cand, tid), recs(fixed, tid)
+        old, new = (trace(base[tid][0]) if o else {}), (trace(cand[tid][0]) if n else {})
+        fi = fixed_items.get(tid)
+        tickets.append({
+            "id": tid, "text": it["text"], "verdict": it["verdict"], "fixed_verdict": fi["verdict"] if fi else None,
+            "old": old, "new": new, "fixed": trace(fixed[tid][0]) if fx else None,
+            "cells": {"old": {st: cell(o[st], None, prompts) for st in o},
+                      "new": {st: cell(n[st], o.get(st), prompts) for st in n},
+                      "fixed": {st: cell(fx[st], o.get(st), prompts) for st in fx}},
+            "expected": {st: expected(st, gold[tid]) for st in STEPS} if tid in gold else {},
+            "first_divergence": first_divergence(old, new), "causal_steps": cs.get("causal_steps", []),
+            "status": cs.get("status"), "experiments": cs.get("experiments", []),
+            "outputs": {"old": it["baseline"]["output"], "new": it["candidate"]["output"],
+                        "fixed": fi["candidate"]["output"] if fi else None}})
+    order = {"REGRESSED": 0, "CHANGED": 1, "IMPROVED": 2, "SAME": 3}
+    tickets.sort(key=lambda t: (order.get(t["verdict"], 4), t["id"]))
     return {"steps": STEPS, "info": STEP_INFO, "old_label": m["old_model"], "new_label": m["new_model"],
             "causal_steps": sorted({s for t in tickets for s in t["causal_steps"]}, key=STEPS.index),
-            "tickets": tickets, "lines": m.get("lines", []),
-            "fix": {"before": cand_rep["verdict_counts"]["REGRESSED"], "after": after,
+            "tickets": tickets, "prompts": prompts, "lines": m.get("lines", []),
+            "planted_steps": m.get("planted_steps"),
+            "fix": {"before": cand_rep["verdict_counts"]["REGRESSED"],
+                    "after": fix_rep["verdict_counts"]["REGRESSED"] if fix else None,
                     "total": cand_rep["inputs_compared"], "decision": fix["decision"] if fix else None,
-                    "change": (f"remove {fix['component']}" if fix and fix["kind"] == "remove_line"
+                    "change": (f"remove {fix['component']}" if fix["kind"] == "remove_line"
                                else f"edit {fix['component']}") if fix else None}}
 
 
@@ -108,6 +116,7 @@ def export(out_dir, m, cand_rep, fix_reports):
     steps = sorted({f["step"] for f in m["fixes"]})
     dash = {
         "task": "agent", "started": m.get("started"), "finished": m.get("finished"),
+        "group": m.get("group", "Migrations"), "label": m.get("label"),
         "baseline": {"file": cand_rep["baseline_file"], **cand_rep["baseline"]},
         "candidates": [{"model": m["new_model"], "resolved_model": c["resolved_model"],
                         "regressed": cand_rep["verdict_counts"]["REGRESSED"], "verdict_counts": cand_rep["verdict_counts"],
@@ -134,6 +143,9 @@ def export(out_dir, m, cand_rep, fix_reports):
 def export_dir(out_dir):
     out_dir = Path(out_dir)
     m = json.loads((out_dir / "migration.json").read_text())
+    if "group" not in m:  # reports written before groups existed
+        m["group"] = "Demos" if out_dir.name.startswith("demo_e2e") else "Migrations"
+        m.setdefault("label", out_dir.name.replace("demo_e2e_", "end-to-end · ").replace("_", " "))
     cand_file = out_dir / (m.get("comparison_file") or "compare_candidate.json")
     fix_reports = {f["id"]: json.loads((out_dir / f["verification"]["report_file"]).read_text()) for f in m["fixes"]}
     return export(out_dir, m, json.loads(cand_file.read_text()), fix_reports)

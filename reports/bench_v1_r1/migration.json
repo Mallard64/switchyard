@@ -1,0 +1,794 @@
+{
+  "title": "Planted break r1: draft: no order IDs, amounts or timelines",
+  "group": "Step-finder benchmark (sol vs terra)",
+  "label": "r1 \u00b7 draft: no order IDs, amounts or timelines",
+  "old_model": "gpt-5.6-terra",
+  "new_model": "gpt-5.6-sol+r1",
+  "planted_steps": [
+    "draft"
+  ],
+  "causes": [
+    {
+      "input_id": "t02",
+      "text": "I'd like to return the wool sweater from order A1002. It just doesn't fit right.",
+      "baseline_output": "refund/deny",
+      "candidate_output": "refund/deny",
+      "causal_steps": [
+        "draft"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "refund/deny",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "refund/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only draft new",
+          "kind": "only_new",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "refund/deny",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t03",
+      "text": "Please refund the lamp I got on clearance, order A1003. I don't like the color.",
+      "baseline_output": "refund/deny",
+      "candidate_output": "refund/deny",
+      "causal_steps": [
+        "draft"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "refund/deny",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "refund/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only draft new",
+          "kind": "only_new",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "refund/deny",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t05",
+      "text": "Hey can I return the phone case from order A1008? Unopened.",
+      "baseline_output": "refund/deny",
+      "candidate_output": "refund/deny",
+      "causal_steps": [
+        "draft"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "refund/deny",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "refund/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only draft new",
+          "kind": "only_new",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "refund/deny",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t06",
+      "text": "My mug set (A1005) arrived and two of the four mugs are smashed. Really disappointed.",
+      "baseline_output": "damaged/replace",
+      "candidate_output": "damaged/replace",
+      "causal_steps": [
+        "draft"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "damaged/replace",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/replace",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/replace",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/replace",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "damaged/replace",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "damaged/replace",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only draft new",
+          "kind": "only_new",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "damaged/replace",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t08",
+      "text": "Found a big hole in the sleeve of my sweater, order A1002. I've only worn it twice.",
+      "baseline_output": "damaged/escalate",
+      "candidate_output": "damaged/escalate",
+      "causal_steps": [
+        "draft"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "damaged/escalate",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/escalate",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/escalate",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/escalate",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "damaged/escalate",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "damaged/escalate",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only draft new",
+          "kind": "only_new",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "damaged/escalate",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t09",
+      "text": "Where is my blender? Order A1004 was supposed to arrive on the 4th.",
+      "baseline_output": "shipping/info",
+      "candidate_output": "shipping/info",
+      "causal_steps": [
+        "draft"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "shipping/info",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/info",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "shipping/info",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "shipping/info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only draft new",
+          "kind": "only_new",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "shipping/info",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t12",
+      "text": "I want to cancel my blender order, A1004. Found it cheaper elsewhere.",
+      "baseline_output": "cancel/deny",
+      "candidate_output": "cancel/deny",
+      "causal_steps": [
+        "draft"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only draft new",
+          "kind": "only_new",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t13",
+      "text": "I was charged twice for order A1001. I see two charges of $79 on my card.",
+      "baseline_output": "billing/escalate",
+      "candidate_output": "billing/escalate",
+      "causal_steps": [
+        "draft"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "billing/escalate",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "billing/escalate",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "billing/escalate",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "billing/escalate",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "billing/escalate",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "billing/escalate",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only draft new",
+          "kind": "only_new",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "billing/escalate",
+          "ok": false
+        }
+      ]
+    }
+  ],
+  "fixes": [],
+  "lines": [],
+  "steps": null,
+  "started": null,
+  "finished": null,
+  "comparison_file": "compare_candidate.json"
+}

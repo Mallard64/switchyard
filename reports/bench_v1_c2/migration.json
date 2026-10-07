@@ -1,0 +1,794 @@
+{
+  "title": "Planted break c2: classify: order ID extracted without its letter",
+  "group": "Step-finder benchmark (sol vs terra)",
+  "label": "c2 \u00b7 classify: order ID extracted without its letter",
+  "old_model": "gpt-5.6-terra",
+  "new_model": "gpt-5.6-sol+c2",
+  "planted_steps": [
+    "classify"
+  ],
+  "causes": [
+    {
+      "input_id": "t01",
+      "text": "Hi, I bought the wireless earbuds (order A1001) but I've changed my mind, they're still in the box. Can I get my money back?",
+      "baseline_output": "refund/refund",
+      "candidate_output": "refund/ask_for_info",
+      "causal_steps": [
+        "classify"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "refund/refund",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/refund",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t02",
+      "text": "I'd like to return the wool sweater from order A1002. It just doesn't fit right.",
+      "baseline_output": "refund/deny",
+      "candidate_output": "refund/ask_for_info",
+      "causal_steps": [
+        "classify"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "refund/deny",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t03",
+      "text": "Please refund the lamp I got on clearance, order A1003. I don't like the color.",
+      "baseline_output": "refund/deny",
+      "candidate_output": "refund/ask_for_info",
+      "causal_steps": [
+        "classify"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "refund/deny",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t04",
+      "text": "Return request for my backpack, order A1007. Never used it.",
+      "baseline_output": "refund/refund",
+      "candidate_output": "refund/ask_for_info",
+      "causal_steps": [
+        "classify"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "refund/refund",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/refund",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t05",
+      "text": "Hey can I return the phone case from order A1008? Unopened.",
+      "baseline_output": "refund/deny",
+      "candidate_output": "refund/ask_for_info",
+      "causal_steps": [
+        "classify"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "refund/deny",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/deny",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "refund/ask_for_info",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t06",
+      "text": "My mug set (A1005) arrived and two of the four mugs are smashed. Really disappointed.",
+      "baseline_output": "damaged/replace",
+      "candidate_output": "damaged/ask_for_info",
+      "causal_steps": [
+        "classify"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "damaged/replace",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/ask_for_info",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/replace",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "damaged/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "damaged/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "damaged/ask_for_info",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t08",
+      "text": "Found a big hole in the sleeve of my sweater, order A1002. I've only worn it twice.",
+      "baseline_output": "damaged/escalate",
+      "candidate_output": "damaged/ask_for_info",
+      "causal_steps": [
+        "classify"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "damaged/escalate",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/ask_for_info",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/escalate",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "damaged/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "damaged/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "damaged/ask_for_info",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t09",
+      "text": "Where is my blender? Order A1004 was supposed to arrive on the 4th.",
+      "baseline_output": "shipping/info",
+      "candidate_output": "shipping/ask_for_info",
+      "causal_steps": [
+        "classify"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "shipping/info",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/ask_for_info",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/info",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "shipping/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "shipping/ask_for_info",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "shipping/ask_for_info",
+          "ok": false
+        }
+      ]
+    }
+  ],
+  "fixes": [],
+  "lines": [],
+  "steps": null,
+  "started": null,
+  "finished": null,
+  "comparison_file": "compare_candidate.json"
+}

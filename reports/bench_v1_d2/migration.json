@@ -1,0 +1,212 @@
+{
+  "title": "Planted break d2: decide: damaged items refunded instead of replaced",
+  "group": "Step-finder benchmark (sol vs terra)",
+  "label": "d2 \u00b7 decide: damaged items refunded instead of replaced",
+  "old_model": "gpt-5.6-terra",
+  "new_model": "gpt-5.6-sol+d2",
+  "planted_steps": [
+    "decide"
+  ],
+  "causes": [
+    {
+      "input_id": "t06",
+      "text": "My mug set (A1005) arrived and two of the four mugs are smashed. Really disappointed.",
+      "baseline_output": "damaged/replace",
+      "candidate_output": "damaged/refund",
+      "causal_steps": [
+        "decide"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "damaged/replace",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/refund",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/refund",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/replace",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "damaged/refund",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "damaged/refund",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only decide new",
+          "kind": "only_new",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "damaged/refund",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t20",
+      "text": "The sole of my running shoes (A1009) peeled right off after three runs. Absolute garbage, I want this fixed.",
+      "baseline_output": "damaged/replace",
+      "candidate_output": "damaged/refund",
+      "causal_steps": [
+        "decide"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "damaged/replace",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/refund",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/refund",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/replace",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "damaged/refund",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "damaged/refund",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only decide new",
+          "kind": "only_new",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "damaged/refund",
+          "ok": false
+        }
+      ]
+    }
+  ],
+  "fixes": [],
+  "lines": [],
+  "steps": null,
+  "started": null,
+  "finished": null,
+  "comparison_file": "compare_candidate.json"
+}

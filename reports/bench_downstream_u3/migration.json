@@ -1,0 +1,309 @@
+{
+  "title": "Planted break u3: classify calls late or missing orders cancellations (symptom: decide denies or cancels)",
+  "group": "Downstream-symptom breaks (terra)",
+  "label": "u3 \u00b7 classify calls late or missing orders cancellations",
+  "old_model": "gpt-5.6-terra",
+  "new_model": "gpt-5.6-terra+u3",
+  "planted_steps": [
+    "classify"
+  ],
+  "causes": [
+    {
+      "input_id": "t09",
+      "text": "Where is my blender? Order A1004 was supposed to arrive on the 4th.",
+      "baseline_output": "shipping/info",
+      "candidate_output": "cancel/deny",
+      "causal_steps": [
+        "classify"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "shipping/info",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/info",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t10",
+      "text": "Order A1010 still hasn't shown up. The tracking page said September 26. That's over a week ago.",
+      "baseline_output": "shipping/replace",
+      "candidate_output": "cancel/deny",
+      "causal_steps": [
+        "classify"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "shipping/replace",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/replace",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "input_id": "t23",
+      "text": "my order a1010 never came?? its been forever",
+      "baseline_output": "shipping/replace",
+      "candidate_output": "cancel/deny",
+      "causal_steps": [
+        "classify"
+      ],
+      "status": "confirmed",
+      "confirmed_lines": [],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "shipping/replace",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/replace",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false
+        }
+      ]
+    }
+  ],
+  "fixes": [],
+  "lines": [],
+  "steps": null,
+  "started": null,
+  "finished": null,
+  "comparison_file": "compare_candidate.json"
+}

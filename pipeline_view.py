@@ -94,15 +94,19 @@ def expected(step, ticket):
     return "PASS, or a rewrite that keeps every fact (order ID, amounts, timelines)."
 
 
-def cell(rec, old_rec=None):
-    """Hover detail for one step of one run: the prompt it got, its raw output, and which system-prompt
-    lines differ from the old pipeline's prompt for the same step."""
-    msgs = rec.get("messages") or []
-    system = next((m["content"] for m in msgs if m["role"] == "system"), "")
-    user = next((m["content"] for m in msgs if m["role"] == "user"), "")
-    old_lines = set()
-    if old_rec:
-        old_lines = set(next((m["content"] for m in old_rec.get("messages") or [] if m["role"] == "system"), "").split("\n"))
-    lines = system.split("\n")
-    return {"model": rec.get("model"), "system": lines, "user": user, "output": rec.get("raw") or "",
-            "changed": [i for i, l in enumerate(lines) if old_rec and l not in old_lines]}
+def cell(rec, old_rec=None, prompts=None):
+    """Hover detail for one step of one run: the prompt it got (stored once in `prompts` by hash),
+    its input and raw output, and how its system prompt differs from the old pipeline's for that step:
+    `added` = line numbers not in the old prompt, `removed` = old lines missing here."""
+    import hashlib
+    sys_of = lambda r: next((m["content"] for m in (r or {}).get("messages") or [] if m["role"] == "system"), "")
+    system, old_system = sys_of(rec), sys_of(old_rec)
+    lines, old_lines = system.split("\n"), old_system.split("\n") if old_rec else []
+    ref = hashlib.sha256(system.encode()).hexdigest()[:10]
+    if prompts is not None:
+        prompts.setdefault(ref, lines)
+    return {"model": rec.get("model"), "prompt": ref, "system": None if prompts is not None else lines,
+            "user": next((m["content"] for m in rec.get("messages") or [] if m["role"] == "user"), ""),
+            "output": rec.get("raw") or "",
+            "added": [i for i, l in enumerate(lines) if old_rec and l not in old_lines],
+            "removed": [l for l in old_lines if l not in lines] if old_rec else []}

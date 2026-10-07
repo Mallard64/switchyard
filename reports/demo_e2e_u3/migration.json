@@ -4,6 +4,8 @@
     "Planted break for the demo: classify calls late or missing orders cancellations (symptom: decide denies or cancels). Old and new are both `gpt-5.6-terra`; only the new side's prompt changed, so the true cause is known."
   ],
   "comparison_file": "compare_candidate.json",
+  "group": "Demos",
+  "label": "end-to-end \u00b7 u3",
   "old_model": "gpt-5.6-terra (clean)",
   "new_model": "gpt-5.6-terra+u3",
   "n_inputs": 24,

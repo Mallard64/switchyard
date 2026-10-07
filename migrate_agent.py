@@ -217,6 +217,7 @@ def main():
     other = [f"{it['verdict'].lower()}: `{it['input_id']}` \"{it['text'][:70]}\": {it['baseline']['output']} → "
              f"{it['candidate']['output']}" for it in rep["items"] if it["verdict"] in ("CHANGED", "IMPROVED")]
     m = {
+        "group": "Migrations", "label": f"agent · {args.old} → {args.candidate}",
         "task": "agent", "pipeline": "4-step support agent", "candidate": args.candidate, "old_model": args.old,
         "new_model": args.candidate, "candidate_config": args.candidate_config, "n_inputs": rep["inputs_compared"],
         "cli": f"python migrate_agent.py --candidate {args.candidate} --candidate-config '{cfg}'",
