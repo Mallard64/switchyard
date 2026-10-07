@@ -22,6 +22,7 @@ Everything lands in reports/migration_<task>/ ; migration.json is what the dashb
 """
 import argparse
 import difflib
+import hashlib
 import json
 import os
 import re
@@ -37,6 +38,7 @@ from pathlib import Path
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 from compare import build_report  # noqa: E402
+import pr_report  # noqa: E402
 
 OPENAI_BASE = "https://api.openai.com/v1"
 TASK_CONFIG = {"ner": HERE / "upstream" / "ner_fewshot.cfg", "textcat": HERE / "upstream" / "textcat_zeroshot.cfg"}
@@ -206,7 +208,9 @@ def patch_from_edit(edit):
 # ---------------------------------------------------------------------------------------
 # PR
 # ---------------------------------------------------------------------------------------
-def patched_config_text(task, model, model_config, edit):
+def patched_config_text(task, model, model_config, edits):
+    """Upstream config with the new model block and every accepted prompt edit applied."""
+    by_comp = {e["component"]: e for e in edits or []}
     src = TASK_CONFIG[task].read_text()
     out, i, lines = [], 0, src.splitlines()
     while i < len(lines):
@@ -222,8 +226,8 @@ def patched_config_text(task, model, model_config, edit):
             if i < len(lines):
                 out.append("")
             continue
-        if edit and edit["component"] == "description" and line.startswith("description ="):
-            words = edit["new_text"].split()
+        if "description" in by_comp and line.startswith("description ="):
+            words = by_comp["description"]["new_text"].split()
             wrapped, cur = [], "description ="
             for w in words:
                 if len(cur) + len(w) + 1 > 60:
@@ -236,102 +240,73 @@ def patched_config_text(task, model, model_config, edit):
             while i < len(lines) and lines[i].startswith((" ", "\t")):
                 i += 1
             continue
-        if edit and edit["component"].startswith("label_definitions."):
-            label = edit["component"].split(".", 1)[1]
-            if re.match(rf"^{re.escape(label)}\s*=", line):
-                out.append(f"{label} = {json.dumps(edit['new_text'])}")
-                i += 1
-                continue
+        m = re.match(r"^(\w+)\s*=", line)
+        if m and f"label_definitions.{m.group(1)}" in by_comp:
+            out.append(f"{m.group(1)} = {json.dumps(by_comp['label_definitions.' + m.group(1)]['new_text'])}")
+            i += 1
+            continue
         out.append(line)
         i += 1
     return "\n".join(out).rstrip() + "\n"
 
 
-def fmt_pct(x):
-    return f"{x:.0%}"
+EDIT_FORMAT = {"fix": "fix id this edit replaces (optional)",
+               "component": "description | label_definitions.<LABEL>", "new_text": "full new text of that component"}
 
 
-def pr_body(task, chosen, base_rep, cand_rep, final_rep, causes, accepted, candidates, model_config, args):
-    b, c = base_rep["baseline"], cand_rep["candidate"]
-    f = final_rep["candidate"] if final_rep else None
-    temp_note = ""
-    if model_config is not None and "temperature" not in model_config:
-        temp_note = (f"\n- `spacy.GPT-4.v3` sends `temperature: 0.0` by default, which `{chosen}` rejects "
-                     f"(\"Only the default (1) value is supported\"). Changing only the model name makes every request fail, "
-                     f"so the config sets `config = {json.dumps(model_config)}`.")
-    rows = [("Passed all hard checks", fmt_pct(b["passed_all"]), fmt_pct(c["passed_all"]), f and fmt_pct(f["passed_all"])),
-            (b["accuracy_metric"], f"{b['accuracy']:.2f}", f"{c['accuracy']:.2f}", f and f"{f['accuracy']:.2f}"),
-            ("Inputs regressed vs baseline", "-", str(cand_rep["verdict_counts"]["REGRESSED"]),
-             final_rep and str(final_rep["verdict_counts"]["REGRESSED"])),
-            ("Inputs whose output varies between runs", str(b["unstable_inputs"]), str(c["unstable_inputs"]),
-             f and str(f["unstable_inputs"])),
-            ("Latency p50", f"{b['latency_p50_s']:.2f}s", f"{c['latency_p50_s']:.2f}s", f and f"{f['latency_p50_s']:.2f}s")]
-    if b["cost_per_1k_calls_usd"] is not None and c["cost_per_1k_calls_usd"] is not None:
-        rows.append(("Cost per 1k calls", f"${b['cost_per_1k_calls_usd']:.2f}", f"${c['cost_per_1k_calls_usd']:.2f}",
-                     f and f["cost_per_1k_calls_usd"] is not None and f"${f['cost_per_1k_calls_usd']:.2f}"))
-    head = "| | Baseline (`" + b["resolved_model"][0] + "`) | `" + chosen + "`, model swap only |"
-    sep = "|---|---|---|"
-    if final_rep:
-        head += " `" + chosen + "` + prompt fix |"
-        sep += "---|"
-    table = [head, sep] + ["| " + " | ".join(str(x) for x in (r if final_rep else r[:3])) + " |" for r in rows]
+def verification(rep, target_ids, runs, report_file):
+    reg = [it["input_id"] for it in rep["items"] if it["verdict"] == "REGRESSED"]
+    return {"inputs": rep["inputs_compared"], "runs": runs, "verdict_counts": rep["verdict_counts"],
+            "still_regressed": [i for i in reg if i in target_ids],
+            "newly_regressed": [i for i in reg if i not in target_ids],
+            "passes": rep["verdict_counts"]["REGRESSED"] == 0, "report_file": report_file}
 
-    out = [f"# Move the `{UPSTREAM_PATH[task].split('/')[1]}` example to `{chosen}` before the Oct 23, 2026 model shutdowns", "",
-           "## Why", "",
-           "This example uses `spacy.GPT-3-5.v1` (`gpt-3.5-turbo`, which resolves to `gpt-3.5-turbo-0125`), and the "
-           "obvious upgrade, `spacy.GPT-4.v3`, defaults to `gpt-4` (`gpt-4-0613`). OpenAI shuts down both on "
-           "**Oct 23, 2026** ([deprecations](https://developers.openai.com/api/docs/deprecations)). spacy-llm checks "
-           "`/v1/models` when a pipeline loads and raises `ValueError` for a model that isn't listed, so after that date "
-           "this example stops loading rather than degrading.", "",
-           "## What changes", "",
-           f"- Model: `spacy.GPT-4.v3` with `name = \"{chosen}\"`.{temp_note}"]
-    if accepted:
-        cid = accepted["component"]
-        out.append(f"- Prompt: `{cid}` reworded (diff below). {accepted['rationale']}")
-    out += ["", "## Evidence", "",
-            f"Baseline: this example's prompt on `spacy.GPT-4.v3` (`gpt-4`), the stronger of the two retiring models. "
-            f"{base_rep['inputs_compared']} inputs, each run {args.runs} times per model. An input counts as regressed only "
-            "if most new-model runs fail a hard check the old model passes, or score below the old model's worst run.", ""]
-    out += table
-    if len(candidates) > 1:
-        out += ["", "Other candidates tested:", ""]
-        for cd in candidates:
-            if cd["model"] == chosen:
-                continue
-            if cd.get("unavailable"):
-                out.append(f"- `{cd['model']}`: not available ({cd['unavailable']})")
-            else:
-                out.append(f"- `{cd['model']}`: {cd['regressed']} regressed, {cd['accuracy_metric']} {cd['accuracy']:.2f}")
-    if causes:
-        out += ["", "## Regressions found, and their cause", ""]
-        for cs in causes:
-            out += [f"**\"{cs['text']}\"**", "",
-                    f"- `gpt-4`: {cs['baseline_output']}", f"- `{chosen}`: {cs['candidate_output']}",
-                    f"- Evidence: {'; '.join(cs['evidence'])}"]
-            for u in cs.get("confirmed_lines", []):
-                out.append(f"- Proven line (`{u['component']}`): \"{u['text']}\". Removing only this sentence "
-                           "makes the input stop regressing.")
-            if cs["status"] == "confirmed" and "fix" in (cs.get("confirmed_by") or "fix"):
-                out.append(f"- Cause (confirmed by fix): `{cs['confirmed_component']}`. Editing only that component "
-                           "removes the regression, with no new regressions elsewhere.")
-            else:
-                top = [s["component"] for s in cs["suspects"]][:2]
-                out.append(f"- Suspected cause: {', '.join(f'`{t}`' for t in top)} (not confirmed by a fix)")
-            out.append("")
-    if accepted:
-        out += ["### Prompt change", "", "```diff", f"- {accepted['old_text']}", f"+ {accepted['new_text']}", "```", ""]
-    rest = [it for it in (final_rep or cand_rep)["items"] if it["verdict"] in ("CHANGED", "IMPROVED")]
-    if rest:
-        out += ["## Other differences (not regressions; worth a look)", ""]
-        for it in rest:
-            out.append(f"- {it['verdict'].lower()}: \"{it['text']}\" — `gpt-4` {it['baseline']['output']} → "
-                       f"`{chosen}` {it['candidate']['output']}")
-        out.append("")
-    out += ["## Limits", "",
-            f"- {base_rep['inputs_compared']} hand-labelled inputs; accuracy figures depend on those labels.",
-            f"- `{chosen}` only accepts the default temperature, so its outputs can vary between runs; the "
-            "regression rule above requires a majority of runs to fail.", ""]
-    return "\n".join(out)
+
+def migration_view(task, chosen, cand_rep, shown_rep, causes, fixes, candidates, args, noise):
+    """The shared migration dict pr_report.render() turns into PR.md (mirrored in migration.json)."""
+    b, c = cand_rep["baseline"], cand_rep["candidate"]
+    f = shown_rep["candidate"] if shown_rep else None
+    fx = lambda fn: fn(f) if f else "–"
+    cost = lambda s: f"${s['cost_per_1k_calls_usd']:.2f}" if s and s["cost_per_1k_calls_usd"] is not None else "n/a"
+    table = [("Passed all hard checks", f"{b['passed_all']:.0%}", f"{c['passed_all']:.0%}", fx(lambda s: f"{s['passed_all']:.0%}")),
+             (b["accuracy_metric"], f"{b['accuracy']:.2f}", f"{c['accuracy']:.2f}", fx(lambda s: f"{s['accuracy']:.2f}")),
+             ("Inputs regressed vs baseline", "–", cand_rep["verdict_counts"]["REGRESSED"],
+              shown_rep["verdict_counts"]["REGRESSED"] if shown_rep else "–"),
+             ("Inputs whose output varies between runs", b["unstable_inputs"], c["unstable_inputs"],
+              fx(lambda s: s["unstable_inputs"])),
+             ("Latency p50", f"{b['latency_p50_s']:.2f}s", f"{c['latency_p50_s']:.2f}s", fx(lambda s: f"{s['latency_p50_s']:.2f}s")),
+             ("Cost per 1k calls", cost(b), cost(c), fx(cost))]
+    for cs in causes:
+        item = next((x for x in shown_rep["items"] if x["input_id"] == cs["input_id"]), None) if shown_rep else None
+        cs["fixed_output"] = item["candidate"]["output"] if item else None
+        cs["lines_tested"] = len(cs.get("lines", []))
+    other = [f"{it['verdict'].lower()}: \"{it['text']}\": `gpt-4` {it['baseline']['output']} → `{chosen}` "
+             f"{it['candidate']['output']}" for it in cand_rep["items"] if it["verdict"] in ("CHANGED", "IMPROVED")]
+    other += [f"Other candidate `{cd['model']}`: {cd['regressed']} regressed, {cd['accuracy_metric']} {cd['accuracy']:.2f}"
+              for cd in candidates if cd.get("model") != chosen and "regressed" in cd]
+    cfg = json.dumps(args.model_config if args.model_config is not None else {"temperature": 0.0})
+    cli = (f"python migrate.py --task {task} --candidates {' '.join(cd['model'] for cd in candidates)}"
+           + (f" --model-config '{json.dumps(args.model_config)}'" if args.model_config is not None else ""))
+    return {
+        "pipeline": f"spacy-llm `{UPSTREAM_PATH[task].split('/')[1]}` example, one LLM call per text",
+        "old_model": "gpt-4", "new_model": chosen, "n_inputs": cand_rep["inputs_compared"], "cli": cli,
+        "title": f"Move the `{UPSTREAM_PATH[task].split('/')[1]}` example to `{chosen}` before the Oct 23, 2026 model shutdowns",
+        "why": ["This example uses `spacy.GPT-3-5.v1` (`gpt-3.5-turbo`), and the obvious upgrade, `spacy.GPT-4.v3`, "
+                "defaults to `gpt-4` (`gpt-4-0613`). OpenAI shuts down both on **Oct 23, 2026** "
+                "([deprecations](https://developers.openai.com/api/docs/deprecations)). spacy-llm checks `/v1/models` "
+                "when a pipeline loads and raises `ValueError` for a missing model, so the example stops loading."],
+        "model_change": [f"Model: `spacy.GPT-4.v3` with `name = \"{chosen}\"` and `config = {cfg}`."]
+                        + ([f"`spacy.GPT-4.v3` sends `temperature: 0.0` by default, which `{chosen}` rejects; changing "
+                            "only the model name makes every request fail, hence the empty config."]
+                           if args.model_config is not None and "temperature" not in args.model_config else []),
+        "steps": None, "causes": causes, "fixes": fixes, "edit_format": EDIT_FORMAT, "other_differences": other,
+        "evidence": {"table": table, "noise_floor": noise},
+        "limits": [f"{cand_rep['inputs_compared']} hand-labelled inputs; accuracy figures depend on those labels.",
+                   f"`{chosen}` only accepts the default temperature, so its outputs vary between runs; an input "
+                   "counts as regressed only if most runs fail.",
+                   "Line-level proof only finds lines that are present and over-applied; a missing instruction is "
+                   "proven at component level by the fix instead."],
+    }
 
 
 # ---------------------------------------------------------------------------------------
@@ -352,6 +327,10 @@ def main():
     ap.add_argument("--out", default=None, help="default reports/migration_<task>")
     ap.add_argument("--api-base", help="send OpenAI calls here instead (testing/proxy)")
     ap.add_argument("--no-ablate", action="store_true", help="skip line-level ablation (heuristic causes only)")
+    ap.add_argument("--accept", action="append", default=[], help="engineer accepts this fix id (no re-run)")
+    ap.add_argument("--reject", action="append", default=[], help="engineer rejects this fix id (no re-run)")
+    ap.add_argument("--apply-edit", help="JSON {fix?, component, new_text}: re-run the full suite with the "
+                                         "engineer's text, re-verify, regenerate the PR")
     args = ap.parse_args()
     if not os.environ.get("OPENAI_API_KEY"):
         sys.exit("Set OPENAI_API_KEY first.")
@@ -480,23 +459,90 @@ def main():
                 break
             history.append({"component": edit["component"], "new_text": edit["new_text"], "outcome": outcome})
 
-    # 5. PR ---------------------------------------------------------------------------------
-    ready = bool(accepted) or not causes
-    pr = None
-    if ready:
-        cfg_text = patched_config_text(args.task, chosen, args.model_config, accepted)
-        (out / Path(UPSTREAM_PATH[args.task]).name).write_text(cfg_text)
-        diff = "".join(difflib.unified_diff(TASK_CONFIG[args.task].read_text().splitlines(True), cfg_text.splitlines(True),
-                                            fromfile="a/" + UPSTREAM_PATH[args.task], tofile="b/" + UPSTREAM_PATH[args.task]))
-        (out / "pr.diff").write_text(diff)
-        body = pr_body(args.task, chosen, cand_rep, cand_rep, final_rep, causes, accepted, candidates, args.model_config, args)
-        (out / "PR.md").write_text(body)
-        pr = {"title": body.splitlines()[0].lstrip("# "), "body_file": "PR.md", "diff_file": "pr.diff",
-              "config_file": Path(UPSTREAM_PATH[args.task]).name, "target_repo": "explosion/spacy-llm",
-              "target_path": UPSTREAM_PATH[args.task], "diff": diff}
-        print(f"[5/5] PR written: {out / 'PR.md'}, {out / 'pr.diff'}")
-    else:
-        print("[5/5] PR not written: regressions remain unfixed (see migration.json)")
+    # 5. review: fixes, engineer decisions and edits -----------------------------------------
+    target_ids = {cs["input_id"] for cs in causes}
+    prev_path = out / "migration.json"
+    prev = json.loads(prev_path.read_text()) if prev_path.exists() else {}
+    prev_fixes = ({f["id"]: f for f in prev.get("fixes", [])}
+                  if prev.get("task") == args.task and prev.get("chosen") == chosen else {})
+    fixes = {}
+    for a in attempts:
+        if not a.get("accepted"):
+            continue  # failed attempts stay in fix_attempts; only verified ones are proposed
+        fid = f"fix{a['attempt']}"
+        p = prev_fixes.get(fid, {})
+        if p.get("source", "").startswith("engineer"):
+            fixes[fid] = p
+            continue
+        e = a["edit"]
+        fixes[fid] = {"id": fid, "step": "llm", "component": e["component"], "kind": "edit", "edit": e,
+                      "old_text": e.get("old_text"), "new_text": e["new_text"], "rationale": e.get("rationale"),
+                      "summary": f"reword `{e['component']}`",
+                      "source": f"fixer LLM (`{args.fixer_model or chosen}`), attempt {a['attempt']}",
+                      "verification": verification(json.loads((out / a["report"]).read_text()), target_ids,
+                                                   args.runs, a["report"]),
+                      "decision": p.get("decision", "pending"), "decided_at": p.get("decided_at")}
+    for fid, p in prev_fixes.items():
+        if fid not in fixes and p.get("source", "").startswith("engineer"):
+            fixes[fid] = p
+    if args.apply_edit:
+        e = json.loads(Path(args.apply_edit).read_text())
+        if e["component"] not in components:
+            sys.exit(f"not an editable component: {e['component']}; have {sorted(components)}")
+        e["old_text"] = components[e["component"]]
+        tag = "edit-" + hashlib.sha256(json.dumps(e, sort_keys=True).encode()).hexdigest()[:8]
+        pfile = out / f"{tag}_patch.json"
+        pfile.write_text(json.dumps(patch_from_edit(e), indent=2))
+        path = record(args, chosen, pfile, tag)
+        if not n_ok_rows(path):
+            sys.exit("the edit's re-run produced no results")
+        rep = build_report(base_path, path)
+        (out / f"compare_{chosen}_{tag}.json").write_text(json.dumps(rep, indent=2, default=list))
+        v = verification(rep, target_ids, args.runs, f"compare_{chosen}_{tag}.json")
+        fid = e.get("fix") or f"edit{sum(k.startswith('edit') for k in fixes) + 1}"
+        fixes[fid] = {"id": fid, "step": "llm", "component": e["component"], "kind": "edit", "edit": e,
+                      "old_text": e["old_text"], "new_text": e["new_text"], "summary": f"engineer edit of `{e['component']}`",
+                      "source": "engineer edit" + (f" replacing proposed {fid}" if fid in fixes else ""),
+                      "original": fixes.get(fid), "edit_file": Path(args.apply_edit).name, "verification": v,
+                      "decision": "edited" if v["passes"] else "pending", "decided_at": started if v["passes"] else None}
+        print(f"[5/6] {fid}: engineer edit -> {v['verdict_counts']} -> "
+              f"{'edited (accepted)' if v['passes'] else 'still regressing; left pending'}")
+    for fid in args.accept + args.reject:
+        if fid not in fixes:
+            sys.exit(f"no fix {fid}; have {sorted(fixes)}")
+    for fid, decision in [(f, "accepted") for f in args.accept] + [(f, "rejected") for f in args.reject]:
+        fixes[fid].update(decision=decision, decided_at=started)
+    fix_list = sorted(fixes.values(), key=lambda f: f["id"])
+    live = pr_report.live_fixes({"fixes": fix_list})
+    if len({f["component"] for f in live}) < len(live):
+        sys.exit("two accepted fixes edit the same component; reject one")
+    shown = live[0] if live else next((f for f in fix_list if f["decision"] == "pending"
+                                       and f["verification"]["passes"]), None)
+    shown_rep = json.loads((out / shown["verification"]["report_file"]).read_text()) if shown else None
+    for f in fix_list:
+        print(f"[5/6] {f['id']} ({f['component']}): verified {f['verification']['passes']}, decision {f['decision']}")
+
+    # 6. PR -----------------------------------------------------------------------------------
+    rerun = results_path(args.results, args.task, args.variant, "gpt-4", "rerun")
+    noise = (f"`gpt-4` changed its output between its own runs on {cand_rep['baseline']['unstable_inputs']}/"
+             f"{cand_rep['inputs_compared']} inputs. An input counts as regressed only if most new-model runs fail a "
+             f"hard check the old model passes, or score below the old model's worst run.")
+    if n_ok_rows(rerun):
+        fa = build_report(base_path, rerun)["verdict_counts"]["REGRESSED"]
+        noise += f" A fresh `gpt-4` re-run judged by the same rule flags {fa} regressions (false alarms)."
+    ready = not causes or (bool(live) and all(f["verification"]["passes"] for f in live))
+    edits = [f["edit"] for f in live]
+    cfg_text = patched_config_text(args.task, chosen, args.model_config, edits)
+    (out / Path(UPSTREAM_PATH[args.task]).name).write_text(cfg_text)
+    diff = "".join(difflib.unified_diff(TASK_CONFIG[args.task].read_text().splitlines(True), cfg_text.splitlines(True),
+                                        fromfile="a/" + UPSTREAM_PATH[args.task], tofile="b/" + UPSTREAM_PATH[args.task]))
+    (out / "pr.diff").write_text(diff)
+    view = migration_view(args.task, chosen, cand_rep, shown_rep, causes, fix_list, candidates, args, noise)
+    (out / "PR.md").write_text(pr_report.render(view))
+    pr = {"title": view["title"], "body_file": "PR.md", "diff_file": "pr.diff",
+          "config_file": Path(UPSTREAM_PATH[args.task]).name, "target_repo": "explosion/spacy-llm",
+          "target_path": UPSTREAM_PATH[args.task], "diff": diff}
+    print(f"[6/6] PR written: {out / 'PR.md'} (model swap + {len(live)} accepted prompt fix(es))")
 
     summary = {
         "task": args.task, "started": started, "finished": datetime.now(timezone.utc).isoformat(),
@@ -504,17 +550,19 @@ def main():
         "candidates": sorted(candidates, key=lambda c: c.get("rank", 99)),
         "chosen": chosen, "model_config": args.model_config,
         "editable_components": components,
-        "causes": causes, "fix_attempts": attempts,
-        "final": {"ready_to_merge": ready, "model": chosen, "prompt_edit": accepted,
-                  "report": (f"compare_{chosen}_fix{attempts[-1]['attempt']}.json" if accepted else f"compare_{chosen}.json"),
-                  "verdict_counts": (final_rep or cand_rep)["verdict_counts"],
-                  "candidate": (final_rep or cand_rep)["candidate"]},
+        "causes": causes, "fix_attempts": attempts, "fixes": fix_list, "edit_format": EDIT_FORMAT,
+        "pr_view": {k: view[k] for k in ("title", "why", "model_change", "evidence", "other_differences", "limits")},
+        "final": {"ready_to_merge": ready, "model": chosen, "prompt_edits": edits,
+                  "prompt_edit": edits[0] if edits else None,
+                  "report": shown["verification"]["report_file"] if live else f"compare_{chosen}.json",
+                  "verdict_counts": (shown_rep if live else cand_rep)["verdict_counts"],
+                  "candidate": (shown_rep if live else cand_rep)["candidate"]},
         "pr": pr,
-        "comparison": final_rep or cand_rep,
+        "comparison": shown_rep if live else cand_rep,
     }
     (out / "migration.json").write_text(json.dumps(summary, indent=2, default=list))
-    print(f"\nReady to merge: {'YES' if ready else 'NO'}   ->  {out / 'migration.json'}")
-
+    print(f"\nReady to merge: {'YES' if ready else 'NO (needs an accepted fix)' if causes else 'NO'}   ->  "
+          f"{out / 'migration.json'}")
 
 if __name__ == "__main__":
     main()
