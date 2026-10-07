@@ -13,6 +13,7 @@ All hybrids run live, 3 runs each, cached and resumable in results/agent__<confi
 """
 import argparse
 import json
+import os
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -49,6 +50,9 @@ def run_config(tickets, label, plan, source, first_live, runs, outdir, workers, 
         if row["error"]:
             print(f"   {label} {t['id']} r{r} ERROR {row['error'][:150]}")
 
+    if todo and not os.environ.get("OPENAI_API_KEY"):
+        sys.exit(f"{label}: {len(todo)} ticket-runs need API calls but OPENAI_API_KEY is not set in this shell. "
+                 "Run `export OPENAI_API_KEY=...` (or `source` your env file) and retry; cached results need no key.")
     if todo:
         print(f"   {label}: {len(todo)} to run")
         with ThreadPoolExecutor(max_workers=workers) as pool:

@@ -44,7 +44,7 @@ def main():
     out = HERE / "reports" / f"demo_e2e_{args.brk}{'_live' if args.tag else ''}"
     out.mkdir(parents=True, exist_ok=True)
     old = spec(args.model, {})
-    new = spec(args.model, {}, b["prompts"], f"{args.model}+{args.brk}" + (f"-{args.tag}" if args.tag else ""))
+    new = spec(args.model, {}, b["prompts"], f"{args.model}+{args.brk}" + (f"-live-{args.tag}" if args.tag else ""))
     tickets = list(A.load_tickets())
     base_path = RESULTS / f"agent__{args.model}.jsonl"
     clean_src = {tid: {r["run"]: r for r in rs} for tid, rs in load(base_path).items()}
