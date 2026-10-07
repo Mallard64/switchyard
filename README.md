@@ -51,7 +51,9 @@ reads the migration backend. Nothing is written to it.
 The page then shows a **report picker** in the header and a **Live** button. The button reads "Live · N runs active"
 while runs are writing results; clicking it shows each run's progress (rows, hard checks passed/failed, errors) and the
 latest rows. Start a run in samegrade, for example `python demo_e2e.py --break u3`, and tickets appear as they finish.
-"Reload report" re-reads the report once a run has rewritten it. Without the backend, the page falls back to
+"Reload report" re-reads the report once a run has rewritten it. **▶ Replay a run** streams a recorded run behind the current report (baseline, candidate or fix re-run) back
+through the live view, in recorded order and pacing, compressed to 20 s / 1 min or in real time. Replays make **no model
+calls** and work offline (`POST /api/replay`, accepted only from the dashboard page itself). Without the backend, the page falls back to
 `results.json` exactly as before.
 
 **This version displays recorded results.** Replay controls animate those results; they do not call models, run evaluations, apply real code changes, or create GitHub pull requests. Model names, dates, scores and recommendations come from the supplied fixtures, not live provider information.

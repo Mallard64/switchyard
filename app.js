@@ -196,9 +196,10 @@ function drawLive(){
  const checks=r=>r.error?'<span class="pill warn">error</span>':r.passed===true?'<span class="pill">pass</span>':r.passed===false?'<span class="pill warn">fail</span>':'—';
  liveDialog.innerHTML=`<div class="detail-head"><div><p class="eyebrow">Live results</p><h2 id="live-title">Runs writing to samegrade/results</h2></div><button class="close" aria-label="Close">×</button></div>
  <div class="detail-body">
+ ${replayState?`<p class="provider">${replayState.state==='running'?'Replaying':'Replay '+esc(replayState.state)}: ${esc(replayState.file)} · ${esc(replayState.sent)}/${esc(replayState.total)} rows · recorded run, no model calls</p>`:''}
  ${live.connected?'':'<p>Not connected to the live feed. Run <code>npm start</code> from this folder with the samegrade folder next to it (or set <code>SAMEGRADE_DIR</code>).</p>'}
  ${files.length?`<table class="live-table"><thead><tr><th>Run</th><th>Rows</th><th>Hard checks passed</th><th>Failed</th><th>Errors</th><th>Last row</th></tr></thead><tbody>${files.map(f=>`<tr class="${Date.now()-f.last<ACTIVE_MS?'live-active':''}"><td>${name(f.file)}</td><td>${f.rows}</td><td>${f.passed}</td><td>${f.failed}</td><td>${f.errors}</td><td>${ago(f.last)}</td></tr>`).join('')}</tbody></table>`
-  :'<p>No new rows yet. Start a run in samegrade (for example <code>python demo_e2e.py --break u3</code>); each ticket appears here as soon as it finishes.</p>'}
+  :'<p>No new rows yet. Use <strong>▶ Replay a run</strong> to watch a recorded run, or start a run in samegrade (for example <code>python demo_e2e.py --break u3 --tag try1</code>); each ticket appears here as soon as it finishes.</p>'}
  ${live.rows.length?`<h3>Latest rows</h3><table class="live-table"><thead><tr><th>Input</th><th>Run</th><th>Result</th><th>Hard checks</th><th>Score</th><th>File</th></tr></thead><tbody>${live.rows.slice(-40).reverse().map(r=>`<tr><td>${esc(r.input_id??'')}</td><td>${esc(r.run??'')}</td><td>${esc(r.error?`error: ${r.error}`:r.label??'')}</td><td>${checks(r)}</td><td>${typeof r.score==='number'?r.score.toFixed(2):'—'}</td><td>${name(r.file)}</td></tr>`).join('')}</tbody></table>`:''}
  ${currentReport?'<p class="provider">Reports change only when a run finishes writing them. <button class="button" id="reload-report">Reload report</button></p>':''}
  </div>`;
@@ -206,23 +207,55 @@ function drawLive(){
  const reload=liveDialog.querySelector('#reload-report');
  if(reload)reload.onclick=async()=>{liveDialog.close();try{await loadReport(reportURL(currentReport));}catch(e){showError(e);}};
 }
+// ---- Replay a recorded run through the live view (no model calls) ----------------------------------
+const replayDialog=document.querySelector('#replay');
+let replayState=null;
+async function drawReplay(){
+ const info=currentReport?await (await fetch(`/api/replays?report=${encodeURIComponent(currentReport)}`,{cache:'no-store'})).json():{runs:[]};
+ replayState=info.active||replayState;
+ replayDialog.innerHTML=`<div class="detail-head"><div><p class="eyebrow">Replay a recorded run</p><h2 id="replay-title">Watch a run happen</h2></div><button class="close" aria-label="Close">×</button></div>
+ <div class="detail-body"><p>Streams the rows of a run that already happened, in the order and pacing they were recorded, through the live view. <strong>No model calls, no cost</strong>; works offline.</p>
+ ${info.runs.length?`<label class="replay-field">Run<select id="replay-file">${info.runs.map(r=>`<option value="${esc(r.file)}">${esc(r.role)} · ${esc(r.file.replace(/\.jsonl$/,''))} · ${r.rows} rows</option>`).join('')}</select></label>
+ <label class="replay-field">Speed<select id="replay-speed"><option value="20">Compressed to 20 seconds</option><option value="60">Compressed to 1 minute</option><option value="0">Real time (as recorded)</option></select></label>
+ <div class="actions"><button class="button primary" id="replay-start">Start replay</button>${replayState?.state==='running'?'<button class="button" id="replay-stop">Stop</button>':''}</div>`
+ :'<p>No recorded runs found for this report.</p>'}
+ ${replayState?`<p class="provider">Last replay: ${esc(replayState.file)} · ${esc(replayState.state)} · ${esc(replayState.sent)}/${esc(replayState.total)} rows</p>`:''}</div>`;
+ replayDialog.querySelector('.close').onclick=()=>replayDialog.close();
+ const post=(url,body)=>fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})});
+ const start=replayDialog.querySelector('#replay-start');
+ if(start)start.onclick=async()=>{
+  const r=await post('/api/replay',{report:currentReport,file:replayDialog.querySelector('#replay-file').value,seconds:Number(replayDialog.querySelector('#replay-speed').value)});
+  if(!r.ok){replayDialog.querySelector('.detail-body').insertAdjacentHTML('beforeend',`<p class="error-item">Could not start: ${esc((await r.json()).error)}</p>`);return;}
+  replayDialog.close();drawLive();if(!liveDialog.open)liveDialog.showModal();
+ };
+ const stop=replayDialog.querySelector('#replay-stop');if(stop)stop.onclick=async()=>{await post('/api/replay/stop');replayDialog.close();};
+}
+function installReplay(after){
+ const button=document.createElement('button');button.type='button';button.className='live-button replay-button';button.textContent='▶ Replay a run';
+ after.after(button);
+ button.onclick=async()=>{await drawReplay();if(!replayDialog.open)replayDialog.showModal();};
+ replayDialog.addEventListener('click',e=>{if(e.target===replayDialog)replayDialog.close();});
+}
 function installLive(){
  const label=document.querySelector('.connection');if(!label)return;
  const button=document.createElement('button');button.type='button';button.className='live-button';label.replaceWith(button);
  const paint=()=>{
-  const active=[...live.files.values()].filter(f=>Date.now()-f.last<ACTIVE_MS).length;
-  button.innerHTML=live.connected?`<span class="live-dot ${active?'on':''}"></span>Live · ${active?`${active} run${active>1?'s':''} active`:'idle'}`:'● Local replay';
+  const active=[...live.files.values()].filter(f=>!f.file.startsWith('replay: ')&&Date.now()-f.last<ACTIVE_MS).length;  // real runs only
+  const replaying=replayState?.state==='running';
+  button.innerHTML=live.connected?`<span class="live-dot ${active||replaying?'on':''}"></span>Live · ${replaying?`replaying ${replayState.sent}/${replayState.total}`:active?`${active} run${active>1?'s':''} active`:'idle'}`:'● Local replay';
   if(liveDialog.open)drawLive();
  };
  button.onclick=()=>{drawLive();if(!liveDialog.open)liveDialog.showModal();};
  liveDialog.addEventListener('click',e=>{if(e.target===liveDialog)liveDialog.close();});
  if(window.EventSource){
   const source=new EventSource('/api/live');
-  source.addEventListener('hello',e=>{live.connected=true;JSON.parse(e.data).recent.forEach(addLiveRow);paint();});
-  source.addEventListener('row',e=>{addLiveRow(JSON.parse(e.data));paint();});
+  source.addEventListener('hello',e=>{const h=JSON.parse(e.data);live.connected=true;replayState=h.replay||replayState;h.recent.forEach(addLiveRow);paint();});
+  source.addEventListener('row',e=>{const ev=JSON.parse(e.data);addLiveRow(ev);if(ev.replay&&replayState?.state==='running'&&ev.file===`replay: ${replayState.file}`)replayState.sent++;paint();});
+  source.addEventListener('replay',e=>{replayState=JSON.parse(e.data);paint();});
   source.onerror=()=>{live.connected=false;paint();};
  }
  setInterval(paint,5000);paint();
+ installReplay(button);
 }
 
 try{const r=await fetch('/api/reports',{cache:'no-store'});if(r.ok)reports=await r.json();}catch{reports=[];}
