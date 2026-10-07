@@ -192,7 +192,8 @@ def main():
                 lines = A.PROMPTS[step][:i] + ([new_text] if new_text else []) + A.PROMPTS[step][i + 1:]
             prompt_edits = {step: lines}
         fid = e.get("fix") or f"edit{sum(f['id'].startswith('edit') for f in fixes.values()) + 1}"
-        v = verification(verify(args, prompt_edits, f"{args.candidate}__edit-{sha(prompt_edits)}"), regressed,
+        edit_label = f"{args.candidate}__edit-{sha(prompt_edits)}" + (f"__{args.tag}" if args.tag else "")
+        v = verification(verify(args, prompt_edits, edit_label), regressed,
                          args.runs, f"compare_{args.candidate}_{fid}_edit.json")
         original = fixes.get(fid)
         where = (f"{step} prompts ({len(changes)} lines)" if "edits" in e else

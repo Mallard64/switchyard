@@ -535,7 +535,7 @@
       },
       "edit_file": "edit_real_failures.json",
       "decision": "edited",
-      "decided_at": "2026-10-07T20:47:07.420652+00:00"
+      "decided_at": "2026-10-07T21:11:08.452994+00:00"
     }
   ],
   "edit_format": {
@@ -593,8 +593,8 @@
     "**The `decide` prompt line \"Final-sale items are not eligible for refunds or replacements.\" was planted** for this demo, chosen because it breaks only the new model (see `reports/agent/plant_probe.json`). Apart from it, this candidate showed no regressions.",
     "Line-level proof works when the new model over-applies a line that is present. It cannot find a missing instruction; those are proven at component level by the fix instead."
   ],
-  "started": "2026-10-07T20:47:07.420652+00:00",
-  "finished": "2026-10-07T20:47:53.581103+00:00",
+  "started": "2026-10-07T21:11:08.452994+00:00",
+  "finished": "2026-10-07T21:11:08.640970+00:00",
   "ready_to_merge": true,
   "comparison_file": "compare_gpt-5.6-sol.json"
 }

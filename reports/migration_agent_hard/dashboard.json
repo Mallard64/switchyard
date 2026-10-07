@@ -1,7 +1,7 @@
 {
   "task": "agent",
-  "started": "2026-10-07T20:47:07.420652+00:00",
-  "finished": "2026-10-07T20:47:53.581103+00:00",
+  "started": "2026-10-07T21:11:08.452994+00:00",
+  "finished": "2026-10-07T21:11:08.640970+00:00",
   "group": "Migrations",
   "label": "agent \u00b7 gpt-4 \u2192 gpt-5.6-sol \u00b7 hard tickets",
   "baseline": {
@@ -252,7 +252,7 @@
   },
   "comparison": {
     "task": "agent",
-    "candidate_file": "agent__gpt-5.6-sol__edit-02ab8a24.jsonl",
+    "candidate_file": "agent__gpt-5.6-sol__edit-02ab8a24__hard.jsonl",
     "baseline_file": "agent__gpt-4__hard.jsonl",
     "inputs_compared": 12,
     "verdict_counts": {
@@ -891,7 +891,7 @@
       },
       "edit_file": "edit_real_failures.json",
       "decision": "edited",
-      "decided_at": "2026-10-07T20:47:07.420652+00:00"
+      "decided_at": "2026-10-07T21:11:08.452994+00:00"
     }
   ],
   "pipeline": {
@@ -1164,6 +1164,13 @@
             "ok": true
           }
         ],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days."
+          }
+        ],
         "outputs": {
           "old": "refund/refund",
           "new": "refund/refund",
@@ -1416,6 +1423,13 @@
             },
             "output": "cancel/cancel",
             "ok": false
+          }
+        ],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days."
           }
         ],
         "outputs": {
@@ -1672,6 +1686,18 @@
             "ok": false
           }
         ],
+        "failures": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days."
+          },
+          {
+            "kind": "accuracy",
+            "check": null,
+            "instruction": null
+          }
+        ],
         "outputs": {
           "old": "refund/refund",
           "new": "refund/refund",
@@ -1839,6 +1865,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "refund/refund",
           "new": "refund/deny",
@@ -2006,6 +2033,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "damaged/refund",
           "new": "damaged/replace",
@@ -2173,6 +2201,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "damaged/replace",
           "new": "damaged/replace",
@@ -2340,6 +2369,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "damaged/escalate",
           "new": "damaged/escalate",
@@ -2507,6 +2537,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "damaged/replace",
           "new": "damaged/replace",
@@ -2674,6 +2705,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "billing/escalate",
           "new": "billing/escalate",
@@ -2841,6 +2873,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "shipping/replace",
           "new": "shipping/replace",
@@ -3008,6 +3041,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "shipping/info",
           "new": "shipping/info",
@@ -3175,6 +3209,7 @@
         "causal_steps": [],
         "status": null,
         "experiments": [],
+        "failures": [],
         "outputs": {
           "old": "refund/deny",
           "new": "refund/deny",

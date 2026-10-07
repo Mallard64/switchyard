@@ -75,6 +75,8 @@ def pipeline_section(m, cand_rep, fix_reports, results=HERE / "results"):
             "expected": {st: expected(st, gold[tid]) for st in STEPS} if tid in gold else {},
             "first_divergence": first_divergence(old, new), "causal_steps": cs.get("causal_steps", []),
             "status": cs.get("status"), "experiments": cs.get("experiments", []),
+            "failures": [{"kind": r.get("kind"), "check": r.get("check"), "instruction": r.get("instruction")}
+                         for r in it.get("regressions", [])],
             "outputs": {"old": it["baseline"]["output"], "new": it["candidate"]["output"],
                         "fixed": fi["candidate"]["output"] if fi else None}})
     order = {"REGRESSED": 0, "CHANGED": 1, "IMPROVED": 2, "SAME": 3}

@@ -1,6 +1,6 @@
 {
   "task": "agent",
-  "candidate_file": "agent__gpt-5.6-sol__edit-02ab8a24.jsonl",
+  "candidate_file": "agent__gpt-5.6-sol__edit-02ab8a24__hard.jsonl",
   "baseline_file": "agent__gpt-4__hard.jsonl",
   "inputs_compared": 12,
   "verdict_counts": {
