@@ -1,0 +1,3 @@
+{
+  "description": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs are not entities.\nPronouns are not entities.\nCooking methods such as grilling, roasting or frying count as EQUIPMENT only when referring to physical cooking equipment, not an action."
+}

@@ -1,0 +1,6 @@
+{
+  "label_definitions": {
+    "DISH": "Restaurant menu items only; home-cooked food is not a dish."
+  },
+  "description": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nFood dishes include prepared foods, whether restaurant menu items or home-cooked.\nAdjectives, verbs, adverbs are not entities.\nPronouns are not entities."
+}

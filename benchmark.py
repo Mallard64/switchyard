@@ -25,7 +25,7 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
-from compare import build_report  # noqa: E402
+from compare import build_report, load  # noqa: E402
 from record_baseline import cost  # noqa: E402
 from migrate import (editable_components, find_causes, call_llm, fixer_prompt, FIXER_SYSTEM,  # noqa: E402
                      parse_json, patch_from_edit, n_ok_rows)
@@ -88,6 +88,30 @@ BREAKS = [
     {"id": "break10", "component": "label_definitions.EQUIPMENT", "kind": "contradict",
      "new_text": EQUIPMENT + ", bowl, plate, cup"},
 ]
+# Held-out set (Oct 7), written before any run and never used to tune the ranking. Meant to be strong
+# enough that a modern model reacts; a screen run checks that before detection is scored.
+BREAKS_V2 = [
+    {"id": "v2b01", "component": "description", "kind": "contradict",
+     "new_text": DESC.replace("Pronouns are not entities.", "Pronouns that refer to food are entities.")},
+    {"id": "v2b02", "component": "description", "kind": "contradict",
+     "new_text": DESC + "\nCooking methods such as grilling, roasting or frying count as EQUIPMENT."},
+    {"id": "v2b03", "component": "description", "kind": "blur",
+     "new_text": "Entities are any words related to food or cooking."},
+    {"id": "v2b04", "component": "label_definitions.DISH", "kind": "contradict",
+     "new_text": "Any food item, including single ingredients."},
+    {"id": "v2b05", "component": "label_definitions.DISH", "kind": "contradict",
+     "new_text": "Restaurant menu items only; home-cooked food is not a dish."},
+    {"id": "v2b06", "component": "label_definitions.INGREDIENT", "kind": "contradict",
+     "new_text": "Raw, unprocessed foods only; sauces, cheeses and doughs are not ingredients."},
+    {"id": "v2b07", "component": "label_definitions.INGREDIENT", "kind": "blur",
+     "new_text": "Spices and seasonings."},
+    {"id": "v2b08", "component": "label_definitions.EQUIPMENT", "kind": "contradict",
+     "new_text": "Electric appliances only, e.g. blender, microwave, toaster."},
+    {"id": "v2b09", "component": "label_definitions.EQUIPMENT", "kind": "contradict",
+     "new_text": "Any physical object in the kitchen, e.g. plates, cups, bowls, napkins, countertops."},
+    {"id": "v2b10", "component": "label_definitions.EQUIPMENT", "kind": "delete", "new_text": ""},
+]
+BREAK_SETS = {"v1": BREAKS, "v2": BREAKS_V2}
 N_INPUTS = sum(1 for l in open(HERE / "inputs" / f"{TASK}.jsonl") if l.strip())
 CALLS_PER_RUN = N_INPUTS * RUNS
 
@@ -99,13 +123,13 @@ def patch_for(component, new_text):
     return {"label_definitions": {label: new_text}}
 
 
-def run_record(patch, tag):
+def run_record(patch, tag, runs=None):
     pfile = OUT / "patches" / f"{tag}.json"
     pfile.parent.mkdir(parents=True, exist_ok=True)
     pfile.write_text(json.dumps(patch, indent=2))
     path = RESULTS / f"{TASK}__{VARIANT}__{MODEL}__{tag}.jsonl"
     cmd = [sys.executable, str(HERE / "record_baseline.py"), "--task", TASK, "--variant", VARIANT,
-           "--patch", str(pfile), "--tag", tag, "--runs", str(RUNS)] + model_args()
+           "--patch", str(pfile), "--tag", tag, "--runs", str(runs or RUNS)] + model_args()
     print(f"   $ record {tag}")
     before = total_cost(path)
     proc = subprocess.run(cmd, capture_output=True, text=True)
@@ -262,10 +286,43 @@ def planted_units(spec):
     return set(new) or None
 
 
-def rescore():
+def per_run_scores(paths):
+    """{(file, run): (mean lenient F1, hard-check pass rate)} for each run in these results files."""
+    from compare import load_gold, view
+    gold, out = load_gold(TASK), {}
+    for p in paths:
+        by_run = {}
+        for rs in load(p).values():
+            for r in rs:
+                by_run.setdefault(r["run"], []).append(r)
+        for run, rs in by_run.items():
+            out[(Path(p).name, run)] = (sum(view(TASK, r, gold[r["input_id"]])["score"] for r in rs) / len(rs),
+                                        sum(r["passed_all"] for r in rs) / len(rs))
+    return out
+
+
+def screen(breaks):
+    """One run per break on all inputs. Effective = F1 or hard-check pass rate below every unbroken run
+    (baseline, its re-run and the held-out re-run): an effect test independent of the regression rule."""
+    unbroken = per_run_scores(BASELINE + [RESULTS / f"{TASK}__{VARIANT}__{MODEL}__{RERUN_TAG}.jsonl"])
+    f1_floor = min(v[0] for v in unbroken.values())
+    pass_floor = min(v[1] for v in unbroken.values())
+    print(f"\n[screen] {len(unbroken)} unbroken runs: F1 {f1_floor:.3f}-{max(v[0] for v in unbroken.values()):.3f}, "
+          f"pass rate >= {pass_floor:.2f}")
+    out = {}
+    for b in breaks:
+        path = run_record(patch_for(b["component"], b["new_text"]), f"{b['id']}_screen", runs=1)
+        f1, passed = next(iter(per_run_scores([path]).values()))
+        out[b["id"]] = {"f1": round(f1, 4), "pass_rate": round(passed, 4), "f1_floor": round(f1_floor, 4),
+                        "pass_floor": round(pass_floor, 4), "effective": f1 < f1_floor or passed < pass_floor}
+        print(f"   {b['id']}: F1 {f1:.3f}  pass {passed:.2f}  -> {'EFFECTIVE' if out[b['id']]['effective'] else 'no effect'}")
+    return out
+
+
+def rescore(breaks):
     """Cause-ranking metrics from cached break runs (for comparing ranking changes at no cost)."""
     rows = []
-    for b in BREAKS:
+    for b in breaks:
         path = RESULTS / f"{TASK}__{VARIANT}__{MODEL}__{b['id']}.jsonl"
         if not path.exists():
             continue
@@ -335,6 +392,8 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="show the plan and cost estimate; no calls")
     ap.add_argument("--ablate", action="store_true", help="line-level ablation on the caught breaks")
     ap.add_argument("--max-fix-attempts", type=int, default=3)
+    ap.add_argument("--breaks", choices=sorted(BREAK_SETS), default="v1",
+                    help="v2 = held-out set: screened first, detection scored on effective breaks only")
     ap.add_argument("--rescore", action="store_true",
                     help="recompute catch / component / top-ranked from cached break runs only (no API calls)")
     ap.add_argument("--model", default="gpt-4", help="model the breaks run on (default: the original gpt-4 benchmark)")
@@ -343,13 +402,16 @@ def main():
                     help="6 = stack the noise-floor re-run onto the baseline (needs the 'rerun' file)")
     args = ap.parse_args()
     configure(args.model, args.model_config, args.baseline_runs)
+    global OUT
+    if args.breaks != "v1":
+        OUT = OUT.with_name(OUT.name + f"_{args.breaks}")
     load_prev_edits()
     if args.ablate:
         return ablate_caught([0.0])
     if args.rescore:
-        return rescore()
+        return rescore(BREAK_SETS[args.breaks])
 
-    breaks = [b for b in BREAKS if not args.only or b["id"] in args.only]
+    breaks = [b for b in BREAK_SETS[args.breaks] if not args.only or b["id"] in args.only]
     if args.dry_run:
         print(f"{len(breaks)} break(s), {RUNS} runs x {N_INPUTS} inputs = {CALLS_PER_RUN} calls each (record step).")
         base0 = BASELINE[0] if isinstance(BASELINE, list) else BASELINE
@@ -368,6 +430,12 @@ def main():
         sys.exit(f"No baseline at {BASELINE}. Run record_baseline.py first.")
     OUT.mkdir(parents=True, exist_ok=True)
     spend = [0.0]
+    screened = None
+    if args.breaks == "v2":
+        if args.baseline_runs != 6:
+            sys.exit("--breaks v2 needs --baseline-runs 6 (the screen uses the held-out re-run)")
+        screened = screen(breaks)
+        breaks = [b for b in breaks if screened[b["id"]]["effective"]]
     results = [run_break(b, args.skip_fix, spend, args.max_fix_attempts) for b in breaks]
     false_alarm = None if args.skip_false_alarm else false_alarm_check(spend)
 
@@ -382,6 +450,7 @@ def main():
     tried = [r for r in caught if r.get("fix_attempted")]
     summary = {
         "model": MODEL, "model_config": MODEL_CONFIG, "n_inputs": N_INPUTS, "runs": RUNS,
+        "break_set": args.breaks, "screen": screened,
         "breaks": results, "false_alarm": false_alarm,
         "all_inputs": rates(results), "first20": rates(results, "first20"),
         "fix_rate_first_attempt": sum(r["fix_first_attempt"] for r in tried) / len(tried) if tried else None,

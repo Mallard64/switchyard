@@ -128,6 +128,18 @@ def span_pos(text, span):
     return sp.root.pos_ if sp is not None else None
 
 
+def check_component(task, check, instruction):
+    """Where a hard check's instruction lives: the editable component of the *upstream* prompt that
+    contains it (e.g. "Pronouns are not entities." is in the description), else the fixed template.
+    Upstream, because a prompt edit may have removed the sentence from the current prompt."""
+    norm = lambda t: " ".join((t or "").split()).lower().rstrip(".")
+    if instruction and task in TASK_CONFIG:
+        for comp, text in editable_components(task).items():
+            if norm(instruction) and norm(instruction) in norm(text):
+                return comp
+    return f"template:{check}"
+
+
 def find_causes(report, components):
     causes = []
     for it in report["items"]:
@@ -137,7 +149,7 @@ def find_causes(report, components):
         evidence = []
         for r in it["regressions"]:
             if r["kind"] == "hard_check":
-                suspects[f"template:{r['check']}"] += 5
+                suspects[check_component(report["task"], r["check"], r["instruction"])] += 5
                 evidence.append(f"hard check '{r['check']}' fails {r['candidate_fail']} runs "
                                 f"(baseline {r['baseline_fail']}); instruction: \"{r['instruction']}\"")
         for e in it["candidate"]["errors"]:
