@@ -45,6 +45,7 @@ PRICES = {"gpt-4": (30.0, 60.0), "gpt-4-0613": (30.0, 60.0),
           "gpt-3.5-turbo": (0.5, 1.5), "gpt-3.5-turbo-0125": (0.5, 1.5),
           "gpt-5.6-sol": (5.0, 30.0), "gpt-5.6-terra": (2.5, 15.0)}  # rates from the user, Oct 6
 OPENAI_BASE = "https://api.openai.com/v1"
+PROTECTED = {f"{t}__{v}.jsonl" for t in ("ner", "textcat") for v in ("gpt-4__gpt-4", "shipped__gpt-3.5-turbo")}
 
 # ---------------------------------------------------------------------------------------
 # Capture layer: wrap requests.get/post (spacy-llm looks these up at call time).
@@ -293,6 +294,11 @@ def main():
             out = outdir / f"{task}__{variant}__{label}{'__' + args.tag if args.tag else ''}.jsonl"
             done = load_done(out)
             todo = [(i, r) for i in inputs for r in range(1, args.runs + 1) if (i["id"], r) not in done]
+            if out.name in PROTECTED and done and todo:
+                # These baselines can't be regenerated after Oct 23, 2026: never append to them.
+                print(f"\n== {out.name} is a protected baseline; refusing to add {len(todo)} rows. "
+                      f"Record new inputs with --only <ids> --tag <name> instead.")
+                continue
             print(f"\n== {task} / {variant} ({label}): {len(done)} done, {len(todo)} to run -> {out.name}")
             if not todo:
                 summarize(out, task)
