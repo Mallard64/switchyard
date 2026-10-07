@@ -46,7 +46,7 @@ function pipelineSection(p,ti){
  const node=(s,i)=>`<div class="pipe-node ${cause.has(s)?'cause':''}"><span class="pipe-num">${i+1}</span><strong>${esc(s)}</strong><small>${esc(p.info[s])}</small>${cause.has(s)?'<em>broken here</em>':''}</div>`;
  const flow=steps.map((s,i)=>node(s,i)+(i<steps.length-1?'<span class="pipe-arrow" aria-hidden="true">→</span>':'')).join('');
  const differs=(s,row)=>['classify','decide'].includes(s)&&row[s]!=null&&t.old[s]!=null&&decisionPart(row[s])!==decisionPart(t.old[s]);
- const traceRow=(label,sub,row,out,ok,kind)=>row?`<div class="trace-row ${kind}"><div class="trace-label"><strong>${esc(label)}</strong><small>${esc(sub)}</small></div>${steps.map(s=>`<div class="trace-cell ${cause.has(s)?'cause-col':''} ${kind!=='old'&&differs(s,row)?'changed-cell':''}">${esc(row[s]??'—')}</div>`).join('')}<div class="trace-out ${ok?'ok':'bad'}">${ok?'✓':'✗'} ${esc((out||[]).join?out.join(' · '):out)}</div></div>`:'';
+ const traceRow=(label,sub,row,out,ok,kind)=>row?`<div class="trace-row ${kind}"><div class="trace-label"><strong>${esc(label)}</strong><small>${esc(sub)}</small></div>${steps.map(s=>`<div class="trace-cell ${cause.has(s)?'cause-col':''} ${kind!=='old'&&differs(s,row)?'changed-cell':''}" tabindex="0" data-row="${kind}" data-step="${esc(s)}" aria-label="${esc(s)}, ${esc(label)}: show prompt, expected and actual answer">${esc(row[s]??'—')}</div>`).join('')}<div class="trace-out ${ok?'ok':'bad'}">${ok?'✓':'✗'} ${esc((out||[]).join?out.join(' · '):out)}</div></div>`:'';
  const head=`<div class="trace-row trace-head"><div></div>${steps.map(s=>`<div class="${cause.has(s)?'cause-col':''}">${esc(s)}</div>`).join('')}<div>final result</div></div>`;
  const verdict=r=>r.kind==='reference'?(r.ok?'✓ correct':'✗ wrong'):r.kind==='swap_back'?(r.ok?'✓ fixed':'✗ still wrong'):(r.ok?'✓ not reproduced':'✗ breaks again');
  const decisive=r=>(r.kind==='swap_back'&&r.ok)||(r.kind==='only_new'&&!r.ok);
@@ -68,9 +68,50 @@ function pipelineSection(p,ti){
  ${f.after!=null?`<h3 class="pipe-h">The fix</h3><div class="pipe-fix"><div><span>Before</span>${bar(f.before,'before')}<b>${esc(f.before)} of ${esc(f.total)} broken</b></div><div><span>After: ${esc(f.change)}</span>${bar(f.after,'after')}<b>${esc(f.after)} of ${esc(f.total)} broken</b></div><p>${f.decision==='pending'?'Proposed fix, awaiting an engineer’s review.':`Fix ${esc(f.decision)}.`}</p></div>`:''}
  </section>`;
 }
+// Hover / focus a trace cell: the prompt that step got, what it should have answered, what it answered.
+const cellPop=Object.assign(document.createElement('div'),{id:'cell-pop',role:'dialog'});cellPop.setAttribute('aria-label','Step detail');
+document.body.append(cellPop);
+let popTimer=null,popPinned=false;
+function cellVerdict(step,expected,output){
+ // Only classify and decide have a single right answer to compare against.
+ if(step==='classify'){try{const o=JSON.parse(output);return expected===`category: ${o.category} · order ${o.order_id||'none'}`;}catch{return null;}}
+ if(step==='decide'){try{return expected===`action: ${JSON.parse(output.slice(output.indexOf('{'),output.lastIndexOf('}')+1)).action}`;}catch{return null;}}
+ return null;
+}
+function showCellPop(el,p,ti){
+ clearTimeout(popTimer);
+ const t=p.tickets[ti],row=el.dataset.row,step=el.dataset.step,c=t.cells?.[row]?.[step];if(!c)return;
+ const label={old:'Old pipeline',new:'New pipeline',fixed:'New + fix'}[row];
+ const exp=t.expected?.[step]||'—',ok=cellVerdict(step,exp,c.output),old=t.cells.old?.[step];
+ cellPop.innerHTML=`<div class="pop-head"><div><strong>${esc(step)}</strong> · ${esc(label)} <small>${esc(c.model)}</small></div>${ok===null?'':`<span class="pop-verdict ${ok?'ok':'bad'}">${ok?'✓ matches expected':'✗ not what was expected'}</span>`}</div>
+ <div class="pop-cols"><section><h4>Prompt (system)</h4><ol class="pop-system">${c.system.map((l,i)=>`<li class="${c.changed.includes(i)?'changed':''}">${esc(l)}</li>`).join('')}</ol>
+ ${c.changed.length?'<p class="pop-note">Highlighted: not in the old pipeline’s prompt for this step.</p>':''}
+ <details><summary>Input this step received</summary><pre>${esc(c.user)}</pre></details></section>
+ <section><h4>Expected</h4><p class="pop-expected">${esc(exp)}</p>
+ ${row!=='old'&&old?`<h4>Old pipeline answered</h4><pre>${esc(old.output)}</pre>`:''}
+ <h4>Actual</h4><pre class="${ok===false?'bad':ok?'ok':''}">${esc(c.output)}</pre></section></div>
+ <p class="pop-hint">${popPinned?'Pinned · Esc or click outside to close':'Click the cell to pin'}</p>`;
+ cellPop.classList.add('open');
+ const r=el.getBoundingClientRect(),w=Math.min(780,innerWidth-24),h=cellPop.offsetHeight;
+ cellPop.style.width=`${w}px`;
+ cellPop.style.left=`${Math.max(12,Math.min(r.left+r.width/2-w/2,innerWidth-w-12))}px`;
+ cellPop.style.top=`${r.bottom+8+h<innerHeight?r.bottom+8:Math.max(12,r.top-8-h)}px`;
+}
+function hideCellPop(){if(popPinned)return;popTimer=setTimeout(()=>cellPop.classList.remove('open'),180);}
+cellPop.addEventListener('mouseenter',()=>clearTimeout(popTimer));
+cellPop.addEventListener('mouseleave',hideCellPop);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){popPinned=false;cellPop.classList.remove('open');}});
+document.addEventListener('click',e=>{if(popPinned&&!cellPop.contains(e.target)&&!e.target.closest('.trace-cell')){popPinned=false;cellPop.classList.remove('open');}});
+addEventListener('scroll',()=>{if(!popPinned)cellPop.classList.remove('open');},{passive:true});
 function installPipeline(p){
  const card=document.querySelector('#pipeline-card');if(!card)return;
- card.addEventListener('click',e=>{const b=e.target.closest('.pipe-chip');if(!b)return;
+ const ti=Number(card.querySelector('.pipe-chip.on')?.dataset.ti||0);
+ card.querySelectorAll('.trace-cell[data-row]').forEach(el=>{
+  el.addEventListener('mouseenter',()=>showCellPop(el,p,ti));el.addEventListener('mouseleave',hideCellPop);
+  el.addEventListener('focus',()=>showCellPop(el,p,ti));el.addEventListener('blur',hideCellPop);
+  el.addEventListener('click',()=>{popPinned=!popPinned;showCellPop(el,p,ti);});
+ });
+ card.addEventListener('click',e=>{const b=e.target.closest('.pipe-chip');if(!b)return;popPinned=false;cellPop.classList.remove('open');
   const fresh=document.createElement('div');fresh.innerHTML=pipelineSection(p,Number(b.dataset.ti));
   const next=fresh.firstElementChild;card.replaceWith(next);installPipeline(p);next.querySelector('.pipe-chip.on')?.focus();});
 }
