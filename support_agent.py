@@ -30,7 +30,11 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 TICKETS = HERE / "inputs" / "agent.jsonl"  # inputs/<task>.jsonl, as compare.load_gold expects
+# Ticket sets: "agent" = the original 24; "agent_hard" = 12 harder tickets (Oct 7). Flows that run every ticket
+# use one set, so adding a set never makes an existing cached flow spend.
+TICKET_SETS = {"agent": TICKETS, "agent_hard": HERE / "inputs" / "agent_hard.jsonl"}
 OPENAI_BASE = "https://api.openai.com/v1"
+PROTECTED = {"agent__gpt-4.jsonl", "agent__gpt-4__hard.jsonl"}
 TODAY = "2026-10-06"  # fixed so the tools and prompts are deterministic
 
 # ---------------------------------------------------------------------------------------
@@ -49,6 +53,11 @@ ORDERS = {
     "A1009": {"item": "Running shoes", "price": 110.00, "status": "delivered", "delivered": "2026-09-15"},
     "A1010": {"item": "Throw blanket", "price": 38.00, "status": "shipped", "estimated_delivery": "2026-09-26"},
     "A1011": {"item": "Scarf", "price": 54.50, "status": "delivered", "delivered": "2026-09-26"},
+    # Orders used only by the hard ticket set (inputs/agent_hard.jsonl).
+    "A1012": {"item": "Ceramic vase (clearance)", "price": 28.00, "status": "delivered", "delivered": "2026-09-05",
+              "final_sale": True},
+    "A1013": {"item": "Lamp shade", "price": 22.00, "status": "shipped", "estimated_delivery": "2026-09-29"},
+    "A1014": {"item": "Electric kettle", "price": 45.00, "status": "shipped", "estimated_delivery": "2026-09-30"},
 }
 
 POLICIES = {
@@ -346,8 +355,10 @@ def record_row(ticket, run, plan, label, reuse=None, prompts=None, **meta):
     return row
 
 
-def load_tickets(limit=None):
-    return [json.loads(l) for l in open(TICKETS) if l.strip()][:limit]
+def load_tickets(limit=None, sets=("agent",)):
+    """Tickets from one or more sets (sets="all" for every set)."""
+    names = list(TICKET_SETS) if sets == "all" else sets
+    return [json.loads(l) for n in names for l in open(TICKET_SETS[n]) if l.strip()][:limit]
 
 
 def load_done(path):
@@ -429,12 +440,14 @@ def main():
     ap.add_argument("--outdir", default=str(HERE / "results"))
     ap.add_argument("--dry-run", action="store_true", help="render prompts and estimate cost; no API calls")
     ap.add_argument("--show", action="store_true", help="with --dry-run, print the first ticket's prompts")
+    ap.add_argument("--tickets", choices=list(TICKET_SETS), default="agent", help="ticket set to run")
+    ap.add_argument("--tag", help="results go to agent__<label>__<tag>.jsonl (keeps ticket sets in separate files)")
     args = ap.parse_args()
     overrides = dict(s.split("=", 1) for s in args.step)
     bad = set(overrides) - set(STEPS)
     if bad:
         sys.exit(f"unknown step(s) {bad}; steps are {STEPS}")
-    tickets = load_tickets(args.limit)
+    tickets = load_tickets(args.limit, (args.tickets,))
     plan = build_plan(args.model, args.model_config, overrides)
     if args.dry_run:
         return dry_run(args, tickets, plan)
@@ -442,10 +455,13 @@ def main():
         sys.exit("Set OPENAI_API_KEY first.")
 
     label = config_label(args.model, overrides)
-    out = Path(args.outdir) / f"agent__{label}.jsonl"
+    out = Path(args.outdir) / f"agent__{label}{'__' + args.tag if args.tag else ''}.jsonl"
     out.parent.mkdir(parents=True, exist_ok=True)
     done = load_done(out)
     todo = [(t, r) for t in tickets for r in range(1, args.runs + 1) if (t["id"], r) not in done]
+    if out.name in PROTECTED and done and todo:
+        # gpt-4 baselines can't be regenerated after Oct 23, 2026: never append to them.
+        sys.exit(f"{out.name} is a protected baseline; refusing to add {len(todo)} rows. Use --tag <name> instead.")
     print(f"== agent / {label}: {len(done)} done, {len(todo)} to run -> {out.name}")
     lock = threading.Lock()
 

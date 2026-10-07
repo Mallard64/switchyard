@@ -50,7 +50,8 @@ def pipeline_section(m, cand_rep, fix_reports, results=HERE / "results"):
     prompt lines tested and the fix tally. Prompts are stored once in `prompts`, keyed by hash."""
     from compare import load
     from pipeline_view import STEP_INFO, STEPS, cell, expected, first_divergence, trace
-    gold = {t["id"]: t for t in (json.loads(l) for l in open(HERE / "inputs" / "agent.jsonl") if l.strip())}
+    from compare import load_gold
+    gold = load_gold("agent")
     rows = lambda f: load([results / x.strip() for x in f.split(" + ")] if " + " in f else results / f)
     base, cand = rows(cand_rep["baseline_file"]), rows(cand_rep["candidate_file"])
     fix = m["fixes"][0] if m["fixes"] else None

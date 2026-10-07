@@ -44,13 +44,15 @@ def main():
     ap.add_argument("--max-lines", type=int, help="test only the N lines the heuristic ranks first")
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--outdir", default=str(HERE / "results"))
+    ap.add_argument("--tag", help="read stepfinder_<candidate>_<tag>.json, write linefinder_<candidate>_<tag>.json")
     args = ap.parse_args()
     outdir = Path(args.outdir)
-    sf = json.loads((REPORTS / f"stepfinder_{args.candidate}.json").read_text())
+    suffix = f"_{args.tag}" if args.tag else ""
+    sf = json.loads((REPORTS / f"stepfinder_{args.candidate}{suffix}.json").read_text())
     base, cand = load(outdir / sf["baseline_file"]), load(outdir / sf["candidate_file"])
     gold = load_gold("agent")
     cand_src = {tid: {r["run"]: r for r in rs} for tid, rs in cand.items()}
-    tickets = {t["id"]: t for t in A.load_tickets()}
+    tickets = {t["id"]: t for t in A.load_tickets(sets="all")}
     plan = make_plan((args.candidate, args.candidate_config), {})
     out_items, files = [], []
 
@@ -86,7 +88,7 @@ def main():
               "method": "remove one line of the causal step's prompt; re-run on the new model; confirmed = "
                         "ticket no longer REGRESSED under compare.py's noise-floor rule",
               "items": out_items, "live_calls": new_calls_cost(files)}
-    out = REPORTS / f"linefinder_{args.candidate}.json"
+    out = REPORTS / f"linefinder_{args.candidate}{suffix}.json"
     out.write_text(json.dumps(result, indent=2))
     for it in out_items:
         print(f"\n{it['input_id']} / {it['step']}: {it['baseline_output']} -> {it['candidate_output']}  "

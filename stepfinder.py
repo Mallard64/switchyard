@@ -116,7 +116,7 @@ def localize(old, new, base_path, cand_path, runs, outdir, workers, max_pairs=Tr
     if not regressed:
         return {"old_model": old["label"], "candidate": new["label"], "runs": runs, "regressed": [],
                 "summary": {}, "unexplained": [], "tickets": [], "live_calls": {}}
-    tickets = [t for t in A.load_tickets() if t["id"] in regressed]
+    tickets = [t for t in A.load_tickets(sets="all") if t["id"] in regressed]
     base, cand, gold = load(base_path), load(cand_path), load_gold("agent")
     by_run = lambda rows: {tid: {r["run"]: r for r in rs} for tid, rs in rows.items()}
     cand_src, base_src = by_run(cand), by_run(base)
@@ -214,18 +214,20 @@ def main():
     ap.add_argument("--runs", type=int, default=3)
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--outdir", default=str(HERE / "results"))
+    ap.add_argument("--tag", help="use agent__<model>__<tag>.jsonl files and write stepfinder_<candidate>_<tag>.json")
     args = ap.parse_args()
     if len(A.STEPS) > 4:
         sys.exit("more than 4 steps: add the binary-search mode before using this")
     outdir = Path(args.outdir)
     result = localize(spec(args.old, args.old_config), spec(args.candidate, args.candidate_config),
-                      outdir / f"agent__{args.old}.jsonl", outdir / f"agent__{args.candidate}.jsonl",
+                      outdir / f"agent__{args.old}{'__' + args.tag if args.tag else ''}.jsonl",
+                      outdir / f"agent__{args.candidate}{'__' + args.tag if args.tag else ''}.jsonl",
                       args.runs, outdir, args.workers)
     print(f"{args.old} -> {args.candidate}: {len(result['regressed'])} regressed ticket(s): {result['regressed']}")
     if not result["regressed"]:
         return
     summary, out_tickets, n = result["summary"], result["tickets"], len(result["regressed"])
-    out_path = REPORTS / f"stepfinder_{args.candidate}.json"
+    out_path = REPORTS / f"stepfinder_{args.candidate}{'_' + args.tag if args.tag else ''}.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(result, indent=2))
 

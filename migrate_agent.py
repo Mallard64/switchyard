@@ -44,13 +44,18 @@ def sha(obj):
     return hashlib.sha256(json.dumps(obj, sort_keys=True).encode()).hexdigest()[:8]
 
 
+def tagged(model, args):
+    return Path(args.results) / f"agent__{model}{'__' + args.tag if args.tag else ''}.jsonl"
+
+
 def verify(args, step, lines, label):
-    """Full re-run of every ticket on the candidate with one step's prompt replaced."""
-    cand = load(Path(args.results) / f"agent__{args.candidate}.jsonl")
+    """Full re-run of every ticket in this migration on the candidate with one step's prompt replaced."""
+    cand = load(tagged(args.candidate, args))
     source = {tid: {r["run"]: r for r in rs} for tid, rs in cand.items()}
-    path = run_config(A.load_tickets(), label, make_plan((args.candidate, args.candidate_config), {}), source, 0,
+    tickets = [t for t in A.load_tickets(sets="all") if t["id"] in cand]
+    path = run_config(tickets, label, make_plan((args.candidate, args.candidate_config), {}), source, 0,
                       args.runs, Path(args.results), args.workers, prompts={step: lines})
-    return build_report(Path(args.results) / f"agent__{args.old}.jsonl", path)
+    return build_report(tagged(args.old, args), path)
 
 
 def verification(rep, regressed_before, runs, report_file):
@@ -106,7 +111,11 @@ def main():
     ap.add_argument("--accept", action="append", default=[])
     ap.add_argument("--reject", action="append", default=[])
     ap.add_argument("--apply-edit", help="JSON file with the engineer's edited lines (see docstring)")
+    ap.add_argument("--tag", help="ticket-set tag: agent__<model>__<tag>.jsonl in, reports/migration_agent_<tag> out")
     args = ap.parse_args()
+    global OUT
+    if args.tag:
+        OUT = OUT.with_name(f"migration_agent_{args.tag}")
     started = datetime.now(timezone.utc).isoformat()
     results = Path(args.results)
     OUT.mkdir(parents=True, exist_ok=True)
@@ -115,7 +124,7 @@ def main():
     prev = prev if prev.get("candidate") == args.candidate else {}
 
     # 1. compare, 2. step-finder + line-finder (all cached) -------------------------------------
-    rep = build_report(results / f"agent__{args.old}.jsonl", results / f"agent__{args.candidate}.jsonl")
+    rep = build_report(tagged(args.old, args), tagged(args.candidate, args))
     (OUT / f"compare_{args.candidate}.json").write_text(json.dumps(rep, indent=2, default=list))
     regressed = [it["input_id"] for it in rep["items"] if it["verdict"] == "REGRESSED"]
     print(f"[1/4] {args.old} -> {args.candidate}: {rep['verdict_counts']}")
@@ -123,9 +132,11 @@ def main():
     if regressed:
         for script in ("stepfinder.py", "linefinder.py"):
             subprocess.run([sys.executable, str(HERE / script), "--candidate", args.candidate, "--candidate-config", cfg,
-                            "--runs", str(args.runs)], check=True, capture_output=True, text=True)
-        sf = json.loads((REPORTS / f"stepfinder_{args.candidate}.json").read_text())
-        lf = json.loads((REPORTS / f"linefinder_{args.candidate}.json").read_text())
+                            "--runs", str(args.runs)] + (["--tag", args.tag] if args.tag else []),
+                           check=True, capture_output=True, text=True)
+        suffix = f"_{args.tag}" if args.tag else ""
+        sf = json.loads((REPORTS / f"stepfinder_{args.candidate}{suffix}.json").read_text())
+        lf = json.loads((REPORTS / f"linefinder_{args.candidate}{suffix}.json").read_text())
         print("[2/4] step-finder: " + ", ".join(f"{s} {v['explains']}/{v['of']}" for s, v in sf["summary"].items()))
 
     # 3. fixes: one per proven line, plus engineer edits ----------------------------------------
@@ -140,7 +151,7 @@ def main():
         if fixes.get(fid, {}).get("source", "").startswith("engineer"):
             continue  # an engineer edit replaced this fix; keep it
         lines = A.PROMPTS[step][:i] + A.PROMPTS[step][i + 1:]
-        v = verification(verify(args, step, lines, f"{args.candidate}__fix-{step}-L{i}"), regressed, args.runs,
+        v = verification(verify(args, step, lines, f"{args.candidate}__fix-{step}-L{i}{'__' + args.tag if args.tag else ''}"), regressed, args.runs,
                          f"compare_{args.candidate}_{fid}.json")
         fixes[fid] = {"id": fid, "step": step, "component": f"{step} prompt, line {i + 1}", "line_index": i,
                       "kind": "remove_line", "old_text": line, "new_text": None, "new_lines": lines,
@@ -217,7 +228,7 @@ def main():
     other = [f"{it['verdict'].lower()}: `{it['input_id']}` \"{it['text'][:70]}\": {it['baseline']['output']} → "
              f"{it['candidate']['output']}" for it in rep["items"] if it["verdict"] in ("CHANGED", "IMPROVED")]
     m = {
-        "group": "Migrations", "label": f"agent · {args.old} → {args.candidate}",
+        "group": "Migrations", "label": f"agent · {args.old} → {args.candidate}" + (f" · {args.tag} tickets" if args.tag else ""),
         "task": "agent", "pipeline": "4-step support agent", "candidate": args.candidate, "old_model": args.old,
         "new_model": args.candidate, "candidate_config": args.candidate_config, "n_inputs": rep["inputs_compared"],
         "cli": f"python migrate_agent.py --candidate {args.candidate} --candidate-config '{cfg}'",

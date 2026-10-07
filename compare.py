@@ -73,7 +73,9 @@ def load(path):
 
 
 def load_gold(task):
-    return {r["id"]: r for r in map(json.loads, open(HERE / "inputs" / f"{task}.jsonl"))}
+    # The agent has extra ticket sets (inputs/agent_*.jsonl); ids are unique across them.
+    files = [HERE / "inputs" / f"{task}.jsonl"] + (sorted((HERE / "inputs").glob("agent_*.jsonl")) if task == "agent" else [])
+    return {r["id"]: r for f in files for r in map(json.loads, open(f))}
 
 
 def norm(s):
