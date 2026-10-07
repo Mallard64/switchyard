@@ -43,6 +43,37 @@ def proposed_diff(m):
     return "".join(out)
 
 
+def pipeline_section(m, cand_rep, fix_reports, results=HERE / "results"):
+    """What the dashboard's pipeline view draws: per-step traces of each regressed ticket on the old
+    pipeline, the new one and the new one with the (first) fix; the step-swap experiments; the prompt
+    lines tested; and the fix tally."""
+    from compare import load
+    from pipeline_view import STEP_INFO, STEPS, first_divergence, trace
+    rows = lambda f: load([results / x.strip() for x in f.split(" + ")] if " + " in f else results / f)
+    base, cand = rows(cand_rep["baseline_file"]), rows(cand_rep["candidate_file"])
+    fix = m["fixes"][0] if m["fixes"] else None
+    fixed = rows(fix_reports[fix["id"]]["candidate_file"]) if fix else {}
+    tickets = []
+    for cs in m["causes"]:
+        tid = cs["input_id"]
+        old = trace(base[tid][0]) if base.get(tid) else {}
+        new = trace(cand[tid][0]) if cand.get(tid) else {}
+        tickets.append({"id": tid, "text": cs["text"], "old": old, "new": new,
+                        "fixed": trace(fixed[tid][0]) if fixed.get(tid) else None,
+                        "first_divergence": first_divergence(old, new), "causal_steps": cs.get("causal_steps", []),
+                        "status": cs["status"], "experiments": cs.get("experiments", []),
+                        "outputs": {"old": cs["baseline_output"], "new": cs["candidate_output"],
+                                    "fixed": cs.get("fixed_output")}})
+    after = fix_reports[fix["id"]]["verdict_counts"]["REGRESSED"] if fix else None
+    return {"steps": STEPS, "info": STEP_INFO, "old_label": m["old_model"], "new_label": m["new_model"],
+            "causal_steps": sorted({s for t in tickets for s in t["causal_steps"]}, key=STEPS.index),
+            "tickets": tickets, "lines": m.get("lines", []),
+            "fix": {"before": cand_rep["verdict_counts"]["REGRESSED"], "after": after,
+                    "total": cand_rep["inputs_compared"], "decision": fix["decision"] if fix else None,
+                    "change": (f"remove {fix['component']}" if fix and fix["kind"] == "remove_line"
+                               else f"edit {fix['component']}") if fix else None}}
+
+
 def export(out_dir, m, cand_rep, fix_reports):
     """m: the pr_report migration dict; cand_rep: compare report (model swap only);
     fix_reports: {fix_id: compare report with that fix}."""
@@ -87,6 +118,7 @@ def export(out_dir, m, cand_rep, fix_reports):
         "comparison": with_lists(final_rep),
         # Extra context (older dashboard versions ignore it): step-finder summary and review list.
         "steps": m.get("steps"), "fixes": m["fixes"],
+        "pipeline": pipeline_section(m, cand_rep, fix_reports),
     }
     Path(out_dir, "dashboard.json").write_text(json.dumps(dash, indent=2, default=list))
     return dash

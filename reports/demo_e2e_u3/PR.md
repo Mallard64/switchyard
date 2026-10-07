@@ -18,26 +18,51 @@ For 3 regressed tickets, each step was swapped back to the old side one at a tim
 | `draft` | 0/3 (0%) |
 | `tone` | 0/3 (0%) |
 
-`t09`:
-- `gpt-5.6-terra+u3` everywhere except `classify` (old prompt) → SAME (shipping/info)
-- `gpt-5.6-terra+u3` everywhere except `decide` (old prompt) → REGRESSED (cancel/deny)
-- `gpt-5.6-terra+u3` everywhere except `draft` (old prompt) → REGRESSED (cancel/deny)
-- `gpt-5.6-terra+u3` everywhere except `tone` (old prompt) → REGRESSED (cancel/deny)
-- old everywhere except `classify` (new prompt) → REGRESSED (cancel/deny)
+● = new model ran that step, ○ = old model. ✓ = the ticket came out like the old pipeline.
 
-`t10`:
-- `gpt-5.6-terra+u3` everywhere except `classify` (old prompt) → SAME (shipping/replace)
-- `gpt-5.6-terra+u3` everywhere except `decide` (old prompt) → REGRESSED (cancel/deny)
-- `gpt-5.6-terra+u3` everywhere except `draft` (old prompt) → REGRESSED (cancel/deny)
-- `gpt-5.6-terra+u3` everywhere except `tone` (old prompt) → REGRESSED (cancel/deny)
-- old everywhere except `classify` (new prompt) → REGRESSED (cancel/deny)
+**`t09`**
 
-`t23`:
-- `gpt-5.6-terra+u3` everywhere except `classify` (old prompt) → SAME (shipping/replace)
-- `gpt-5.6-terra+u3` everywhere except `decide` (old prompt) → REGRESSED (cancel/deny)
-- `gpt-5.6-terra+u3` everywhere except `draft` (old prompt) → REGRESSED (cancel/deny)
-- `gpt-5.6-terra+u3` everywhere except `tone` (old prompt) → REGRESSED (cancel/deny)
-- old everywhere except `classify` (new prompt) → REGRESSED (cancel/deny)
+| Experiment | classify | decide | draft | tone | Result |
+|---|---|---|---|---|---|
+| Old pipeline | ○ old | ○ old | ○ old | ○ old | ✓ shipping/info |
+| New pipeline | ● new | ● new | ● new | ● new | ✗ cancel/deny |
+| Swap classify back to old | ○ old | ● new | ● new | ● new | ✓ shipping/info |
+| Swap decide back to old | ● new | ○ old | ● new | ● new | ✗ cancel/deny |
+| Swap draft back to old | ● new | ● new | ○ old | ● new | ✗ cancel/deny |
+| Swap tone back to old | ● new | ● new | ● new | ○ old | ✗ cancel/deny |
+| Only classify new | ● new | ○ old | ○ old | ○ old | ✗ cancel/deny |
+
+<details><summary>t10: same experiments</summary>
+
+**`t10`**
+
+| Experiment | classify | decide | draft | tone | Result |
+|---|---|---|---|---|---|
+| Old pipeline | ○ old | ○ old | ○ old | ○ old | ✓ shipping/replace |
+| New pipeline | ● new | ● new | ● new | ● new | ✗ cancel/deny |
+| Swap classify back to old | ○ old | ● new | ● new | ● new | ✓ shipping/replace |
+| Swap decide back to old | ● new | ○ old | ● new | ● new | ✗ cancel/deny |
+| Swap draft back to old | ● new | ● new | ○ old | ● new | ✗ cancel/deny |
+| Swap tone back to old | ● new | ● new | ● new | ○ old | ✗ cancel/deny |
+| Only classify new | ● new | ○ old | ○ old | ○ old | ✗ cancel/deny |
+
+</details>
+
+<details><summary>t23: same experiments</summary>
+
+**`t23`**
+
+| Experiment | classify | decide | draft | tone | Result |
+|---|---|---|---|---|---|
+| Old pipeline | ○ old | ○ old | ○ old | ○ old | ✓ shipping/replace |
+| New pipeline | ● new | ● new | ● new | ● new | ✗ cancel/deny |
+| Swap classify back to old | ○ old | ● new | ● new | ● new | ✓ shipping/replace |
+| Swap decide back to old | ● new | ○ old | ● new | ● new | ✗ cancel/deny |
+| Swap draft back to old | ● new | ● new | ○ old | ● new | ✗ cancel/deny |
+| Swap tone back to old | ● new | ● new | ● new | ○ old | ✗ cancel/deny |
+| Only classify new | ● new | ○ old | ○ old | ○ old | ✗ cancel/deny |
+
+</details>
 
 ## 2. What broke (prompt lines)
 

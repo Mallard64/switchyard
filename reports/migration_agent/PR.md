@@ -19,12 +19,19 @@ For each regressed ticket, each step was swapped back to `gpt-4` one at a time (
 | `draft` | 0/1 (0%) |
 | `tone` | 0/1 (0%) |
 
-`t07`:
-- `gpt-5.6-sol` everywhere except `classify` (on `gpt-4`) → REGRESSED (damaged/deny)
-- `gpt-5.6-sol` everywhere except `decide` (on `gpt-4`) → SAME (damaged/replace)
-- `gpt-5.6-sol` everywhere except `draft` (on `gpt-4`) → REGRESSED (damaged/deny)
-- `gpt-5.6-sol` everywhere except `tone` (on `gpt-4`) → REGRESSED (damaged/deny)
-- `gpt-4` everywhere except `decide` (on `gpt-5.6-sol`) → REGRESSED (damaged/deny)
+● = new model ran that step, ○ = old model. ✓ = the ticket came out like the old pipeline.
+
+**`t07`**
+
+| Experiment | classify | decide | draft | tone | Result |
+|---|---|---|---|---|---|
+| Old pipeline | ○ old | ○ old | ○ old | ○ old | ✓ damaged/replace |
+| New pipeline | ● new | ● new | ● new | ● new | ✗ damaged/deny |
+| Swap classify back to old | ○ old | ● new | ● new | ● new | ✗ damaged/deny |
+| Swap decide back to old | ● new | ○ old | ● new | ● new | ✓ damaged/replace |
+| Swap draft back to old | ● new | ● new | ○ old | ● new | ✗ damaged/deny |
+| Swap tone back to old | ● new | ● new | ● new | ○ old | ✗ damaged/deny |
+| Only decide new | ○ old | ● new | ○ old | ○ old | ✗ damaged/deny |
 
 ## 2. What broke (prompt lines)
 

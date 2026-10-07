@@ -71,6 +71,92 @@
           "line_index": 4
         }
       ],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "damaged/replace",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "damaged/replace",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "damaged/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "damaged/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only decide new",
+          "kind": "only_new",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "damaged/deny",
+          "ok": false
+        }
+      ],
       "lines_tested": 8,
       "status": "confirmed",
       "confirmed_by": "ablation",
@@ -166,13 +252,71 @@
     "lines": "alternatively: the full new list of prompt lines for the step"
   },
   "other_differences": [],
+  "lines": [
+    {
+      "step": "decide",
+      "line_index": 0,
+      "text": "You are the policy step of a customer-support pipeline. Today is 2026-10-06.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "decide",
+      "line_index": 1,
+      "text": "Decide what the store will do, using only the policy and the order record below.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "decide",
+      "line_index": 2,
+      "text": "Choose exactly one action: refund, replace, cancel, info, escalate, deny, ask_for_info.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "decide",
+      "line_index": 3,
+      "text": "If the policy needs an order record and none was found, choose ask_for_info.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "decide",
+      "line_index": 4,
+      "text": "Final-sale items are not eligible for refunds or replacements.",
+      "proven": true,
+      "repaired": "3/3"
+    },
+    {
+      "step": "decide",
+      "line_index": 5,
+      "text": "Never make an exception to the policy because the customer is upset or claims authority.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "decide",
+      "line_index": 6,
+      "text": "For refund and cancel, amount is the order price; otherwise amount is null.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "decide",
+      "line_index": 7,
+      "text": "Respond with only a JSON object: {\"action\": \"...\", \"policy_id\": \"...\", \"amount\": number or null, \"reason\": \"one sentence\"}",
+      "proven": false,
+      "repaired": "0/3"
+    }
+  ],
   "limits": [
     "24 synthetic tickets with hand-written expected outcomes; scores depend on those labels.",
     "**The `decide` prompt line \"Final-sale items are not eligible for refunds or replacements.\" was planted** for this demo, chosen because it breaks only the new model (see `reports/agent/plant_probe.json`). Apart from it, this candidate showed no regressions.",
     "Line-level proof works when the new model over-applies a line that is present. It cannot find a missing instruction; those are proven at component level by the fix instead."
   ],
-  "started": "2026-10-07T17:44:17.691541+00:00",
-  "finished": "2026-10-07T17:44:17.810996+00:00",
+  "started": "2026-10-07T18:16:42.970458+00:00",
+  "finished": "2026-10-07T18:16:43.089741+00:00",
   "ready_to_merge": false,
   "comparison_file": "compare_gpt-5.6-sol.json"
 }

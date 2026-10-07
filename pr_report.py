@@ -8,6 +8,8 @@ as proposals and "rejected" ones are listed but excluded.
 """
 import difflib
 
+from pipeline_view import matrix_markdown
+
 DECISION_LABEL = {"pending": "awaiting review", "accepted": "accepted", "edited": "accepted with engineer edits",
                   "rejected": "rejected"}
 
@@ -53,8 +55,14 @@ def render(m):
         st = m["steps"]
         out += [st["method"], "", "| Step | Regressions it explains |", "|---|---|"]
         out += [f"| `{s}` | {v['explains']}/{v['of']} ({v['pct']}%) |" for s, v in st["summary"].items()]
-        for c in causes:
-            if c.get("step_evidence"):
+        out += ["", "● = new model ran that step, ○ = old model. ✓ = the ticket came out like the old pipeline."]
+        for n, c in enumerate(causes):
+            if c.get("experiments"):
+                table = ["", f"**`{c['input_id']}`**", ""] + matrix_markdown(c["experiments"])
+                # First ticket in full; the rest collapsed so the PR stays scannable.
+                out += table if n == 0 else ["", f"<details><summary>{c['input_id']}: same experiments</summary>"] + \
+                    table + ["", "</details>"]
+            elif c.get("step_evidence"):
                 out += ["", f"`{c['input_id']}`:"] + [f"- {row}" for row in c["step_evidence"]]
         out.append("")
     else:

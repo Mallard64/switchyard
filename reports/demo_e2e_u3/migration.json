@@ -63,6 +63,92 @@
       "causal_steps": [
         "classify"
       ],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "shipping/info",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/info",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false
+        }
+      ],
       "lines_tested": 6,
       "status": "confirmed",
       "confirmed_by": "ablation",
@@ -91,6 +177,92 @@
       "causal_steps": [
         "classify"
       ],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "shipping/replace",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/replace",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false
+        }
+      ],
       "lines_tested": 6,
       "status": "confirmed",
       "confirmed_by": "ablation",
@@ -118,6 +290,92 @@
       ],
       "causal_steps": [
         "classify"
+      ],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "shipping/replace",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/replace",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false
+        }
       ],
       "lines_tested": 6,
       "status": "confirmed",
@@ -192,6 +450,50 @@
     }
   ],
   "other_differences": [],
+  "lines": [
+    {
+      "step": "classify",
+      "line_index": 0,
+      "text": "You are the triage step of a customer-support pipeline for an online store.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "classify",
+      "line_index": 1,
+      "text": "Classify the ticket into exactly one category: refund, damaged, shipping, cancel, billing, account, other.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "classify",
+      "line_index": 2,
+      "text": "refund: wants money back for an item they no longer want. damaged: item arrived broken or defective. shipping: order is late or missing. cancel: wants to cancel an order. billing: charges or payment disputes. account: login, password or account details. other: anything else.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "classify",
+      "line_index": 3,
+      "text": "Extract the order ID if the ticket gives one: the letter A followed by 4 digits, in uppercase (e.g. A1234). Use null if there is none.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "classify",
+      "line_index": 4,
+      "text": "Tickets about late or missing orders are cancel requests.",
+      "proven": true,
+      "repaired": "3/3"
+    },
+    {
+      "step": "classify",
+      "line_index": 5,
+      "text": "Respond with only a JSON object: {\"category\": \"...\", \"order_id\": \"...\" or null}",
+      "proven": false,
+      "repaired": "0/3"
+    }
+  ],
   "limits": [
     "1 run per configuration and 3 tickets localized: enough to show the method, not a noise-robust measurement.",
     "Planted break; 24 synthetic tickets."

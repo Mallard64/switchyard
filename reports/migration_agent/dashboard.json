@@ -1,7 +1,7 @@
 {
   "task": "agent",
-  "started": "2026-10-07T17:44:17.691541+00:00",
-  "finished": "2026-10-07T17:44:17.810996+00:00",
+  "started": "2026-10-07T18:16:42.970458+00:00",
+  "finished": "2026-10-07T18:16:43.089741+00:00",
   "baseline": {
     "file": "agent__gpt-4.jsonl",
     "model": "gpt-4",
@@ -1179,5 +1179,209 @@
       "decision": "pending",
       "decided_at": null
     }
-  ]
+  ],
+  "pipeline": {
+    "steps": [
+      "classify",
+      "decide",
+      "draft",
+      "tone"
+    ],
+    "info": {
+      "classify": "Reads the ticket; picks a category and the order ID",
+      "decide": "Looks up the order and policy; picks the action",
+      "draft": "Writes the reply to the customer",
+      "tone": "Checks the reply's tone; may rewrite it"
+    },
+    "old_label": "gpt-4",
+    "new_label": "gpt-5.6-sol",
+    "causal_steps": [
+      "decide"
+    ],
+    "tickets": [
+      {
+        "id": "t07",
+        "text": "The clearance lamp from order A1003 arrived with the base cracked in half. It won't stand up.",
+        "old": {
+          "classify": "category: damaged \u00b7 order A1003",
+          "decide": "replace \u2014 The item arrived damaged within 30 days of delivery.",
+          "draft": "We're sorry to hear about the damaged lamp from your order A1003. We've decided to replace it at no cost to you, as it arrived damaged withi\u2026",
+          "tone": "PASS"
+        },
+        "new": {
+          "classify": "category: damaged \u00b7 order A1003",
+          "decide": "deny \u2014 The damaged lamp is a final-sale item and is not eligible for a refund or replacement.",
+          "draft": "We\u2019re sorry the lamp arrived damaged. We\u2019re unable to issue a refund or replacement for order A1003 because the clearance lamp was sold as a\u2026",
+          "tone": "PASS"
+        },
+        "fixed": {
+          "classify": "category: damaged \u00b7 order A1003",
+          "decide": "replace \u2014 The damaged clearance lamp was reported within 30 days of delivery, so it qualifies for a ",
+          "draft": "We\u2019ll replace the damaged clearance desk lamp from order A1003. Since the damage was reported within 30 days of delivery, a replacement will\u2026",
+          "tone": "REVISED: The draft adds the unsupported detail that the lamp is a desk lamp."
+        },
+        "first_divergence": "decide",
+        "causal_steps": [
+          "decide"
+        ],
+        "status": "confirmed",
+        "experiments": [
+          {
+            "label": "Old pipeline",
+            "models": {
+              "classify": "old",
+              "decide": "old",
+              "draft": "old",
+              "tone": "old"
+            },
+            "output": "damaged/replace",
+            "ok": true,
+            "kind": "reference"
+          },
+          {
+            "label": "New pipeline",
+            "models": {
+              "classify": "new",
+              "decide": "new",
+              "draft": "new",
+              "tone": "new"
+            },
+            "output": "damaged/deny",
+            "ok": false,
+            "kind": "reference"
+          },
+          {
+            "label": "Swap classify back to old",
+            "models": {
+              "classify": "old",
+              "decide": "new",
+              "draft": "new",
+              "tone": "new"
+            },
+            "output": "damaged/deny",
+            "ok": false,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Swap decide back to old",
+            "models": {
+              "classify": "new",
+              "decide": "old",
+              "draft": "new",
+              "tone": "new"
+            },
+            "output": "damaged/replace",
+            "ok": true,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Swap draft back to old",
+            "models": {
+              "classify": "new",
+              "decide": "new",
+              "draft": "old",
+              "tone": "new"
+            },
+            "output": "damaged/deny",
+            "ok": false,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Swap tone back to old",
+            "models": {
+              "classify": "new",
+              "decide": "new",
+              "draft": "new",
+              "tone": "old"
+            },
+            "output": "damaged/deny",
+            "ok": false,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Only decide new",
+            "kind": "only_new",
+            "models": {
+              "classify": "old",
+              "decide": "new",
+              "draft": "old",
+              "tone": "old"
+            },
+            "output": "damaged/deny",
+            "ok": false
+          }
+        ],
+        "outputs": {
+          "old": "damaged/replace",
+          "new": "damaged/deny",
+          "fixed": "damaged/replace"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "step": "decide",
+        "line_index": 0,
+        "text": "You are the policy step of a customer-support pipeline. Today is 2026-10-06.",
+        "proven": false,
+        "repaired": "0/3"
+      },
+      {
+        "step": "decide",
+        "line_index": 1,
+        "text": "Decide what the store will do, using only the policy and the order record below.",
+        "proven": false,
+        "repaired": "0/3"
+      },
+      {
+        "step": "decide",
+        "line_index": 2,
+        "text": "Choose exactly one action: refund, replace, cancel, info, escalate, deny, ask_for_info.",
+        "proven": false,
+        "repaired": "0/3"
+      },
+      {
+        "step": "decide",
+        "line_index": 3,
+        "text": "If the policy needs an order record and none was found, choose ask_for_info.",
+        "proven": false,
+        "repaired": "0/3"
+      },
+      {
+        "step": "decide",
+        "line_index": 4,
+        "text": "Final-sale items are not eligible for refunds or replacements.",
+        "proven": true,
+        "repaired": "3/3"
+      },
+      {
+        "step": "decide",
+        "line_index": 5,
+        "text": "Never make an exception to the policy because the customer is upset or claims authority.",
+        "proven": false,
+        "repaired": "0/3"
+      },
+      {
+        "step": "decide",
+        "line_index": 6,
+        "text": "For refund and cancel, amount is the order price; otherwise amount is null.",
+        "proven": false,
+        "repaired": "0/3"
+      },
+      {
+        "step": "decide",
+        "line_index": 7,
+        "text": "Respond with only a JSON object: {\"action\": \"...\", \"policy_id\": \"...\", \"amount\": number or null, \"reason\": \"one sentence\"}",
+        "proven": false,
+        "repaired": "0/3"
+      }
+    ],
+    "fix": {
+      "before": 1,
+      "after": 0,
+      "total": 24,
+      "decision": "pending",
+      "change": "remove decide prompt, line 5"
+    }
+  }
 }

@@ -1235,5 +1235,431 @@
       "decision": "pending",
       "decided_at": null
     }
-  ]
+  ],
+  "pipeline": {
+    "steps": [
+      "classify",
+      "decide",
+      "draft",
+      "tone"
+    ],
+    "info": {
+      "classify": "Reads the ticket; picks a category and the order ID",
+      "decide": "Looks up the order and policy; picks the action",
+      "draft": "Writes the reply to the customer",
+      "tone": "Checks the reply's tone; may rewrite it"
+    },
+    "old_label": "gpt-5.6-terra (clean)",
+    "new_label": "gpt-5.6-terra+u3",
+    "causal_steps": [
+      "classify"
+    ],
+    "tickets": [
+      {
+        "id": "t09",
+        "text": "Where is my blender? Order A1004 was supposed to arrive on the 4th.",
+        "old": {
+          "classify": "category: shipping \u00b7 order A1004",
+          "decide": "info \u2014 The order is 2 days past its estimated delivery date, so provide an apology and tracking l",
+          "draft": "We\u2019re sorry your blender order A1004 is running late. It has shipped and is currently 2 days past its estimated delivery date. You can check\u2026",
+          "tone": "PASS"
+        },
+        "new": {
+          "classify": "category: cancel \u00b7 order A1004",
+          "decide": "deny \u2014 The order has already shipped and cannot be cancelled; the item may be returned after deli",
+          "draft": "Order A1004 has already shipped, so it cannot be cancelled at this stage. The blender was estimated to arrive on October 4 and is currently \u2026",
+          "tone": "PASS"
+        },
+        "fixed": {
+          "classify": "category: shipping \u00b7 order A1004",
+          "decide": "info \u2014 The order is 2 days past its estimated delivery date, so provide tracking information and ",
+          "draft": "We\u2019re sorry your blender order A1004 has not arrived yet. It has shipped and is currently 2 days past its estimated delivery date of October\u2026",
+          "tone": "PASS"
+        },
+        "first_divergence": "classify",
+        "causal_steps": [
+          "classify"
+        ],
+        "status": "confirmed",
+        "experiments": [
+          {
+            "label": "Old pipeline",
+            "models": {
+              "classify": "old",
+              "decide": "old",
+              "draft": "old",
+              "tone": "old"
+            },
+            "output": "shipping/info",
+            "ok": true,
+            "kind": "reference"
+          },
+          {
+            "label": "New pipeline",
+            "models": {
+              "classify": "new",
+              "decide": "new",
+              "draft": "new",
+              "tone": "new"
+            },
+            "output": "cancel/deny",
+            "ok": false,
+            "kind": "reference"
+          },
+          {
+            "label": "Swap classify back to old",
+            "models": {
+              "classify": "old",
+              "decide": "new",
+              "draft": "new",
+              "tone": "new"
+            },
+            "output": "shipping/info",
+            "ok": true,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Swap decide back to old",
+            "models": {
+              "classify": "new",
+              "decide": "old",
+              "draft": "new",
+              "tone": "new"
+            },
+            "output": "cancel/deny",
+            "ok": false,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Swap draft back to old",
+            "models": {
+              "classify": "new",
+              "decide": "new",
+              "draft": "old",
+              "tone": "new"
+            },
+            "output": "cancel/deny",
+            "ok": false,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Swap tone back to old",
+            "models": {
+              "classify": "new",
+              "decide": "new",
+              "draft": "new",
+              "tone": "old"
+            },
+            "output": "cancel/deny",
+            "ok": false,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Only classify new",
+            "kind": "only_new",
+            "models": {
+              "classify": "new",
+              "decide": "old",
+              "draft": "old",
+              "tone": "old"
+            },
+            "output": "cancel/deny",
+            "ok": false
+          }
+        ],
+        "outputs": {
+          "old": "shipping/info",
+          "new": "cancel/deny",
+          "fixed": "shipping/info"
+        }
+      },
+      {
+        "id": "t10",
+        "text": "Order A1010 still hasn't shown up. The tracking page said September 26. That's over a week ago.",
+        "old": {
+          "classify": "category: shipping \u00b7 order A1010",
+          "decide": "replace \u2014 The order is 10 days past its estimated delivery date, so a free replacement will be shipp",
+          "draft": "We\u2019re sorry your order A1010 has not arrived. Since it is 10 days past the estimated delivery date, we will ship a replacement throw blanket\u2026",
+          "tone": "PASS"
+        },
+        "new": {
+          "classify": "category: cancel \u00b7 order A1010",
+          "decide": "deny \u2014 The order has already shipped and cannot be cancelled under the policy.",
+          "draft": "We\u2019re sorry your order A1010 has not arrived. We can\u2019t cancel the order because it has already shipped, in line with our shipping policy (CA\u2026",
+          "tone": "PASS"
+        },
+        "fixed": {
+          "classify": "category: shipping \u00b7 order A1010",
+          "decide": "replace \u2014 The order is 10 days past its estimated delivery date, so a free replacement will be shipp",
+          "draft": "We\u2019re sorry your throw blanket order A1010 has not arrived. Since it is 10 days past the estimated delivery date, we will send a replacement\u2026",
+          "tone": "PASS"
+        },
+        "first_divergence": "classify",
+        "causal_steps": [
+          "classify"
+        ],
+        "status": "confirmed",
+        "experiments": [
+          {
+            "label": "Old pipeline",
+            "models": {
+              "classify": "old",
+              "decide": "old",
+              "draft": "old",
+              "tone": "old"
+            },
+            "output": "shipping/replace",
+            "ok": true,
+            "kind": "reference"
+          },
+          {
+            "label": "New pipeline",
+            "models": {
+              "classify": "new",
+              "decide": "new",
+              "draft": "new",
+              "tone": "new"
+            },
+            "output": "cancel/deny",
+            "ok": false,
+            "kind": "reference"
+          },
+          {
+            "label": "Swap classify back to old",
+            "models": {
+              "classify": "old",
+              "decide": "new",
+              "draft": "new",
+              "tone": "new"
+            },
+            "output": "shipping/replace",
+            "ok": true,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Swap decide back to old",
+            "models": {
+              "classify": "new",
+              "decide": "old",
+              "draft": "new",
+              "tone": "new"
+            },
+            "output": "cancel/deny",
+            "ok": false,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Swap draft back to old",
+            "models": {
+              "classify": "new",
+              "decide": "new",
+              "draft": "old",
+              "tone": "new"
+            },
+            "output": "cancel/deny",
+            "ok": false,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Swap tone back to old",
+            "models": {
+              "classify": "new",
+              "decide": "new",
+              "draft": "new",
+              "tone": "old"
+            },
+            "output": "cancel/deny",
+            "ok": false,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Only classify new",
+            "kind": "only_new",
+            "models": {
+              "classify": "new",
+              "decide": "old",
+              "draft": "old",
+              "tone": "old"
+            },
+            "output": "cancel/deny",
+            "ok": false
+          }
+        ],
+        "outputs": {
+          "old": "shipping/replace",
+          "new": "cancel/deny",
+          "fixed": "shipping/replace"
+        }
+      },
+      {
+        "id": "t23",
+        "text": "my order a1010 never came?? its been forever",
+        "old": {
+          "classify": "category: shipping \u00b7 order A1010",
+          "decide": "replace \u2014 The order is 10 days past its estimated delivery date, so a free replacement will be shipp",
+          "draft": "We\u2019re sorry your order A1010 has not arrived. Since it is 10 days past the estimated delivery date, we will ship a replacement throw blanket\u2026",
+          "tone": "PASS"
+        },
+        "new": {
+          "classify": "category: cancel \u00b7 order A1010",
+          "decide": "deny \u2014 The order has already shipped and cannot be cancelled; it may be returned after delivery.",
+          "draft": "Hello, Order A1010 has already shipped, so we\u2019re unable to cancel it. Once it is delivered, you may return the throw blanket if you no longe\u2026",
+          "tone": "PASS"
+        },
+        "fixed": {
+          "classify": "category: shipping \u00b7 order A1010",
+          "decide": "replace \u2014 The order is 10 days past its estimated delivery date, so a free replacement will be shipp",
+          "draft": "We\u2019re sorry your order A1010 hasn\u2019t arrived. Since it is 10 days past the estimated delivery date, we will ship a replacement throw blanket \u2026",
+          "tone": "PASS"
+        },
+        "first_divergence": "classify",
+        "causal_steps": [
+          "classify"
+        ],
+        "status": "confirmed",
+        "experiments": [
+          {
+            "label": "Old pipeline",
+            "models": {
+              "classify": "old",
+              "decide": "old",
+              "draft": "old",
+              "tone": "old"
+            },
+            "output": "shipping/replace",
+            "ok": true,
+            "kind": "reference"
+          },
+          {
+            "label": "New pipeline",
+            "models": {
+              "classify": "new",
+              "decide": "new",
+              "draft": "new",
+              "tone": "new"
+            },
+            "output": "cancel/deny",
+            "ok": false,
+            "kind": "reference"
+          },
+          {
+            "label": "Swap classify back to old",
+            "models": {
+              "classify": "old",
+              "decide": "new",
+              "draft": "new",
+              "tone": "new"
+            },
+            "output": "shipping/replace",
+            "ok": true,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Swap decide back to old",
+            "models": {
+              "classify": "new",
+              "decide": "old",
+              "draft": "new",
+              "tone": "new"
+            },
+            "output": "cancel/deny",
+            "ok": false,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Swap draft back to old",
+            "models": {
+              "classify": "new",
+              "decide": "new",
+              "draft": "old",
+              "tone": "new"
+            },
+            "output": "cancel/deny",
+            "ok": false,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Swap tone back to old",
+            "models": {
+              "classify": "new",
+              "decide": "new",
+              "draft": "new",
+              "tone": "old"
+            },
+            "output": "cancel/deny",
+            "ok": false,
+            "kind": "swap_back"
+          },
+          {
+            "label": "Only classify new",
+            "kind": "only_new",
+            "models": {
+              "classify": "new",
+              "decide": "old",
+              "draft": "old",
+              "tone": "old"
+            },
+            "output": "cancel/deny",
+            "ok": false
+          }
+        ],
+        "outputs": {
+          "old": "shipping/replace",
+          "new": "cancel/deny",
+          "fixed": "shipping/replace"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "step": "classify",
+        "line_index": 0,
+        "text": "You are the triage step of a customer-support pipeline for an online store.",
+        "proven": false,
+        "repaired": "0/3"
+      },
+      {
+        "step": "classify",
+        "line_index": 1,
+        "text": "Classify the ticket into exactly one category: refund, damaged, shipping, cancel, billing, account, other.",
+        "proven": false,
+        "repaired": "0/3"
+      },
+      {
+        "step": "classify",
+        "line_index": 2,
+        "text": "refund: wants money back for an item they no longer want. damaged: item arrived broken or defective. shipping: order is late or missing. cancel: wants to cancel an order. billing: charges or payment disputes. account: login, password or account details. other: anything else.",
+        "proven": false,
+        "repaired": "0/3"
+      },
+      {
+        "step": "classify",
+        "line_index": 3,
+        "text": "Extract the order ID if the ticket gives one: the letter A followed by 4 digits, in uppercase (e.g. A1234). Use null if there is none.",
+        "proven": false,
+        "repaired": "0/3"
+      },
+      {
+        "step": "classify",
+        "line_index": 4,
+        "text": "Tickets about late or missing orders are cancel requests.",
+        "proven": true,
+        "repaired": "3/3"
+      },
+      {
+        "step": "classify",
+        "line_index": 5,
+        "text": "Respond with only a JSON object: {\"category\": \"...\", \"order_id\": \"...\" or null}",
+        "proven": false,
+        "repaired": "0/3"
+      }
+    ],
+    "fix": {
+      "before": 3,
+      "after": 0,
+      "total": 24,
+      "decision": "pending",
+      "change": "remove classify prompt, line 5"
+    }
+  }
 }

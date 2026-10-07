@@ -28,6 +28,7 @@ from pathlib import Path
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 import pr_report  # noqa: E402
+from pipeline_view import experiments  # noqa: E402
 import support_agent as A  # noqa: E402
 from compare import build_report, load  # noqa: E402
 from stepfinder import make_plan, run_config  # noqa: E402
@@ -208,6 +209,7 @@ def main():
                        "fixed_output": fixed_item["candidate"]["output"] if fixed_item else None,
                        "causal_steps": tk["causal_steps"] if tk else [], "step_status": tk["status"] if tk else None,
                        "step_evidence": ev, "confirmed_lines": conf,
+                       "experiments": experiments(tk, it["baseline"]["output"], it["candidate"]["output"]) if tk else [],
                        "lines_tested": sum(x["lines_tested"] for x in lit),
                        "status": "confirmed" if conf or (tk and tk["causal_steps"]) else "suspected",
                        "confirmed_by": "ablation" if conf else ("step-swap" if tk and tk["causal_steps"] else None),
@@ -236,6 +238,9 @@ def main():
                                     f"tickets. A ticket counts as regressed only if most `{args.candidate}` runs fail a "
                                     f"hard check `{args.old}` passes, or score below `{args.old}`'s worst run."},
         "fixes": fix_list, "edit_format": EDIT_FORMAT, "other_differences": other,
+        "lines": [{"step": x["step"], "line_index": r["line_index"], "text": r["line"], "proven": r["status"] == "confirmed",
+                   "repaired": r["repaired_runs"]} for x in (lf or {}).get("items", [])[:1] for r in
+                  sorted(x["lines"], key=lambda r: r["line_index"])],
         "limits": ["24 synthetic tickets with hand-written expected outcomes; scores depend on those labels.",
                    "**The `decide` prompt line \"Final-sale items are not eligible for refunds or replacements.\" was "
                    "planted** for this demo, chosen because it breaks only the new model (see "
