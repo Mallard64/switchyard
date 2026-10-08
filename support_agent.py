@@ -32,7 +32,9 @@ HERE = Path(__file__).parent
 TICKETS = HERE / "inputs" / "agent.jsonl"  # inputs/<task>.jsonl, as compare.load_gold expects
 # Ticket sets: "agent" = the original 24; "agent_hard" = 12 harder tickets (Oct 7). Flows that run every ticket
 # use one set, so adding a set never makes an existing cached flow spend.
-TICKET_SETS = {"agent": TICKETS, "agent_hard": HERE / "inputs" / "agent_hard.jsonl"}
+TICKET_SETS = {"agent": TICKETS, "agent_hard": HERE / "inputs" / "agent_hard.jsonl",
+               # Oct 8: 12 fresh held-out tickets, committed before any model ran on them.
+               "agent_holdout2": HERE / "inputs" / "agent_holdout2.jsonl"}
 OPENAI_BASE = "https://api.openai.com/v1"
 PROTECTED = {"agent__gpt-4.jsonl", "agent__gpt-4__hard.jsonl"}
 TODAY = "2026-10-06"  # fixed so the tools and prompts are deterministic
