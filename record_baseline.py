@@ -40,10 +40,16 @@ TASKS = {
                 "inputs": HERE / "inputs" / "textcat.jsonl"},
 }
 VARIANTS = ["shipped", "gpt-4"]
-# USD per 1M tokens (input, output). Verify on OpenAI's pricing page before quoting numbers.
-PRICES = {"gpt-4": (30.0, 60.0), "gpt-4-0613": (30.0, 60.0),
-          "gpt-3.5-turbo": (0.5, 1.5), "gpt-3.5-turbo-0125": (0.5, 1.5),
-          "gpt-5.6-sol": (5.0, 30.0), "gpt-5.6-terra": (2.5, 15.0)}  # rates from the user, Oct 6
+# USD per 1M tokens (input, output), from config/prices.yml (source URL + date per model). A model whose
+# price is unverified (null) is left out, so costs for it come out as None and reports show tokens instead.
+def _load_prices():
+    import yaml
+    models = yaml.safe_load((HERE / "config" / "prices.yml").read_text())["models"]
+    return {m: (p["input_per_1m"], p["output_per_1m"]) for m, p in models.items()
+            if p.get("input_per_1m") is not None and p.get("output_per_1m") is not None}
+
+
+PRICES = _load_prices()
 OPENAI_BASE = "https://api.openai.com/v1"
 PROTECTED = {f"{t}__{v}.jsonl" for t in ("ner", "textcat")
              for v in ("gpt-4__gpt-4", "shipped__gpt-3.5-turbo", "gpt-4__gpt-4__ext")}

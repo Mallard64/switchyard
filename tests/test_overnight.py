@@ -14,6 +14,7 @@ import llm  # noqa: E402
 import stepswap as S  # noqa: E402
 import support_agent as A  # noqa: E402
 import thin_e2e as T  # noqa: E402
+from record_baseline import PRICES  # noqa: E402
 from stepfinder import spec  # noqa: E402
 
 TICKET = {"id": "x1", "gold": {"category": "damaged", "action": "replace"}}
@@ -141,7 +142,8 @@ class HashCache(unittest.TestCase):
         self.assertEqual((self.calls, a["cached"], b["cached"], a["raw"], b["raw"]), (1, False, True, "answer 1", "answer 1"))
         row = json.loads(llm.CACHE.read_text().splitlines()[0])
         self.assertEqual((row["step"], row["run"]), ("decide", 1))
-        self.assertAlmostEqual(row["cost_usd"], 1000 / 1e6 * 2.5 + 100 / 1e6 * 15)
+        pin, pout = PRICES["gpt-5.6-terra"]
+        self.assertAlmostEqual(row["cost_usd"], 1000 / 1e6 * pin + 100 / 1e6 * pout)
 
     def test_each_run_is_a_separate_sample(self):
         msgs = [{"role": "user", "content": "hi"}]
@@ -154,7 +156,7 @@ class HashCache(unittest.TestCase):
         msgs = [{"role": "user", "content": "hi"}]
         llm.set_run(1)
         llm.call_llm("decide", "gpt-4", msgs, {"temperature": 0.0}, completion=self.fake)
-        llm.SPEND_CAP_USD = 0.01  # the call above cost $0.036
+        llm.SPEND_CAP_USD = 0.01  # the call above cost $0.036 at gpt-4's $30/$60
         self.assertTrue(llm.call_llm("decide", "gpt-4", msgs, {"temperature": 0.0}, completion=self.fake)["cached"])
         llm.set_run(2)
         with self.assertRaisesRegex(RuntimeError, "spend cap"):

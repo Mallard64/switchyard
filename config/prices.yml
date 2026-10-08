@@ -1,0 +1,40 @@
+# USD per 1M tokens. Only prices read from the source page on the date given; anything unverified is null,
+# and reports then show tokens instead of dollars. record_baseline.PRICES loads this file.
+# gpt-4 / gpt-3.5-turbo resolve to gpt-4-0613 / gpt-3.5-turbo-0125 (see results/*.jsonl resolved_model).
+models:
+  gpt-5.6-sol:
+    input_per_1m: 4.00
+    output_per_1m: 20.00
+    tier: standard, short context
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-5.6-terra:
+    input_per_1m: 2.00
+    output_per_1m: 12.00
+    tier: standard, short context
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-4:
+    input_per_1m: 30.00
+    output_per_1m: 60.00
+    tier: standard (listed as gpt-4-0613)
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-4-0613:
+    input_per_1m: 30.00
+    output_per_1m: 60.00
+    tier: standard
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-3.5-turbo:
+    input_per_1m: 0.50
+    output_per_1m: 1.50
+    tier: standard (listed as gpt-3.5-turbo)
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-3.5-turbo-0125:
+    input_per_1m: 0.50
+    output_per_1m: 1.50
+    tier: standard
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08

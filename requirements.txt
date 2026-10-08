@@ -6,3 +6,5 @@ en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_
 anthropic>=1.11
 # All agent model calls (llm.py). 1.82.7 and 1.82.8 were the compromised PyPI releases (Mar 2026).
 litellm==1.104.1
+# config/prices.yml
+pyyaml>=6
