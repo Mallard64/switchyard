@@ -102,3 +102,20 @@ Spend after task 1: **$7.11** (logged in `results/llm_calls.jsonl`).
 **Not done, on purpose:** I didn't try terra×3 + sol-tone on held-out after seeing the mix fail there, because that would tune on the held-out set. It's the obvious next candidate; it needs a fresh held-out set.
 
 Spend after task 2: **$10.59**.
+
+## Task 3: results.json additions (done)
+- `python results_demo.py` writes `reports/demo/results.json`. The v1 fields keep the sample's exact shape and pass the dashboard's `validate()`. Everything new is additive:
+  - Per result: `synthetic`, `split` (dev/heldout), `verdict`, `failed_checks`.
+  - Per cause: `synthetic`, `step`.
+  - Per input: `split`, `synthetic: true` (the tickets are hand-written).
+  - Top level: `synthetic: false`.
+  - A `demo` block with:
+    - `per_step`: ladder, chosen model, cost per step for all-old / all-new / mix, repair and reproduce n/of.
+    - `totals_usd_per_1k`, `savings`, `recommended`, `mix` (accepted: false, plus why).
+    - `confidence`: 3 runs, 24 dev + 12 held-out tickets, regression counts, old-model unstable tickets.
+    - `patch` (diff, edits, fixer, what it saw, dev/held-out before/after), `lines`.
+    - `examples`: t21 dev and t36 held-out, with old / new / fixed tone output and final reply.
+    - `benchmark`: **synthetic**, held-out 34/39 exact and 38/39 two-way, asserted against RESULTS.md at build time.
+    - `prices` with source and date.
+    - `monthly_requests_default: 100000`, labelled as an assumption the buyer edits.
+- Numbers: sol as-is has 7/36 regressed (4 dev + 3 held-out) and 0/36 after the patch. Terra has 2/36. Cost per 1k ticket runs: gpt-4 $39.32, sol as-is $9.05, sol + patch $7.84.
