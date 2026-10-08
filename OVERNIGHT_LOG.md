@@ -11,3 +11,11 @@
 8. `migrate.py` / `migrate_agent.py` produce the PR. `pr_report.py` renders PR.md. `judge.py` is a Claude judge (a different provider; skipped without a key).
 9. `dashboard/` is the frontend (plain Node, no deps). It reads `reports/*/dashboard.json` and falls back to `results.json`. `results.sample.json` defines the v1 schema.
 10. Not there before tonight: LiteLLM (calls went over raw HTTP), a per-call hash cache, `public/results.json`, the brief's 2/3-vs-1/3 rule, and unit tests.
+
+## Task 2: thin end-to-end (done)
+- `llm.py`: every agent call now goes through LiteLLM (`litellm==1.104.1`, pinned; the compromised 1.82.7/1.82.8 releases aren't on the index). It adds a per-call sha256 cache (`results/llm_calls.jsonl`) keyed on model+params+messages+run, and a hard spend cap (`LLM_SPEND_CAP_USD`, default 15) that refuses uncached calls once the logged spend reaches it.
+- `support_agent.call_openai` delegates to `llm.call_llm`, so `run_ticket`, the step-finder, `agent_bench` and `probe_plant` all use it. A live smoke test (t01, terra, 4 calls, $0.0046) passed, and a re-run under a new tag was served fully from the hash cache with no key.
+- `thin_e2e.py` writes `public/results.json` (v1 sample schema; it passes the dashboard's own `validate()`). The hard checks are valid_json, required_fields and label_match. The noise rule is: broken iff old ≥2/3 and new ≤1/3.
+- **Result (cached runs, $0):** gpt-4 vs gpt-5.6-sol: **1 broken (t07)**, 23 same. gpt-4 vs gpt-5.6-terra: **0 broken**. Baseline noise under these checks is 0%. Cost per 1k ticket runs: gpt-4 $38.88, sol $12.04, terra $4.81. p50 latency: sol 7.1 s, terra 4.7 s.
+- Honest note: compare.py's richer checks find 6 sol regressions. Most are draft/tone instructions (timeline, word limit) that the brief's three checks don't cover. The real migration still has those failures, and they're documented in `reports/migration_agent/`.
+- Deviations: 24 tickets (the cached set), not 20. Re-recording to cut 4 would cost money and change nothing. NER/textcat calls still go through spacy-llm's own HTTP client, because routing them through LiteLLM means replacing spacy-llm's backend. The NER fixer (`migrate.py`) and the Claude judge are also unchanged. None of those were used tonight.

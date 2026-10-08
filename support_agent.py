@@ -301,24 +301,10 @@ def score_row(ctx, ticket):
 # ---------------------------------------------------------------------------------------
 # Running
 # ---------------------------------------------------------------------------------------
-def call_openai(model, params, messages):
-    import requests
-    t0 = time.perf_counter()
-    for attempt in range(4):
-        resp = requests.post(f"{OPENAI_BASE}/chat/completions", timeout=120,
-                             headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
-                             json={"model": model, "messages": messages, **params})
-        if resp.status_code in (429, 500, 502, 503) and attempt < 3:
-            time.sleep(2 ** attempt * 2)
-            continue
-        break
-    body = resp.json()
-    if resp.status_code != 200:
-        raise RuntimeError(f"{model}: HTTP {resp.status_code} {json.dumps(body.get('error'))[:300]}")
-    choice = body["choices"][0]
-    return {"raw": choice["message"].get("content") or "", "usage": body.get("usage"),
-            "resolved_model": body.get("model"), "system_fingerprint": body.get("system_fingerprint"),
-            "finish_reason": choice.get("finish_reason"), "latency_s": round(time.perf_counter() - t0, 3)}
+def call_openai(model, params, messages, step=None):
+    """One chat call through LiteLLM with the per-call hash cache (llm.py)."""
+    import llm
+    return llm.call_llm(step, model, messages, params, api_base=OPENAI_BASE)
 
 
 def cost(model, usage):
@@ -346,7 +332,7 @@ def run_ticket(ticket, plan, reuse=None, call=call_openai, prompts=None):
             m = plan[step]
             rec = {"step": step, "model": m["model"], "params": m["params"], "messages": messages,
                    "prompt_sha": hashlib.sha256(messages[0]["content"].encode()).hexdigest()[:12],
-                   **call(m["model"], m["params"], messages), "replayed": False}
+                   **call(m["model"], m["params"], messages, step=step), "replayed": False}
             rec["cost_usd"] = cost(m["model"], rec["usage"])
         raws[step] = rec["raw"]
         rec["parsed"] = advance(step, ctx, rec["raw"])
@@ -363,6 +349,8 @@ def record_row(ticket, run, plan, label, reuse=None, prompts=None, **meta):
            "ts": datetime.now(timezone.utc).isoformat(), "text": ticket["text"],
            "tricky": ticket.get("tricky", False)}
     try:
+        import llm
+        llm.set_run(run)
         row.update(run_ticket(ticket, plan, reuse=reuse, prompts=prompts), error=None)
     except Exception as e:
         row["error"] = f"{type(e).__name__}: {e}"[:1000]
