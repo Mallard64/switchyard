@@ -1,0 +1,364 @@
+{
+  "old_model": "gpt-4-np",
+  "candidate": "gpt-5.6-sol-np",
+  "runs": 3,
+  "baseline_file": "agent__gpt-4__noplant.jsonl",
+  "candidate_file": "agent__gpt-5.6-sol__noplant.jsonl",
+  "regressed": [
+    "t01",
+    "t11",
+    "t21",
+    "t24"
+  ],
+  "summary": {
+    "classify": {
+      "explains": 0,
+      "of": 4,
+      "pct": 0
+    },
+    "decide": {
+      "explains": 0,
+      "of": 4,
+      "pct": 0
+    },
+    "draft": {
+      "explains": 0,
+      "of": 4,
+      "pct": 0
+    },
+    "tone": {
+      "explains": 4,
+      "of": 4,
+      "pct": 100
+    }
+  },
+  "unexplained": [],
+  "tickets": [
+    {
+      "input_id": "t01",
+      "text": "Hi, I bought the wireless earbuds (order A1001) but I've changed my mind, they're still in the box. Can I get my money back?",
+      "tricky": false,
+      "baseline_output": "refund/refund",
+      "candidate_output": "refund/refund",
+      "causal_steps": [
+        "tone"
+      ],
+      "status": "confirmed",
+      "necessity": {
+        "classify": {
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__classify-gpt-4-np.jsonl"
+        },
+        "decide": {
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__decide-gpt-4-np.jsonl"
+        },
+        "draft": {
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__draft-gpt-4-np.jsonl"
+        },
+        "tone": {
+          "verdict": "SAME",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__tone-gpt-4-np.jsonl"
+        }
+      },
+      "pairs": {},
+      "sufficiency": {
+        "tone": {
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-4-np__tone-gpt-5.6-sol-np.jsonl"
+        }
+      },
+      "narrowed": null,
+      "step_outputs": {
+        "tone": {
+          "new": {
+            "model": "gpt-5.6-sol",
+            "raw": "{\"verdict\":\"REVISED\",\"issues\":[\"The draft adds a refund method and 5\u20137 business day timeline that are not included in the decision.\"],\"final_reply\":\"Your refund for order A1001 has been approved. The unused earbuds are eligible for a full refund because you requested the return within 30 days of delivery.\\n\\nThe refund amount is $79.00.\\n\\nThe Support Team\"}"
+          },
+          "old": {
+            "model": "gpt-4",
+            "raw": "{\"verdict\": \"PASS\", \"issues\": [], \"final_reply\": null}"
+          }
+        }
+      }
+    },
+    {
+      "input_id": "t11",
+      "text": "Please cancel order A1006, I ordered the wrong chair.",
+      "tricky": false,
+      "baseline_output": "cancel/cancel",
+      "candidate_output": "cancel/cancel",
+      "causal_steps": [
+        "tone"
+      ],
+      "status": "confirmed",
+      "necessity": {
+        "classify": {
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__classify-gpt-4-np.jsonl"
+        },
+        "decide": {
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__decide-gpt-4-np.jsonl"
+        },
+        "draft": {
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__draft-gpt-4-np.jsonl"
+        },
+        "tone": {
+          "verdict": "SAME",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__tone-gpt-4-np.jsonl"
+        }
+      },
+      "pairs": {},
+      "sufficiency": {
+        "tone": {
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-4-np__tone-gpt-5.6-sol-np.jsonl"
+        }
+      },
+      "narrowed": null,
+      "step_outputs": {
+        "tone": {
+          "new": {
+            "model": "gpt-5.6-sol",
+            "raw": "{\"verdict\":\"REVISED\",\"issues\":[\"The original payment method and 5\u20137 business day timeline are not included in the decision.\"],\"final_reply\":\"Order A1006 has been cancelled because it was still processing. A full refund of $249.00 will be issued.\\n\\nThe Support Team\"}"
+          },
+          "old": {
+            "model": "gpt-4",
+            "raw": "{\"verdict\": \"PASS\", \"issues\": [], \"final_reply\": null}"
+          }
+        }
+      }
+    },
+    {
+      "input_id": "t21",
+      "text": "Hello, the scarf from order A1011 was a gift and they already have one. Unopened. Can I return it?",
+      "tricky": false,
+      "baseline_output": "refund/refund",
+      "candidate_output": "refund/refund",
+      "causal_steps": [
+        "tone"
+      ],
+      "status": "necessary_only",
+      "necessity": {
+        "classify": {
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__classify-gpt-4-np.jsonl"
+        },
+        "decide": {
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__decide-gpt-4-np.jsonl"
+        },
+        "draft": {
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__draft-gpt-4-np.jsonl"
+        },
+        "tone": {
+          "verdict": "SAME",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__tone-gpt-4-np.jsonl"
+        }
+      },
+      "pairs": {},
+      "sufficiency": {
+        "tone": {
+          "verdict": "SAME",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-4-np__tone-gpt-5.6-sol-np.jsonl"
+        }
+      },
+      "narrowed": null,
+      "step_outputs": {
+        "tone": {
+          "new": {
+            "model": "gpt-5.6-sol",
+            "raw": "{\"verdict\":\"REVISED\",\"issues\":[\"The draft promises a refund timeline and payment method that are not included in the decision.\"],\"final_reply\":\"Hello,\\n\\nYes, the unopened scarf from order A1011 is eligible for return because it is unused and within 30 days of delivery. A full refund of $54.50 has been approved.\\n\\nThe Support Team\"}"
+          },
+          "old": {
+            "model": "gpt-4",
+            "raw": "{\"verdict\": \"PASS\", \"issues\": [], \"final_reply\": null}"
+          }
+        }
+      }
+    },
+    {
+      "input_id": "t24",
+      "text": "Cancel A1006. Your site is a mess and I shouldn't have to email you for this.",
+      "tricky": true,
+      "baseline_output": "cancel/cancel",
+      "candidate_output": "cancel/cancel",
+      "causal_steps": [
+        "tone"
+      ],
+      "status": "necessary_only",
+      "necessity": {
+        "classify": {
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__classify-gpt-4-np.jsonl"
+        },
+        "decide": {
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__decide-gpt-4-np.jsonl"
+        },
+        "draft": {
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__draft-gpt-4-np.jsonl"
+        },
+        "tone": {
+          "verdict": "SAME",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol-np__tone-gpt-4-np.jsonl"
+        }
+      },
+      "pairs": {},
+      "sufficiency": {
+        "tone": {
+          "verdict": "SAME",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-4-np__tone-gpt-5.6-sol-np.jsonl"
+        }
+      },
+      "narrowed": null,
+      "step_outputs": {
+        "tone": {
+          "new": {
+            "model": "gpt-5.6-sol",
+            "raw": "{\"verdict\":\"REVISED\",\"issues\":[\"The refund method and 5\u20137 business day timeline are not included in the decision.\"],\"final_reply\":\"Order A1006 has been canceled because it was still processing and eligible for cancellation. A full refund of $249.00 will be issued.\\n\\nWe\u2019re sorry for the frustrating experience.\\n\\nThe Support Team\"}"
+          },
+          "old": {
+            "model": "gpt-4",
+            "raw": "{\"verdict\": \"PASS\", \"issues\": [], \"final_reply\": null}"
+          }
+        }
+      }
+    }
+  ],
+  "live_calls": {
+    "gpt-4": {
+      "calls": 48,
+      "usd": 0.4743
+    },
+    "gpt-5.6-sol": {
+      "calls": 84,
+      "usd": 0.3877
+    }
+  }
+}

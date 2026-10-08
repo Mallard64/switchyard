@@ -1,0 +1,337 @@
+{
+  "pair": {
+    "old": "gpt-4",
+    "new": "gpt-5.6-sol",
+    "prompts": "clean agent (planted decide line removed) on both sides",
+    "sampling": {
+      "old": {
+        "temperature": 0.0
+      },
+      "new": "model default (temperature 0 rejected)"
+    }
+  },
+  "synthetic": {
+    "tickets": true,
+    "regression": false,
+    "note": "hand-written tickets; the regression is the new model's own behavior, nothing planted"
+  },
+  "dev": {
+    "tickets": 24,
+    "runs": 3,
+    "verdict_counts": {
+      "REGRESSED": 4,
+      "IMPROVED": 0,
+      "CHANGED": 0,
+      "SAME": 20
+    },
+    "regressed": [
+      {
+        "input_id": "t01",
+        "regressions": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+            "baseline_fail": "0/3",
+            "candidate_fail": "2/3"
+          }
+        ]
+      },
+      {
+        "input_id": "t11",
+        "regressions": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+            "baseline_fail": "0/3",
+            "candidate_fail": "2/3"
+          }
+        ]
+      },
+      {
+        "input_id": "t21",
+        "regressions": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+            "baseline_fail": "0/3",
+            "candidate_fail": "3/3"
+          }
+        ]
+      },
+      {
+        "input_id": "t24",
+        "regressions": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+            "baseline_fail": "0/3",
+            "candidate_fail": "3/3"
+          }
+        ]
+      }
+    ]
+  },
+  "heldout_before": {
+    "tickets": 12,
+    "verdict_counts": {
+      "REGRESSED": 3,
+      "IMPROVED": 2,
+      "CHANGED": 0,
+      "SAME": 7
+    },
+    "regressed": [
+      {
+        "input_id": "t27",
+        "regressions": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+            "baseline_fail": "0/3",
+            "candidate_fail": "3/3"
+          }
+        ]
+      },
+      {
+        "input_id": "t29",
+        "regressions": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+            "baseline_fail": "0/3",
+            "candidate_fail": "2/3"
+          }
+        ]
+      },
+      {
+        "input_id": "t36",
+        "regressions": [
+          {
+            "kind": "hard_check",
+            "check": "draft.states_timeline",
+            "instruction": "... and that it goes back to the original payment method in 5-7 business days.",
+            "baseline_fail": "0/3",
+            "candidate_fail": "3/3"
+          }
+        ]
+      }
+    ]
+  },
+  "stepfinder": {
+    "runs": 3,
+    "per_step": {
+      "classify": {
+        "repair": 0,
+        "reproduce": 0,
+        "of": 4
+      },
+      "decide": {
+        "repair": 0,
+        "reproduce": 0,
+        "of": 4
+      },
+      "draft": {
+        "repair": 0,
+        "reproduce": 0,
+        "of": 4
+      },
+      "tone": {
+        "repair": 4,
+        "reproduce": 2,
+        "of": 4
+      }
+    },
+    "guilty_step": "tone",
+    "tickets": [
+      {
+        "input_id": "t01",
+        "causal_steps": [
+          "tone"
+        ],
+        "status": "confirmed",
+        "repair": {
+          "classify": "REGRESSED",
+          "decide": "REGRESSED",
+          "draft": "REGRESSED",
+          "tone": "SAME"
+        },
+        "reproduce": {
+          "tone": "REGRESSED"
+        }
+      },
+      {
+        "input_id": "t11",
+        "causal_steps": [
+          "tone"
+        ],
+        "status": "confirmed",
+        "repair": {
+          "classify": "REGRESSED",
+          "decide": "REGRESSED",
+          "draft": "REGRESSED",
+          "tone": "SAME"
+        },
+        "reproduce": {
+          "tone": "REGRESSED"
+        }
+      },
+      {
+        "input_id": "t21",
+        "causal_steps": [
+          "tone"
+        ],
+        "status": "necessary_only",
+        "repair": {
+          "classify": "REGRESSED",
+          "decide": "REGRESSED",
+          "draft": "REGRESSED",
+          "tone": "SAME"
+        },
+        "reproduce": {
+          "tone": "SAME"
+        }
+      },
+      {
+        "input_id": "t24",
+        "causal_steps": [
+          "tone"
+        ],
+        "status": "necessary_only",
+        "repair": {
+          "classify": "REGRESSED",
+          "decide": "REGRESSED",
+          "draft": "REGRESSED",
+          "tone": "SAME"
+        },
+        "reproduce": {
+          "tone": "SAME"
+        }
+      }
+    ],
+    "live_calls": {
+      "gpt-4": {
+        "calls": 48,
+        "usd": 0.4743
+      },
+      "gpt-5.6-sol": {
+        "calls": 84,
+        "usd": 0.3877
+      }
+    }
+  },
+  "lines": {
+    "step": "tone",
+    "results": [
+      {
+        "line_index": 0,
+        "line": "You are the final tone check before a support reply is sent to a customer.",
+        "repairs": 0,
+        "of": 4,
+        "tickets": []
+      },
+      {
+        "line_index": 1,
+        "line": "The reply must be polite and calm, must not blame the customer, and must not be sarcastic.",
+        "repairs": 0,
+        "of": 4,
+        "tickets": []
+      },
+      {
+        "line_index": 2,
+        "line": "It must not promise anything beyond the decision.",
+        "repairs": 4,
+        "of": 4,
+        "tickets": [
+          "t01",
+          "t11",
+          "t21",
+          "t24"
+        ]
+      },
+      {
+        "line_index": 3,
+        "line": "If the draft passes, set verdict to PASS and final_reply to null.",
+        "repairs": 0,
+        "of": 4,
+        "tickets": []
+      },
+      {
+        "line_index": 4,
+        "line": "If not, set verdict to REVISED and rewrite only what is needed, keeping every fact (order ID, amounts, timelines).",
+        "repairs": 0,
+        "of": 4,
+        "tickets": []
+      },
+      {
+        "line_index": 5,
+        "line": "Respond with only a JSON object: {\"verdict\": \"PASS\" or \"REVISED\", \"issues\": [\"...\"], \"final_reply\": \"...\" or null}",
+        "repairs": 0,
+        "of": 4,
+        "tickets": []
+      }
+    ]
+  },
+  "fix": {
+    "fixer_model": "gpt-5.6-sol",
+    "max_edits": 2,
+    "saw": "dev tickets only",
+    "attempts": [
+      {
+        "attempt": 1,
+        "valid": true,
+        "edits": [
+          {
+            "line_index": 2,
+            "new_text": "It must not add promises beyond the decision; however, standard refund details already present in the draft, including return to the original payment method within 5-7 business days, are allowed and must be preserved."
+          }
+        ],
+        "rationale": "This preserves the prohibition on adding unsupported promises while preventing valid, existing refund-processing details from being removed.",
+        "dev_file": "agent__gpt-5.6-sol-np__patch-87f14ffb.jsonl",
+        "dev_verdict_counts": {
+          "REGRESSED": 0,
+          "IMPROVED": 0,
+          "CHANGED": 0,
+          "SAME": 24
+        },
+        "dev_still_regressed": []
+      }
+    ]
+  },
+  "patch": {
+    "step": "tone",
+    "rationale": "This preserves the prohibition on adding unsupported promises while preventing valid, existing refund-processing details from being removed.",
+    "diff": "--- a/PROMPTS['tone']\n+++ b/PROMPTS['tone']\n@@ -1,6 +1,6 @@\n You are the final tone check before a support reply is sent to a customer.\n The reply must be polite and calm, must not blame the customer, and must not be sarcastic.\n-It must not promise anything beyond the decision.\n+It must not add promises beyond the decision; however, standard refund details already present in the draft, including return to the original payment method within 5-7 business days, are allowed and must be preserved.\n If the draft passes, set verdict to PASS and final_reply to null.\n If not, set verdict to REVISED and rewrite only what is needed, keeping every fact (order ID, amounts, timelines).\n Respond with only a JSON object: {\"verdict\": \"PASS\" or \"REVISED\", \"issues\": [\"...\"], \"final_reply\": \"...\" or null}",
+    "edits": [
+      {
+        "line_index": 2,
+        "old": "It must not promise anything beyond the decision.",
+        "new": "It must not add promises beyond the decision; however, standard refund details already present in the draft, including return to the original payment method within 5-7 business days, are allowed and must be preserved."
+      }
+    ],
+    "dev_verdict_counts": {
+      "REGRESSED": 0,
+      "IMPROVED": 0,
+      "CHANGED": 0,
+      "SAME": 24
+    }
+  },
+  "heldout_after": {
+    "tickets": 12,
+    "file": "agent__gpt-5.6-sol-np__patch-87f14ffb__hard.jsonl",
+    "verdict_counts": {
+      "REGRESSED": 0,
+      "IMPROVED": 2,
+      "CHANGED": 0,
+      "SAME": 10
+    },
+    "regressed": [],
+    "baseline_passed_all": 1.0,
+    "patched_passed_all": 1.0
+  },
+  "generated_at": "2026-10-08T18:41:17.598532+00:00"
+}
