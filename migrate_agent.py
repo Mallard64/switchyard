@@ -69,16 +69,22 @@ def verification(rep, regressed_before, runs, report_file):
 
 
 def bench_note():
-    """One sentence on how reliable the step-finder is, from the planted-break benchmark (if run)."""
-    f = HERE / "reports" / "agent_bench" / "results.json"
-    if not f.exists():
+    """One sentence on how reliable the step-finder is, from the planted-break benchmark (if run).
+    Quotes the HELD-OUT column of RESULTS.md: results.json only keeps the numbers after the narrowing fix,
+    which was designed on the same tickets."""
+    f, md = HERE / "reports" / "agent_bench" / "results.json", HERE / "reports" / "agent_bench" / "RESULTS.md"
+    if not f.exists() or not md.exists():
         return ""
-    r = json.loads(f.read_text())
-    sf, n = r["stepfinder"], r["tickets_localized"]
-    return (f" How reliable this is: on {r['breaks']} planted breaks ({r['breaks_with_effect']} with an effect, {n} "
-            f"tickets), the step-finder named the planted step(s) exactly on {sf['correct']}/{n}, a correct subset "
-            f"of a two-step break on {sf['correct_subset']}, and a wrong step on {sf['wrong']} "
-            f"(`reports/agent_bench/RESULTS.md`).")
+    import re
+    r, text = json.loads(f.read_text()), md.read_text()
+    n = r["tickets_localized"]
+    row = lambda label: re.search(rf"^\| {re.escape(label)}[^|]*\| \**(\d+)\**", text, re.M)
+    exact, both, wrong = row("Exactly the planted step(s)"), row("Confirmed both ways"), row("Wrong step")
+    if not (exact and both and wrong):
+        return ""
+    return (f" How reliable this is (synthetic benchmark, {r['breaks']} planted breaks, {n} tickets, held-out): the "
+            f"step-finder named exactly the planted step(s) on {exact.group(1)}/{n}, confirmed both ways on "
+            f"{both.group(1)}/{n}, and named a wrong step on {wrong.group(1)} (`reports/agent_bench/RESULTS.md`).")
 
 
 def score_rows(rep, fixed):

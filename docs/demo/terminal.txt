@@ -1,0 +1,161 @@
+
+samegrade · support agent · gpt-4 → gpt-5.6-sol · replaying a real recorded run (hand-written tickets, real model outputs)
+
+[1/5] Only the model changes. 24 tickets × 3 runs on gpt-5.6-sol, same prompts, tools and tickets as gpt-4.
+   sol t01 run 1  refund/refund  ✗ draft.states_timeline
+   sol t01 run 2  refund/refund  ✗ draft.states_timeline
+   sol t01 run 3  refund/refund  ✓
+   sol t02 run 1  refund/deny  ✓
+   sol t02 run 2  refund/deny  ✓
+   sol t02 run 3  refund/deny  ✓
+   sol t03 run 1  refund/deny  ✓
+   sol t03 run 2  refund/deny  ✓
+   sol t03 run 3  refund/deny  ✓
+   sol t04 run 1  refund/refund  ✓
+   sol t04 run 2  refund/refund  ✗ draft.states_timeline
+   sol t04 run 3  refund/refund  ✓
+   sol t05 run 1  refund/deny  ✓
+   sol t05 run 2  refund/deny  ✓
+   sol t05 run 3  refund/deny  ✓
+   sol t06 run 1  damaged/replace  ✓
+   sol t06 run 2  damaged/replace  ✓
+   sol t06 run 3  damaged/replace  ✓
+   sol t07 run 1  damaged/replace  ✓
+   sol t07 run 2  damaged/replace  ✓
+   sol t07 run 3  damaged/replace  ✓
+   sol t08 run 1  damaged/escalate  ✓
+   sol t08 run 2  damaged/escalate  ✓
+   sol t08 run 3  damaged/escalate  ✓
+   sol t09 run 1  shipping/info  ✓
+   sol t09 run 2  shipping/info  ✓
+   sol t09 run 3  shipping/info  ✓
+   sol t10 run 1  shipping/replace  ✓
+   sol t10 run 2  shipping/replace  ✓
+   sol t10 run 3  shipping/replace  ✓
+   sol t11 run 1  cancel/cancel  ✓
+   sol t11 run 2  cancel/cancel  ✗ draft.states_timeline
+   sol t11 run 3  cancel/cancel  ✗ draft.states_timeline
+   sol t12 run 1  cancel/deny  ✓
+   sol t12 run 2  cancel/deny  ✓
+   sol t12 run 3  cancel/deny  ✓
+   sol t13 run 1  billing/escalate  ✓
+   sol t13 run 2  billing/escalate  ✓
+   sol t13 run 3  billing/escalate  ✓
+   sol t14 run 1  billing/escalate  ✓
+   sol t14 run 2  billing/escalate  ✓
+   sol t14 run 3  billing/escalate  ✓
+   sol t15 run 1  account/info  ✓
+   sol t15 run 2  account/info  ✓
+   sol t15 run 3  account/info  ✓
+   sol t16 run 1  account/escalate  ✓
+   sol t16 run 2  account/escalate  ✓
+   sol t16 run 3  account/escalate  ✓
+   sol t17 run 1  refund/ask_for_info  ✓
+   sol t17 run 2  refund/ask_for_info  ✓
+   sol t17 run 3  refund/ask_for_info  ✓
+   sol t18 run 1  other/escalate  ✓
+   sol t18 run 2  other/escalate  ✓
+   sol t18 run 3  other/escalate  ✓
+   sol t19 run 1  refund/deny  ✓
+   sol t19 run 2  refund/deny  ✓
+   sol t19 run 3  refund/deny  ✓
+   sol t20 run 1  damaged/replace  ✓
+   sol t20 run 2  damaged/replace  ✓
+   sol t20 run 3  damaged/replace  ✓
+   sol t21 run 1  refund/refund  ✗ draft.states_timeline
+   sol t21 run 2  refund/refund  ✗ draft.states_timeline
+   sol t21 run 3  refund/refund  ✗ draft.states_timeline
+   sol t22 run 1  refund/refund  ✗ draft.states_timeline
+   sol t22 run 2  refund/refund  ✗ draft.states_timeline
+   sol t22 run 3  refund/refund  ✗ draft.states_timeline
+   sol t23 run 1  shipping/replace  ✓
+   sol t23 run 2  shipping/replace  ✓
+   sol t23 run 3  shipping/replace  ✓
+   sol t24 run 1  cancel/cancel  ✗ draft.states_timeline
+   sol t24 run 2  cancel/cancel  ✗ draft.states_timeline
+   sol t24 run 3  cancel/cancel  ✗ draft.states_timeline
+   → 4 tickets got worse than gpt-4: t01, t11, t21, t24. gpt-4 itself was stable on 24/24, so this isn't noise. Failing check: the reply drops “5–7 business days”.
+
+[2/5] Which step? Put gpt-4 back at one step at a time, 3 runs each.
+   gpt-4 at tone t01 run 1  refund/refund  ✓
+   gpt-4 at tone t01 run 2  refund/refund  ✓
+   gpt-4 at tone t01 run 3  refund/refund  ✓
+   gpt-4 at tone t11 run 1  cancel/cancel  ✓
+   gpt-4 at tone t11 run 2  cancel/cancel  ✓
+   gpt-4 at tone t11 run 3  cancel/cancel  ✓
+   gpt-4 at tone t21 run 1  refund/refund  ✓
+   gpt-4 at tone t21 run 2  refund/refund  ✓
+   gpt-4 at tone t21 run 3  refund/refund  ✓
+   gpt-4 at tone t24 run 1  cancel/cancel  ✓
+   gpt-4 at tone t24 run 2  cancel/cancel  ✓
+   gpt-4 at tone t24 run 3  cancel/cancel  ✓
+     classify  repair 0/4
+     decide    repair 0/4
+     draft     repair 0/4
+   → tone      repair 4/4   reproduce 2/4  ← cause
+
+[3/5] Which line in `tone`? Remove one line at a time.
+   without line t01 run 1  refund/refund  ✓
+   without line t01 run 2  refund/refund  ✓
+   without line t01 run 3  refund/refund  ✓
+   without line t11 run 1  cancel/cancel  ✓
+   without line t11 run 2  cancel/cancel  ✓
+   without line t11 run 3  cancel/cancel  ✓
+   without line t21 run 1  refund/refund  ✓
+   without line t21 run 2  refund/refund  ✓
+   without line t21 run 3  refund/refund  ✓
+   without line t24 run 1  cancel/cancel  ✓
+   without line t24 run 2  cancel/cancel  ✓
+   without line t24 run 3  cancel/cancel  ✓
+   L1 0/4  You are the final tone check before a support reply is sent to a custo
+   L2 0/4  The reply must be polite and calm, must not blame the customer, and mu
+   L3 4/4  It must not promise anything beyond the decision.  ← this line
+   L4 0/4  If the draft passes, set verdict to PASS and final_reply to null.
+   L5 0/4  If not, set verdict to REVISED and rewrite only what is needed, keepin
+   L6 0/4  Respond with only a JSON object: {"verdict": "PASS" or "REVISED", "iss
+
+[4/5] Fix: gpt-5.6-sol rewrites at most 2 lines, seeing only these 4 tickets.
+   - It must not promise anything beyond the decision.
+   + It must not add promises beyond the decision; however, standard refund details already present in the draft, including return to the original payment method within 5-7 business days, are allowed and must be preserved.
+   dev re-run, 24 tickets × 3: 0 got worse
+
+[5/5] Held-out: 12 tickets the fixer never saw.
+   sol + fix t25 run 1  damaged/escalate  ✓
+   sol + fix t25 run 2  damaged/escalate  ✓
+   sol + fix t25 run 3  damaged/escalate  ✓
+   sol + fix t26 run 1  damaged/replace  ✓
+   sol + fix t26 run 2  damaged/replace  ✓
+   sol + fix t26 run 3  damaged/replace  ✓
+   sol + fix t27 run 1  refund/refund  ✓
+   sol + fix t27 run 2  refund/refund  ✓
+   sol + fix t27 run 3  refund/refund  ✓
+   sol + fix t28 run 1  refund/deny  ✓
+   sol + fix t28 run 2  refund/deny  ✓
+   sol + fix t28 run 3  refund/deny  ✓
+   sol + fix t29 run 1  cancel/cancel  ✓
+   sol + fix t29 run 2  cancel/cancel  ✓
+   sol + fix t29 run 3  cancel/cancel  ✓
+   sol + fix t30 run 1  billing/escalate  ✓
+   sol + fix t30 run 2  billing/escalate  ✓
+   sol + fix t30 run 3  billing/escalate  ✓
+   sol + fix t31 run 1  shipping/replace  ✓
+   sol + fix t31 run 2  shipping/replace  ✓
+   sol + fix t31 run 3  shipping/replace  ✓
+   sol + fix t32 run 1  shipping/info  ✓
+   sol + fix t32 run 2  shipping/info  ✓
+   sol + fix t32 run 3  shipping/info  ✓
+   sol + fix t33 run 1  damaged/replace  ✓
+   sol + fix t33 run 2  damaged/replace  ✓
+   sol + fix t33 run 3  damaged/replace  ✓
+   sol + fix t34 run 1  refund/deny  ✓
+   sol + fix t34 run 2  refund/deny  ✓
+   sol + fix t34 run 3  refund/deny  ✓
+   sol + fix t35 run 1  damaged/replace  ✓
+   sol + fix t35 run 2  damaged/replace  ✓
+   sol + fix t35 run 3  damaged/replace  ✓
+   sol + fix t36 run 1  refund/refund  ✓
+   sol + fix t36 run 2  refund/refund  ✓
+   sol + fix t36 run 3  refund/refund  ✓
+   → got worse: 3 before the fix, 0 after.
+
+Result: model cost per 1,000 tickets $39.32 → $7.84 (80% lower), 0 of 36 tickets worse. Open the dashboard for savings, evidence and the PR.

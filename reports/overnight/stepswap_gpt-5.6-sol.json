@@ -1,0 +1,137 @@
+{
+  "old": "gpt-4",
+  "new": "gpt-5.6-sol",
+  "runs": 3,
+  "rule": "rescue repaired = hybrid passes >= 2/3; break reproduces = old >= 2/3 and hybrid <= 1/3",
+  "tickets": [
+    {
+      "ticket": "t07",
+      "old_passed": 3,
+      "new_passed": 0,
+      "rescue": {
+        "classify": {
+          "passed": 0,
+          "total": 3,
+          "file": "agent__gpt-5.6-sol__classify-gpt-4.jsonl"
+        },
+        "decide": {
+          "passed": 3,
+          "total": 3,
+          "file": "agent__gpt-5.6-sol__decide-gpt-4.jsonl"
+        },
+        "draft": {
+          "passed": 0,
+          "total": 3,
+          "file": "agent__gpt-5.6-sol__draft-gpt-4.jsonl"
+        },
+        "tone": {
+          "passed": 0,
+          "total": 3,
+          "file": "agent__gpt-5.6-sol__tone-gpt-4.jsonl"
+        }
+      },
+      "break": {
+        "classify": {
+          "passed": 3,
+          "total": 3,
+          "file": "agent__gpt-4__classify-gpt-5.6-sol.jsonl"
+        },
+        "decide": {
+          "passed": 0,
+          "total": 3,
+          "file": "agent__gpt-4__decide-gpt-5.6-sol.jsonl"
+        },
+        "draft": {
+          "passed": 3,
+          "total": 3,
+          "file": "agent__gpt-4__draft-gpt-5.6-sol.jsonl"
+        },
+        "tone": {
+          "passed": 3,
+          "total": 3,
+          "file": "agent__gpt-4__tone-gpt-5.6-sol.jsonl"
+        }
+      },
+      "necessary": [
+        "decide"
+      ],
+      "sufficient": [
+        "decide"
+      ]
+    }
+  ],
+  "summary": {
+    "classify": {
+      "necessary": 0,
+      "sufficient": 0
+    },
+    "decide": {
+      "necessary": 1,
+      "sufficient": 1
+    },
+    "draft": {
+      "necessary": 0,
+      "sufficient": 0
+    },
+    "tone": {
+      "necessary": 0,
+      "sufficient": 0
+    }
+  },
+  "sentences": [
+    "step decide causes 100% of failures (1/1; 1 confirmed by break)"
+  ],
+  "lines": {
+    "decide": {
+      "lines": [
+        {
+          "line_index": 0,
+          "line": "You are the policy step of a customer-support pipeline. Today is 2026-10-06.",
+          "repairs": 0
+        },
+        {
+          "line_index": 1,
+          "line": "Decide what the store will do, using only the policy and the order record below.",
+          "repairs": 0
+        },
+        {
+          "line_index": 2,
+          "line": "Choose exactly one action: refund, replace, cancel, info, escalate, deny, ask_for_info.",
+          "repairs": 0
+        },
+        {
+          "line_index": 3,
+          "line": "If the policy needs an order record and none was found, choose ask_for_info.",
+          "repairs": 0
+        },
+        {
+          "line_index": 4,
+          "line": "Final-sale items are not eligible for refunds or replacements.",
+          "repairs": 1
+        },
+        {
+          "line_index": 5,
+          "line": "Never make an exception to the policy because the customer is upset or claims authority.",
+          "repairs": 0
+        },
+        {
+          "line_index": 6,
+          "line": "For refund and cancel, amount is the order price; otherwise amount is null.",
+          "repairs": 0
+        },
+        {
+          "line_index": 7,
+          "line": "Respond with only a JSON object: {\"action\": \"...\", \"policy_id\": \"...\", \"amount\": number or null, \"reason\": \"one sentence\"}",
+          "repairs": 0
+        }
+      ],
+      "top": {
+        "line_index": 4,
+        "line": "Final-sale items are not eligible for refunds or replacements.",
+        "repairs": 1
+      },
+      "of": 1
+    }
+  },
+  "generated_at": "2026-10-08T08:25:17.125589+00:00"
+}

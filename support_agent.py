@@ -32,7 +32,11 @@ HERE = Path(__file__).parent
 TICKETS = HERE / "inputs" / "agent.jsonl"  # inputs/<task>.jsonl, as compare.load_gold expects
 # Ticket sets: "agent" = the original 24; "agent_hard" = 12 harder tickets (Oct 7). Flows that run every ticket
 # use one set, so adding a set never makes an existing cached flow spend.
-TICKET_SETS = {"agent": TICKETS, "agent_hard": HERE / "inputs" / "agent_hard.jsonl"}
+TICKET_SETS = {"agent": TICKETS, "agent_hard": HERE / "inputs" / "agent_hard.jsonl",
+               # Oct 8: 12 fresh held-out tickets, committed before any model ran on them.
+               "agent_holdout2": HERE / "inputs" / "agent_holdout2.jsonl",
+               # Oct 8: 8 more fresh tickets for a cheap retest of the luna + llama mix, committed before any run.
+               "agent_fresh3": HERE / "inputs" / "agent_fresh3.jsonl"}
 OPENAI_BASE = "https://api.openai.com/v1"
 PROTECTED = {"agent__gpt-4.jsonl", "agent__gpt-4__hard.jsonl"}
 TODAY = "2026-10-06"  # fixed so the tools and prompts are deterministic
@@ -161,6 +165,13 @@ PROMPTS = {
     ],
 }
 STEPS = list(PROMPTS)
+# The planted step-2 bug. It is on by default because every cached run used it; --no-plant runs the clean agent.
+PLANTED = ("decide", "Final-sale items are not eligible for refunds or replacements.")
+
+
+def unplanted_prompts():
+    step, line = PLANTED
+    return {step: [x for x in PROMPTS[step] if x != line]}
 
 
 def render(step, ctx, prompt_lines=None):
@@ -301,24 +312,10 @@ def score_row(ctx, ticket):
 # ---------------------------------------------------------------------------------------
 # Running
 # ---------------------------------------------------------------------------------------
-def call_openai(model, params, messages):
-    import requests
-    t0 = time.perf_counter()
-    for attempt in range(4):
-        resp = requests.post(f"{OPENAI_BASE}/chat/completions", timeout=120,
-                             headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
-                             json={"model": model, "messages": messages, **params})
-        if resp.status_code in (429, 500, 502, 503) and attempt < 3:
-            time.sleep(2 ** attempt * 2)
-            continue
-        break
-    body = resp.json()
-    if resp.status_code != 200:
-        raise RuntimeError(f"{model}: HTTP {resp.status_code} {json.dumps(body.get('error'))[:300]}")
-    choice = body["choices"][0]
-    return {"raw": choice["message"].get("content") or "", "usage": body.get("usage"),
-            "resolved_model": body.get("model"), "system_fingerprint": body.get("system_fingerprint"),
-            "finish_reason": choice.get("finish_reason"), "latency_s": round(time.perf_counter() - t0, 3)}
+def call_openai(model, params, messages, step=None):
+    """One chat call through LiteLLM with the per-call hash cache (llm.py)."""
+    import llm
+    return llm.call_llm(step, model, messages, params, api_base=OPENAI_BASE)
 
 
 def cost(model, usage):
@@ -346,7 +343,7 @@ def run_ticket(ticket, plan, reuse=None, call=call_openai, prompts=None):
             m = plan[step]
             rec = {"step": step, "model": m["model"], "params": m["params"], "messages": messages,
                    "prompt_sha": hashlib.sha256(messages[0]["content"].encode()).hexdigest()[:12],
-                   **call(m["model"], m["params"], messages), "replayed": False}
+                   **call(m["model"], m["params"], messages, step=step), "replayed": False}
             rec["cost_usd"] = cost(m["model"], rec["usage"])
         raws[step] = rec["raw"]
         rec["parsed"] = advance(step, ctx, rec["raw"])
@@ -363,6 +360,8 @@ def record_row(ticket, run, plan, label, reuse=None, prompts=None, **meta):
            "ts": datetime.now(timezone.utc).isoformat(), "text": ticket["text"],
            "tricky": ticket.get("tricky", False)}
     try:
+        import llm
+        llm.set_run(run)
         row.update(run_ticket(ticket, plan, reuse=reuse, prompts=prompts), error=None)
     except Exception as e:
         row["error"] = f"{type(e).__name__}: {e}"[:1000]
@@ -398,8 +397,13 @@ def build_plan(model, model_config, overrides):
     return plan
 
 
+def safe(name):
+    """Model name -> file-safe label: 'ollama/llama3.2:3b' -> 'ollama-llama3.2-3b' (OpenAI names are unchanged)."""
+    return name.replace("/", "-").replace(":", "-")
+
+
 def config_label(model, overrides):
-    return model + "".join(f"__{s}-{m}" for s, m in sorted(overrides.items(), key=lambda kv: STEPS.index(kv[0])))
+    return safe(model) + "".join(f"__{s}-{safe(m)}" for s, m in sorted(overrides.items(), key=lambda kv: STEPS.index(kv[0])))
 
 
 def dry_run(args, tickets, plan):
@@ -456,6 +460,8 @@ def main():
     ap.add_argument("--show", action="store_true", help="with --dry-run, print the first ticket's prompts")
     ap.add_argument("--tickets", choices=list(TICKET_SETS), default="agent", help="ticket set to run")
     ap.add_argument("--tag", help="results go to agent__<label>__<tag>.jsonl (keeps ticket sets in separate files)")
+    ap.add_argument("--no-plant", action="store_true",
+                    help="remove the planted step-2 line (PLANTED); results go to agent__<label>__noplant[__<tag>].jsonl")
     args = ap.parse_args()
     overrides = dict(s.split("=", 1) for s in args.step)
     bad = set(overrides) - set(STEPS)
@@ -469,7 +475,9 @@ def main():
         sys.exit("Set OPENAI_API_KEY first.")
 
     label = config_label(args.model, overrides)
-    out = Path(args.outdir) / f"agent__{label}{'__' + args.tag if args.tag else ''}.jsonl"
+    suffix = ("__noplant" if args.no_plant else "") + (f"__{args.tag}" if args.tag else "")
+    out = Path(args.outdir) / f"agent__{label}{suffix}.jsonl"
+    prompts = unplanted_prompts() if args.no_plant else None
     out.parent.mkdir(parents=True, exist_ok=True)
     done = load_done(out)
     todo = [(t, r) for t in tickets for r in range(1, args.runs + 1) if (t["id"], r) not in done]
@@ -480,7 +488,7 @@ def main():
     lock = threading.Lock()
 
     def work(t, r):
-        row = record_row(t, r, plan, label)
+        row = record_row(t, r, plan, label, prompts=prompts)
         with lock, open(out, "a") as f:
             f.write(json.dumps(row) + "\n")
         return row

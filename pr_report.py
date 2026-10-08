@@ -93,7 +93,7 @@ def render(m):
                    + (f" · `{new}` + fix → {c['fixed_output']}" if c.get("fixed_output") else ""))
     out += ["", "### Scores", "", f"| | `{old}` (baseline) | `{new}`, model swap only | `{new}` + fix |", "|---|---|---|---|"]
     out += [f"| {r[0]} | {r[1]} | {r[2]} | {r[3]} |" for r in m["evidence"]["table"]]
-    out += ["", f"**Old-model noise floor:** {m['evidence']['noise_floor']}", ""]
+    out += ["", f"**How much the old model varies on its own:** {m['evidence']['noise_floor']}", ""]
 
     # 4. Fixes -----------------------------------------------------------------------------
     out += ["## 4. Proposed fixes", "",

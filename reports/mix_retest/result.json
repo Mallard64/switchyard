@@ -1,0 +1,124 @@
+{
+  "fix": {
+    "step": "classify",
+    "line_index": 3,
+    "old": "Extract the order ID if the ticket gives one: the letter A followed by 4 digits, in uppercase (e.g. A1234). Use null if there is none.",
+    "new": "Extract the order ID if the ticket gives one: the letter A followed by 4 digits (e.g. A1234). Customers may type it in lowercase or with a #; return it in uppercase without the # (a1234 -> A1234). Use null if there is none.",
+    "written_by": "engineer edit, from the t42 failure"
+  },
+  "mix": {
+    "classify": "gpt-5.6-luna",
+    "decide": "gpt-5.6-luna",
+    "draft": "gpt-5.6-luna",
+    "tone": "ollama/llama3.1:8b"
+  },
+  "synthetic": {
+    "tickets": true,
+    "regression": false
+  },
+  "dev": {
+    "file": "agent__pool-mix-fixed.jsonl",
+    "verdict_counts": {
+      "REGRESSED": 0,
+      "IMPROVED": 0,
+      "CHANGED": 0,
+      "SAME": 24
+    },
+    "tickets": 24,
+    "regressed": [],
+    "passed_all": 0.9583,
+    "gold": 1.0,
+    "gold_old": 1.0,
+    "old_unstable": 0,
+    "errors": 0
+  },
+  "holdout2_seen": {
+    "file": "agent__pool-mix-fixed__holdout2.jsonl",
+    "verdict_counts": {
+      "REGRESSED": 0,
+      "IMPROVED": 0,
+      "CHANGED": 0,
+      "SAME": 12
+    },
+    "tickets": 12,
+    "regressed": [],
+    "passed_all": 1.0,
+    "gold": 1.0,
+    "gold_old": 1.0,
+    "old_unstable": 0,
+    "errors": 0
+  },
+  "fresh3": {
+    "tickets": 8,
+    "runs": 3,
+    "gpt4_file": "agent__gpt-4__noplant__fresh3.jsonl",
+    "sol_patch": {
+      "file": "agent__gpt-5.6-sol-np__patch-87f14ffb__fresh3.jsonl",
+      "verdict_counts": {
+        "REGRESSED": 0,
+        "IMPROVED": 0,
+        "CHANGED": 0,
+        "SAME": 8
+      },
+      "tickets": 8,
+      "regressed": [],
+      "passed_all": 1.0,
+      "gold": 1.0,
+      "gold_old": 0.9896,
+      "old_unstable": 0,
+      "errors": 0
+    },
+    "mix": {
+      "file": "agent__pool-mix-fixed__fresh3.jsonl",
+      "verdict_counts": {
+        "REGRESSED": 0,
+        "IMPROVED": 0,
+        "CHANGED": 0,
+        "SAME": 8
+      },
+      "tickets": 8,
+      "regressed": [],
+      "passed_all": 1.0,
+      "gold": 1.0,
+      "gold_old": 0.9896,
+      "old_unstable": 0,
+      "errors": 0,
+      "accepted": true
+    }
+  },
+  "cost": {
+    "per_step": {
+      "classify": {
+        "model": "gpt-5.6-luna",
+        "calls": 96,
+        "prompt_tokens": 208.5,
+        "completion_tokens": 15.6,
+        "usd_per_1k": 0.0604
+      },
+      "decide": {
+        "model": "gpt-5.6-luna",
+        "calls": 96,
+        "prompt_tokens": 274.5,
+        "completion_tokens": 63.9,
+        "usd_per_1k": 0.1316
+      },
+      "draft": {
+        "model": "gpt-5.6-luna",
+        "calls": 96,
+        "prompt_tokens": 291.4,
+        "completion_tokens": 49.4,
+        "usd_per_1k": 0.1176
+      },
+      "tone": {
+        "model": "ollama/llama3.1:8b",
+        "calls": 96,
+        "prompt_tokens": 283.7,
+        "completion_tokens": 78.9,
+        "usd_per_1k": null
+      }
+    },
+    "api_usd_per_1k": 0.3096,
+    "self_hosted_tokens_per_ticket": 362.6
+  },
+  "generated_at": "2026-10-08T23:28:25.985127+00:00"
+}

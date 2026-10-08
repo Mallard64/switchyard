@@ -1,0 +1,260 @@
+{
+  "ladder": [
+    "gpt-5.6-terra",
+    "gpt-5.6-sol",
+    "gpt-4"
+  ],
+  "rule": "a step passes when gpt-4-everywhere-else with this model at the step shows 0 regressions on 24 dev tickets x 3 runs (compare.py noise-floor rule)",
+  "synthetic": {
+    "tickets": true,
+    "regression": false
+  },
+  "per_step": {
+    "classify": {
+      "tried": [
+        {
+          "model": "gpt-5.6-terra",
+          "file": "agent__gpt-4-np__classify-gpt-5.6-terra-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 0,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 24
+          },
+          "passed": true,
+          "regressed": []
+        }
+      ],
+      "chosen": "gpt-5.6-terra"
+    },
+    "decide": {
+      "tried": [
+        {
+          "model": "gpt-5.6-terra",
+          "file": "agent__gpt-4-np__decide-gpt-5.6-terra-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 0,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 24
+          },
+          "passed": true,
+          "regressed": []
+        }
+      ],
+      "chosen": "gpt-5.6-terra"
+    },
+    "draft": {
+      "tried": [
+        {
+          "model": "gpt-5.6-terra",
+          "file": "agent__gpt-4-np__draft-gpt-5.6-terra-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 0,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 24
+          },
+          "passed": true,
+          "regressed": []
+        }
+      ],
+      "chosen": "gpt-5.6-terra"
+    },
+    "tone": {
+      "tried": [
+        {
+          "model": "gpt-5.6-terra",
+          "file": "agent__gpt-4-np__tone-gpt-5.6-terra-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 2,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 22
+          },
+          "passed": false,
+          "regressed": [
+            "t07",
+            "t20"
+          ]
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "file": "agent__gpt-4-np__tone-gpt-5.6-sol-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 1,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 23
+          },
+          "passed": false,
+          "regressed": [
+            "t07"
+          ]
+        }
+      ],
+      "chosen": "gpt-4"
+    }
+  },
+  "assignment": {
+    "classify": "gpt-5.6-terra",
+    "decide": "gpt-5.6-terra",
+    "draft": "gpt-5.6-terra",
+    "tone": "gpt-4"
+  },
+  "mixed": {
+    "dev": {
+      "file": "agent__mix-clterra-deterra-drterra-to4.jsonl",
+      "tickets": 24,
+      "runs": 3,
+      "verdict_counts": {
+        "REGRESSED": 0,
+        "IMPROVED": 0,
+        "CHANGED": 0,
+        "SAME": 24
+      },
+      "regressed": [],
+      "gold_old": 1.0,
+      "gold_new": 1.0,
+      "passed_all_old": 0.9583,
+      "passed_all_new": 0.9583,
+      "old_unstable_inputs": 0
+    },
+    "heldout": {
+      "file": "agent__mix-clterra-deterra-drterra-to4__hard.jsonl",
+      "tickets": 12,
+      "runs": 3,
+      "verdict_counts": {
+        "REGRESSED": 1,
+        "IMPROVED": 1,
+        "CHANGED": 0,
+        "SAME": 10
+      },
+      "regressed": [
+        "t33"
+      ],
+      "gold_old": 0.9583,
+      "gold_new": 1.0,
+      "passed_all_old": 1.0,
+      "passed_all_new": 0.9444,
+      "old_unstable_inputs": 0
+    }
+  },
+  "accepted": false,
+  "noise_floor": 0.0,
+  "costs_per_1k_ticket_runs": {
+    "all_old": {
+      "classify": {
+        "model": "gpt-4",
+        "calls": 108,
+        "prompt_tokens": 189.6,
+        "completion_tokens": 14.9,
+        "usd_per_1k": 6.58
+      },
+      "decide": {
+        "model": "gpt-4",
+        "calls": 108,
+        "prompt_tokens": 282.5,
+        "completion_tokens": 39.3,
+        "usd_per_1k": 10.8342
+      },
+      "draft": {
+        "model": "gpt-4",
+        "calls": 108,
+        "prompt_tokens": 293.1,
+        "completion_tokens": 66.4,
+        "usd_per_1k": 12.7761
+      },
+      "tone": {
+        "model": "gpt-4",
+        "calls": 108,
+        "prompt_tokens": 267.3,
+        "completion_tokens": 18.5,
+        "usd_per_1k": 9.1294
+      }
+    },
+    "all_new": {
+      "classify": {
+        "model": "gpt-5.6-sol",
+        "calls": 108,
+        "prompt_tokens": 187.5,
+        "completion_tokens": 19.1,
+        "usd_per_1k": 1.1325
+      },
+      "decide": {
+        "model": "gpt-5.6-sol",
+        "calls": 108,
+        "prompt_tokens": 279.9,
+        "completion_tokens": 46.7,
+        "usd_per_1k": 2.0541
+      },
+      "draft": {
+        "model": "gpt-5.6-sol",
+        "calls": 108,
+        "prompt_tokens": 296.3,
+        "completion_tokens": 64.8,
+        "usd_per_1k": 2.4817
+      },
+      "tone": {
+        "model": "gpt-5.6-sol",
+        "calls": 108,
+        "prompt_tokens": 284.4,
+        "completion_tokens": 51.9,
+        "usd_per_1k": 2.1749
+      }
+    },
+    "mix": {
+      "classify": {
+        "model": "gpt-5.6-terra",
+        "calls": 108,
+        "prompt_tokens": 187.5,
+        "completion_tokens": 15.9,
+        "usd_per_1k": 0.5653
+      },
+      "decide": {
+        "model": "gpt-5.6-terra",
+        "calls": 108,
+        "prompt_tokens": 279.9,
+        "completion_tokens": 45.5,
+        "usd_per_1k": 1.1063
+      },
+      "draft": {
+        "model": "gpt-5.6-terra",
+        "calls": 108,
+        "prompt_tokens": 294.7,
+        "completion_tokens": 46.6,
+        "usd_per_1k": 1.1482
+      },
+      "tone": {
+        "model": "gpt-4",
+        "calls": 108,
+        "prompt_tokens": 250.1,
+        "completion_tokens": 19.7,
+        "usd_per_1k": 8.6814
+      }
+    }
+  },
+  "totals_usd_per_1k": {
+    "all_old": 39.3197,
+    "all_new": 7.8432,
+    "mix": 11.5012
+  },
+  "savings": {
+    "vs_all_old_pct": 70.7,
+    "vs_all_new_pct": -46.6
+  },
+  "recommended": {
+    "config": "all_new",
+    "assignment": {
+      "classify": "gpt-5.6-sol",
+      "decide": "gpt-5.6-sol",
+      "draft": "gpt-5.6-sol",
+      "tone": "gpt-5.6-sol"
+    },
+    "usd_per_1k": 7.8432,
+    "why": "the per-step mix regressed on held-out; all gpt-5.6-sol + the tone patch had 0 held-out regressions (model_only.py)",
+    "savings_vs_all_old_pct": 80.1
+  },
+  "prices": "config/prices.yml",
+  "generated_at": "2026-10-08T18:46:07.431163+00:00"
+}

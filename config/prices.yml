@@ -1,0 +1,84 @@
+# USD per 1M tokens. Only prices read from the source page on the date given; anything unverified is null,
+# and reports then show tokens instead of dollars. record_baseline.PRICES loads this file.
+# gpt-4 / gpt-3.5-turbo resolve to gpt-4-0613 / gpt-3.5-turbo-0125 (see results/*.jsonl resolved_model).
+models:
+  gpt-5.6-sol:
+    input_per_1m: 4.00
+    output_per_1m: 20.00
+    tier: standard, short context
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-5.6-terra:
+    input_per_1m: 2.00
+    output_per_1m: 12.00
+    tier: standard, short context
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-4:
+    input_per_1m: 30.00
+    output_per_1m: 60.00
+    tier: standard (listed as gpt-4-0613)
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-4-0613:
+    input_per_1m: 30.00
+    output_per_1m: 60.00
+    tier: standard
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-3.5-turbo:
+    input_per_1m: 0.50
+    output_per_1m: 1.50
+    tier: standard (listed as gpt-3.5-turbo)
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-3.5-turbo-0125:
+    input_per_1m: 0.50
+    output_per_1m: 1.50
+    tier: standard
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-5.6-luna:
+    input_per_1m: 0.20
+    output_per_1m: 1.20
+    tier: standard, short context
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-5.4-mini:
+    input_per_1m: 0.75
+    output_per_1m: 4.50
+    tier: standard, short context
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-4.1-nano:
+    input_per_1m: 0.10
+    output_per_1m: 0.40
+    tier: standard
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-5-nano:
+    input_per_1m: 0.05
+    output_per_1m: 0.40
+    tier: standard
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  # Open-weight models run locally through Ollama (Q4 quantized, Apple M4, 16 GB). There is no list price for
+  # self-hosted inference, so these stay null and reports show tokens; hardware and power are not counted.
+  ollama/llama3.2:3b:
+    input_per_1m: null
+    output_per_1m: null
+    tier: self-hosted (Ollama, default Q4_K_M)
+    source: https://ollama.com/library/llama3.2
+    checked: 2026-10-08
+  ollama/qwen2.5:7b:
+    input_per_1m: null
+    output_per_1m: null
+    tier: self-hosted (Ollama, default Q4_K_M)
+    source: https://ollama.com/library/qwen2.5
+    checked: 2026-10-08
+  ollama/llama3.1:8b:
+    input_per_1m: null
+    output_per_1m: null
+    tier: self-hosted (Ollama, default Q4_K_M)
+    source: https://ollama.com/library/llama3.1
+    checked: 2026-10-08
