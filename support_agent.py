@@ -161,6 +161,13 @@ PROMPTS = {
     ],
 }
 STEPS = list(PROMPTS)
+# The planted step-2 bug. It is on by default because every cached run used it; --no-plant runs the clean agent.
+PLANTED = ("decide", "Final-sale items are not eligible for refunds or replacements.")
+
+
+def unplanted_prompts():
+    step, line = PLANTED
+    return {step: [x for x in PROMPTS[step] if x != line]}
 
 
 def render(step, ctx, prompt_lines=None):
@@ -444,6 +451,8 @@ def main():
     ap.add_argument("--show", action="store_true", help="with --dry-run, print the first ticket's prompts")
     ap.add_argument("--tickets", choices=list(TICKET_SETS), default="agent", help="ticket set to run")
     ap.add_argument("--tag", help="results go to agent__<label>__<tag>.jsonl (keeps ticket sets in separate files)")
+    ap.add_argument("--no-plant", action="store_true",
+                    help="remove the planted step-2 line (PLANTED); results go to agent__<label>__noplant[__<tag>].jsonl")
     args = ap.parse_args()
     overrides = dict(s.split("=", 1) for s in args.step)
     bad = set(overrides) - set(STEPS)
@@ -457,7 +466,9 @@ def main():
         sys.exit("Set OPENAI_API_KEY first.")
 
     label = config_label(args.model, overrides)
-    out = Path(args.outdir) / f"agent__{label}{'__' + args.tag if args.tag else ''}.jsonl"
+    suffix = ("__noplant" if args.no_plant else "") + (f"__{args.tag}" if args.tag else "")
+    out = Path(args.outdir) / f"agent__{label}{suffix}.jsonl"
+    prompts = unplanted_prompts() if args.no_plant else None
     out.parent.mkdir(parents=True, exist_ok=True)
     done = load_done(out)
     todo = [(t, r) for t in tickets for r in range(1, args.runs + 1) if (t["id"], r) not in done]
@@ -468,7 +479,7 @@ def main():
     lock = threading.Lock()
 
     def work(t, r):
-        row = record_row(t, r, plan, label)
+        row = record_row(t, r, plan, label, prompts=prompts)
         with lock, open(out, "a") as f:
             f.write(json.dumps(row) + "\n")
         return row
