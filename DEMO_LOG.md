@@ -133,3 +133,49 @@ Spend after task 2: **$10.59**.
 - `python demo.py --demo` narrates the real recorded migration in 5 stages: switch, which step, which line, fix, held-out. It replays the cached rows with their recorded relative timing, squeezed into about 1 minute (`--speed` changes that). It starts the dashboard on :4173 unless one is already running.
 - It imports no model client, reads only `results/*.jsonl` and `reports/*.json`, and exits with a clear message if a cached file is missing.
 - **Offline check:** I ran it with `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` unset and `http(s)_proxy` pointed at a dead port, and it completed (13 s at `--speed 4`). With the server path, `/api/reports` lists `demo` first. The dashboard page loads no external URLs.
+
+## Task 6: DEMO.md + screenshots (done)
+- `DEMO.md` has the setup and offline commands, a timed 2-minute script, what each screen proves (and what it doesn't), and answers to likely questions.
+- `docs/demo/`: `savings.png`, `evidence.png`, `pr.png` (headless Chrome, 1360 px wide) and `terminal.txt` (a transcript of `demo.py --demo`).
+- **Held-out numbers everywhere:** `migrate_agent.bench_note()` quoted 37/39 (post-fix, dev-set) in `reports/migration_agent*/PR.md`. It now reads the held-out row of RESULTS.md (34/39 exact, 38/39 two-way, 0 wrong). I swapped that one sentence in the 6 committed legacy files instead of regenerating them; see the cost issue under Open issues.
+
+## Summary
+
+### Real vs synthetic
+| Item | Real or synthetic |
+|---|---|
+| Model outputs, token counts, latencies (all `results/*.jsonl` rows) | **Real** recorded API calls |
+| The tone-timeline regression, repair/reproduce, line ablation, 1-line patch, held-out 3 → 0 | **Real.** Nothing planted; only the model changed (plus sol's forced default sampling). |
+| Per-step costs and savings | **Real** token counts × official list prices (`config/prices.yml`, OpenAI pricing page, Oct 8) |
+| Monthly volume (100,000) | **Assumption**, labelled on the page and editable |
+| The 36 tickets and expected outcomes | **Synthetic** (hand-written; the 12 hard tickets were written before any run) |
+| Step-finder accuracy 34/39 held-out, 38/39 two-way | **Synthetic** planted-bug benchmark, labelled in the UI |
+| The decide line "Final-sale items…" | **Planted**. Removed on both sides for every demo number. |
+
+### Spend
+**$10.59 total** logged in `results/llm_calls.jsonl`. That's $1.03 overnight + $9.56 for this brief: about $5.0 recording clean baselines and candidates, $1.5 for the step-finder, line ablation, fixer and patch runs, and $3.5 for the per-step ladder and mix. The cap was $20, and no paid calls were made for tasks 3–6.
+
+### Open issues
+1. **The per-step mix isn't validated.** terra×3 + gpt-4 tone regressed held-out t33, and the obvious next candidate (terra×3 + sol-tone) needs a *fresh* held-out set. I didn't tune on the current one.
+2. **Reproduce is 2/4, not 4/4.** On t21 and t24 sol's tone step drops the timeline only when sol also wrote the draft. This is shown as-is.
+3. **Small held-out set.** The patch was verified on 12 tickets (3 → 0). That's real but small; a design partner's traffic is the next test.
+4. **Mixed prices in legacy reports.** Rows recorded before tonight stored `cost_usd` at the user-supplied Oct 6 rates (sol $5/$30, terra $2.50/$15), while compare.py fills in missing costs at the verified rates. Regenerating `reports/migration_agent*` would mix the two in one table ($8.70 next to $10.80), so I left those reports' numbers alone. The demo report recomputes every cost from tokens × `prices.yml` and is consistent. The fix is for compare.py to always recompute from usage.
+5. **Phone width:** the existing dashboard layout overflows at 390 px (the intro and note box clip). The new demo views reflow, but the page as a whole doesn't. It's fine on a laptop.
+6. **The design canvas from earlier** (claude.ai artifact "Switchyard dashboard redesign") says "37 times" for the benchmark. Fix it to the held-out 34/39 before sharing it.
+7. **Not pushed.** `demo` is based on `overnight`, and neither branch is on GitHub.
+
+### Reproduce
+```
+git checkout demo
+source .venv/bin/activate
+pip install -r requirements.txt
+python -m unittest discover tests
+python demo.py --demo
+```
+Rebuilding the demo data from cache is free: `python results_demo.py`. Re-running the experiments costs money; everything is cached, so a repeat is free:
+```
+set -a; source .env; set +a
+python model_only.py
+python assign.py
+python results_demo.py
+```
