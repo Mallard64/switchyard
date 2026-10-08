@@ -119,3 +119,12 @@ Spend after task 2: **$10.59**.
     - `prices` with source and date.
     - `monthly_requests_default: 100000`, labelled as an assumption the buyer edits.
 - Numbers: sol as-is has 7/36 regressed (4 dev + 3 held-out) and 0/36 after the patch. Terra has 2/36. Cost per 1k ticket runs: gpt-4 $39.32, sol as-is $9.05, sol + patch $7.84.
+
+## Task 4: dashboard views (done; existing frontend extended, not rebuilt)
+- `dashboard/demo-views.js` (new) is imported by `app.js`. `render()` gets one inserted section plus one bind call. `server.mjs` lists `reports/<name>/results.json` when it's v1 with a `demo` block, opens the demo report first and serves `demo-views.js`. The styles are an appended `.dm-*` block in `styles.css` using the current black/silver edition's colors.
+- Shown only when a report has `demo`. Three tabs, deep-linkable with `#savings`, `#evidence` and `#pr`:
+  - **Savings (buyer):** per-step cost before/after, an editable tickets-per-month calculator (default 100,000, labelled as an assumption), a quality bar for gpt-4 vs sol without and with the fix, and the rejected cheaper mix explained.
+  - **Evidence (engineer):** repair/reproduce per step, line ablation inside `tone`, before/after replies for a dev ticket (t21) and a held-out ticket (t36), and the synthetic benchmark (34/39 held-out exact, 38/39 two-way), labelled synthetic.
+  - **PR card:** summary (where / what / proof / cost) and 2 changes, the model swap and tone line 3, each with Accept / Edit / Reject. An edit is marked "re-run needed" and is never shown as verified.
+- Fixed while checking: the demo cards were white on the dark theme, and `p95 NaN` appeared in the existing candidate cards (`latency_p95_ms` added, additively).
+- Screenshots: `docs/demo/savings.png`, `evidence.png`, `pr.png` (headless Chrome).

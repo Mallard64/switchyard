@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "_note": "Real runs of the 4-step support agent (clean prompts, nothing planted). Tickets are hand-written (synthetic); model behavior is real. cost_per_1k_calls_usd = per 1k ticket runs (4 calls).",
-  "run_id": "2026-10-08T18:48:09Z",
+  "run_id": "2026-10-08T18:56:24Z",
   "repo": {
     "name": "samegrade support agent (demo)",
     "call_site": "support_agent.py: PROMPTS['tone']"
@@ -255,6 +255,7 @@
         "cost_change_pct": -77.0,
         "cost_per_1k_calls_usd": 9.046,
         "latency_p50_ms": 6910,
+        "latency_p95_ms": 11995,
         "speed_vs_baseline": 0.93,
         "recommended": true,
         "verdict_counts": {
@@ -909,6 +910,7 @@
         "cost_change_pct": -90.1,
         "cost_per_1k_calls_usd": 3.9028,
         "latency_p50_ms": 5154,
+        "latency_p95_ms": 7634,
         "speed_vs_baseline": 1.25,
         "recommended": false,
         "verdict_counts": {
@@ -1609,6 +1611,24 @@
       "regressed_heldout_after": 0,
       "old_model_unstable_tickets": 0,
       "rule": "regressed = most new-model runs fail a hard check the old model passes, or score below the old model's worst run"
+    },
+    "quality": {
+      "old": {
+        "runs": 108,
+        "passed_all": 0.9722,
+        "gold": 0.9861
+      },
+      "new_as_is": {
+        "runs": 108,
+        "passed_all": 0.7963,
+        "gold": 1.0
+      },
+      "new_fixed": {
+        "runs": 108,
+        "passed_all": 0.9722,
+        "gold": 1.0
+      },
+      "note": "all runs, 24 dev + 12 held-out tickets x 3"
     },
     "per_step": [
       {

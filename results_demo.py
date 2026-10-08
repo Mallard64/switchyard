@@ -39,10 +39,26 @@ def describe(row):
     return f"[{row.get('category')} / {d.get('action')}]\n{row.get('final_reply') or ''}".strip()
 
 
+def latencies(paths):
+    return sorted(sum(s.get("latency_s") or 0 for s in r["steps"]) * 1000
+                  for p in paths for r in (json.loads(l) for l in open(p)) if not r.get("error") and r.get("steps"))
+
+
 def p50_ms(paths):
-    vals = [sum(s.get("latency_s") or 0 for s in r["steps"]) * 1000
-            for p in paths for r in (json.loads(l) for l in open(p)) if not r.get("error") and r.get("steps")]
+    vals = latencies(paths)
     return round(statistics.median(vals)) if vals else None
+
+
+def p95_ms(paths):
+    vals = latencies(paths)
+    return round(vals[min(len(vals) - 1, int(0.95 * len(vals)))]) if vals else None
+
+
+def quality(paths):
+    """Share of runs passing every hard check, and mean gold score, over all runs in these files."""
+    rows = [r for p in paths for r in (json.loads(l) for l in open(p)) if not r.get("error")]
+    return {"runs": len(rows), "passed_all": round(sum(bool(r.get("passed_all")) for r in rows) / len(rows), 4),
+            "gold": round(statistics.mean(r["gold_score"]["score"] for r in rows), 4)}
 
 
 def merged(rep_dev, rep_ho):
@@ -77,7 +93,7 @@ def candidate(model_label, files, old_files, cause_id, heldout_ids, after=None):
             "summary": {"passed": len(items) - counts["REGRESSED"], "total": len(items),
                         "passed_after_fix": len(items) - (fixed_counts or counts)["REGRESSED"],
                         "cost_change_pct": None, "cost_per_1k_calls_usd": cost,
-                        "latency_p50_ms": p50_ms(files), "speed_vs_baseline": None,
+                        "latency_p50_ms": p50_ms(files), "latency_p95_ms": p95_ms(files), "speed_vs_baseline": None,
                         "recommended": False, "verdict_counts": counts,
                         **({"verdict_counts_after_fix": fixed_counts} if fixed_counts else {})},
             "results": results}
@@ -196,6 +212,8 @@ def main():
                            "old_model_unstable_tickets": noisy,
                            "rule": "regressed = most new-model runs fail a hard check the old model passes, or score "
                                    "below the old model's worst run"},
+            "quality": {"old": quality(old_files), "new_as_is": quality(sol_files), "new_fixed": quality(sol_fixed),
+                        "note": "all runs, 24 dev + 12 held-out tickets x 3"},
             "per_step": per_step,
             "totals_usd_per_1k": totals, "savings": asg["savings"], "recommended": asg["recommended"],
             "mix": {"assignment": asg["assignment"], "accepted": asg["accepted"], "dev": asg["mixed"]["dev"]["verdict_counts"],

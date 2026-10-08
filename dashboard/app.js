@@ -1,3 +1,4 @@
+import { demoSection, bindDemo } from './demo-views.js';
 const app = document.querySelector('#app');
 const dialog = document.querySelector('#detail');
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -272,6 +273,7 @@ function render() {
  const retirement=days===null?'':`<span class="pill warn">${days} days to retirement at report time</span>`;
  app.innerHTML=`<section class="intro"><div><p class="eyebrow">Migration report / ${esc(data.repo.call_site)}</p><h1>${esc(data.repo.name)}</h1><div class="subline"><span>Baseline</span><strong>${esc(data.baseline.model)}</strong>${retirement}</div></div><div class="actions"><button class="button" id="reset">↺ Reset</button><button class="button primary" id="run" ${phase==='running'?'disabled':''}>${phase==='running'?'Running replay…':phase==='complete'?'↻ Replay run':'▶ Run comparison'}</button></div></section>
  ${data._note?`<div class="sample"><span>◈</span><span>${esc(data._note)} This dashboard replays recorded results; no live model calls.</span></div>`:''}
+ ${demoSection(data)}
  <section class="cards" aria-label="Model comparison">${data.candidates.map((c,ci)=>{
  const repaired=c.results.filter(isFixed).length;
  const passed=done?c.summary.passed+repaired:c.summary.passed;
@@ -288,6 +290,7 @@ function render() {
  ${data._format==='ner'?`<section class="pr-banner ${data.ner.ready_to_merge?'':'merge-blocked'}" role="status"><div><h2><span class="pr-icon">${data.ner.ready_to_merge?'✓':'!'}</span>${data.ner.ready_to_merge?'Ready to merge':'Not ready to merge'}</h2><p>${esc(data.ner.verdict_counts.REGRESSED??0)} regression · ${esc(data.ner.verdict_counts.IMPROVED??0)} improved · ${esc(data.ner.verdict_counts.CHANGED??0)} changed · ${esc(data.ner.verdict_counts.SAME??0)} same</p><span class="pill">${esc(data.ner.inputs_compared)} inputs compared · ${esc(data.ner.candidate.unstable_inputs)} unstable candidate inputs</span></div><span class="provider">${data.ner.ready_to_merge?'All merge checks passed':'Review the regressed and changed examples'}</span></section>`:done&&remaining===0?`<section class="pr-banner" role="status"><div><h2><span class="pr-icon">⑂</span>Migration ready for review</h2><p>${esc(data.pr.title)}</p><span class="pill">${esc(data.pr.status)} · ${esc(data.pr.lines_changed)} lines changed</span></div>${safeURL(data.pr.url)?`<a class="button" href="${esc(safeURL(data.pr.url))}" target="_blank" rel="noopener noreferrer">Open pull request ↗</a>`:'<span class="provider">PR link not available in this report</span>'}</section>`:''}
  <footer><span>SWITCHYARD / Inspect. Repair. Migrate.</span><span>Report ${esc(data.run_id)} · Recorded replay</span></footer>`;
  if(data.migration) {renderMigration(); app.querySelector('.actions').insertAdjacentHTML('afterbegin','<button class="button" id="demo-view">← Dashboard</button>'); app.querySelector('#demo-view').onclick=()=>{clearTimers();reportView=false;render();};}
+ bindDemo(app,data);
  document.querySelector('#run').onclick=start;
  document.querySelector('#reset').onclick=reset;
  app.querySelectorAll('[data-ci]').forEach(b=>b.onclick=()=>openDetail(+b.dataset.ci,+b.dataset.ri));

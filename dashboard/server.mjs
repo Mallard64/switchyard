@@ -6,13 +6,14 @@ import { open, readFile, readdir, stat } from 'node:fs/promises';
 const here = path.dirname(fileURLToPath(import.meta.url));
 // The migration backend (samegrade, this folder's parent repo). Reports and live run results are read from it; nothing is written.
 const SAMEGRADE = path.resolve(process.env.SAMEGRADE_DIR || path.join(here, '..'));
-const files = {'/':'index.html','/index.html':'index.html','/app.js':'app.js','/styles.css':'styles.css','/results.json':'results.json'};
+const files = {'/':'index.html','/index.html':'index.html','/app.js':'app.js','/demo-views.js':'demo-views.js','/styles.css':'styles.css','/results.json':'results.json'};
 const types = {html:'text/html; charset=utf-8',js:'text/javascript; charset=utf-8',css:'text/css; charset=utf-8',json:'application/json'};
 const port = Number(process.env.PORT || 4173);
 
 // ---- Reports -----------------------------------------------------------------------------
 // A report is reports/<name>/dashboard.json (agent reports), or reports/<name>/migration.json when it is
-// already in the dashboard's migration shape (NER migrate.py output).
+// already in the dashboard's migration shape (NER migrate.py output), or reports/<name>/results.json in the v1
+// shape with a `demo` block (results_demo.py).
 const ORDER = ['migration_agent', 'demo_e2e', 'migration_ner'];
 async function listReports() {
   const dir = path.join(SAMEGRADE, 'reports');
@@ -20,10 +21,16 @@ async function listReports() {
   try { names = await readdir(dir); } catch { return []; }
   const out = [];
   for (const name of names) {
-    for (const file of ['dashboard.json', 'migration.json']) {
+    for (const file of ['dashboard.json', 'migration.json', 'results.json']) {
       const full = path.join(dir, name, file);
       try {
         const raw = JSON.parse(await readFile(full, 'utf8'));
+        if (file === 'results.json') {
+          if (raw.schema_version !== 1 || !raw.demo || !Array.isArray(raw.candidates)) continue;
+          out.push({id: name, title: raw.pr?.title || name, task: 'agent', group: 'Demo',
+                    label: `Demo · ${raw.demo.pair.old} → ${raw.demo.pair.new} (real runs)`, updated: (await stat(full)).mtimeMs, file: full});
+          break;
+        }
         if (!raw.comparison || !Array.isArray(raw.candidates)) continue;
         out.push({id: name, title: raw.pr?.title || name, task: raw.task, group: raw.group || 'Migrations',
                   label: raw.label || null, updated: (await stat(full)).mtimeMs, file: full});
@@ -31,7 +38,7 @@ async function listReports() {
       } catch { /* not present or not a dashboard report */ }
     }
   }
-  const rank = id => { const i = ORDER.findIndex(p => id.startsWith(p)); return i < 0 ? ORDER.length : i; };
+  const rank = id => { if (id === 'demo') return -1; const i = ORDER.findIndex(p => id.startsWith(p)); return i < 0 ? ORDER.length : i; };
   return out.sort((a, b) => rank(a.id) - rank(b.id) || a.id.localeCompare(b.id));
 }
 
