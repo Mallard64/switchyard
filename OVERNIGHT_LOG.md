@@ -40,3 +40,35 @@
   - **Hard checks:** valid JSON (fenced JSON still parses), missing field, label mismatch, errored run.
   - **Step swap:** rescue/break plans put the other model at exactly step k with the right sampling params, replay side and `first_live`; cache labels match stepfinder.py's; the repaired threshold; summary sentences; `--no-plant` removes exactly one line.
   - **Hash cache:** a repeat call is free, each run is a separate sample, and the spend cap blocks only uncached calls.
+
+## Task 6: line-level ablation (done)
+- `stepswap.py --new gpt-5.6-sol --lines` removes each of the 8 `decide` lines one at a time (new model everywhere, 3 runs). **Only line 5 repairs t07**: "Final-sale items are not eligible for refunds or replacements." That's the planted line. The other 7 lines repair 0/1. All of these runs were already cached, so this cost $0.
+- Fix verification: removing that line and re-running all 24 tickets × 3 is the `--no-plant` run from task 3. It gave **24/24 not broken**. `public/results.json` now carries the cause (`line: 5`), `fix.status: "verified"`, `retest: 24/24`, `passed_after_fix: 24`, and the after-fix output for t07.
+
+## Summary (morning)
+**What works**
+- A thin end-to-end on cached runs: gpt-4 baseline vs sol + terra, three hard checks, the 2/3-vs-1/3 noise rule, and `public/results.json` in the v1 schema (it passes the dashboard's own `validate()`).
+- LiteLLM for every agent call, with the per-call hash cache and a spend cap that's enforced in code.
+- The 4-step agent with fake tools, a per-step model plan, and the planted step-2 bug that `--no-plant` removes.
+- Step-finder (rescue + break, 3 runs each, live) → "step decide causes 100% of failures (1/1; 1 confirmed by break)".
+- Line ablation → line 5 of decide, with the fix verified on the full suite.
+- 18 unit tests passing.
+
+**What's weak or not done**
+- On the brief's three hard checks, the real candidates barely break: sol breaks 1/24 tickets (the planted one) and terra 0/24. "100%" rests on n=1. compare.py's richer checks still find 6 real sol regressions (draft timeline, word limit, tone), documented in `reports/migration_agent/`. To show those in this view, add those checks to `thin_e2e.CHECKS`.
+- The dashboard server serves `dashboard/results.json`, not `public/results.json`. To view it, run `cp public/results.json dashboard/results.json` (that overwrites Iris's fixture) or point the server at it. I didn't change the dashboard.
+- NER/textcat calls, the NER fixer and the Claude judge don't go through LiteLLM (see the task 2 deviations). None of them ran tonight.
+- The `public/` path was taken from the brief literally. Nothing else in the repo uses `public/`.
+
+**Spend tonight: $1.03 of the $15 cap.** That's $0.005 for the LiteLLM smoke test, $0.87 for the sol `--no-plant` run (72 ticket-runs) and $0.15 for the step-finder break tests. The source of truth is the sum of `cost_usd` in `results/llm_calls.jsonl`; run `python -c "import llm; print(llm.spent_usd())"`. No protected baseline file changed (`git diff --name-only main..overnight -- results/agent__gpt-4.jsonl 'results/*__gpt-4__gpt-4*.jsonl' 'results/*__shipped__gpt-3.5-turbo.jsonl'` prints nothing).
+
+**Reproduce (free; everything is cached, no key needed)**
+```
+source .venv/bin/activate
+pip install -r requirements.txt
+python -m unittest discover tests
+python stepswap.py --new gpt-5.6-sol --lines
+python stepswap.py --new gpt-5.6-terra
+python thin_e2e.py
+```
+To re-run live (it costs money, and the cap stops it at $15): `set -a; source .env; set +a`, then for example `python support_agent.py --model gpt-5.6-sol --model-config '{}' --no-plant --tag rerun1`.

@@ -123,8 +123,9 @@ def check_causes(model, items):
             for c, ids in causes.items()]
 
 
-def step_causes(model, items, sw):
-    """With stepswap.py results: one cause per guilty step ('step X causes N% of failures')."""
+def step_causes(model, items, sw, retest=None):
+    """With stepswap.py results: one cause per guilty step ('step X causes N% of failures').
+    retest: {"passed", "total"} from a full re-run with the top line removed, when one exists."""
     by_ticket = {t["ticket"]: t for t in sw["tickets"]}
     n = len(sw["tickets"])
     causes = []
@@ -142,7 +143,8 @@ def step_causes(model, items, sw):
                       f"(rescue); putting the new model at `{step}` alone breaks {s['sufficient']} of those again "
                       f"(break). 3 runs each, live, judged with the same noise rule.",
             "fix": {"old_line": top["line"] if top else "", "new_line": "",
-                    "status": "none", "retest": None}})
+                    "status": ("verified" if retest["passed"] == retest["total"] else "failed")
+                    if top and retest else "none", "retest": retest if top else None}})
     for it in items:
         if it["verdict"] == "broken":
             st = (by_ticket.get(it["ticket"]["id"]) or {}).get("necessary") or []
@@ -159,6 +161,15 @@ def step_causes(model, items, sw):
     return causes
 
 
+def removal_retest(old_rows, model, sw, tickets, results):
+    """Full re-run with the guilty line removed. The only such run is the planted line's (--no-plant)."""
+    tops = [v["top"]["line"] for v in (sw.get("lines") or {}).values() if v.get("top")]
+    path = results / f"agent__{model}__noplant.jsonl"
+    if A.PLANTED[1] not in tops or not path.exists():
+        return None
+    return compare(old_rows, load_rows(path), tickets)
+
+
 def build(old, candidates, tickets, results=RESULTS, stepswap_dir=STEPSWAP):
     old_rows = load_rows(results / f"agent__{old}.jsonl")
     ost = stats(old_rows)
@@ -169,20 +180,25 @@ def build(old, candidates, tickets, results=RESULTS, stepswap_dir=STEPSWAP):
         items = compare(old_rows, new_rows, tickets)
         sw_path = stepswap_dir / f"stepswap_{model}.json"
         sw = json.loads(sw_path.read_text()) if sw_path.exists() else None
+        fix_items = None
         if sw:
-            causes += step_causes(model, items, sw)
+            fix_items = removal_retest(old_rows, model, sw, tickets, results)
+            retest = {"passed": sum(f["verdict"] != "broken" for f in fix_items), "total": len(fix_items)} if fix_items else None
+            causes += step_causes(model, items, sw, retest)
             step_finder[model] = {"broken": len(sw["tickets"]), "summary": sw["summary"], "sentences": sw["sentences"],
                                   "lines": sw.get("lines") or {}}
             ranked = sorted(sw["summary"].items(), key=lambda kv: -kv[1]["necessary"])
             guilty = guilty or (ranked[0][0] if ranked and ranked[0][1]["necessary"] else None)
         else:
             causes += check_causes(model, items)
+        after = {f["ticket"]["id"]: f for f in fix_items or []}
         nst = stats(new_rows)
         counts = {v: sum(it["verdict"] == v for it in items) for v in ("broken", "fixed", "same", "unknown")}
         cands.append({
             "model": model, "provider": "OpenAI",
             "summary": {"passed": len(items) - counts["broken"], "total": len(items),
-                        "passed_after_fix": len(items) - counts["broken"],
+                        "passed_after_fix": sum(f["verdict"] != "broken" for f in fix_items) if fix_items
+                        else len(items) - counts["broken"],
                         "cost_change_pct": round((nst["cost_per_1k"] / ost["cost_per_1k"] - 1) * 100)
                         if nst["cost_per_1k"] and ost["cost_per_1k"] else None,
                         "cost_per_1k_calls_usd": nst["cost_per_1k"], "latency_p50_ms": nst["p50_ms"],
@@ -198,7 +214,9 @@ def build(old, candidates, tickets, results=RESULTS, stepswap_dir=STEPSWAP):
                          "failed_checks": it["failed_checks"],
                          "baseline_output": describe(it["old_runs"][0] if it["old_runs"] else None),
                          "output": describe(it["new_runs"][0] if it["new_runs"] else None),
-                         "cause_id": it.get("cause_id"), "after_fix_output": None} for it in items]})
+                         "cause_id": it.get("cause_id"),
+                         "after_fix_output": describe(after[it["ticket"]["id"]]["new_runs"][0])
+                         if it["verdict"] == "broken" and it["ticket"]["id"] in after else None} for it in items]})
     step = guilty or "decide"
     return {
         "schema_version": 1,
