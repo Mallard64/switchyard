@@ -25,3 +25,10 @@
 - Planted bug in step 2: `PLANTED` = the decide line "Final-sale items are not eligible for refunds or replacements.", which conflicts with policy DAMAGE-02. `probe_plant.py` chose it: gpt-4 follows the policy and the new model follows the line. It stays **on by default** because every cached run used it. **New flag: `--no-plant`** removes it (results go to `agent__<label>__noplant.jsonl`).
 - **Evidence ($0.87, sol, 24 tickets × 3):** with the plant, sol breaks **t07** (damaged final-sale lamp): gpt-4 replaces 3/3, sol denies 3/3. With `--no-plant`, sol has **0 broken** and t07 is back to replace 3/3.
 - More planted bugs per step, for benchmarking, are in `agent_bench.BREAK_SETS` (e.g. `d2`: decide refunds damaged items).
+
+## Task 4: step-finder (done)
+- `stepswap.py --new <model>` runs, for each ticket thin_e2e calls broken and for each of the 4 steps, a **rescue** test (new everywhere, old at step k) and a **break** test (old everywhere, new at step k). That's 3 runs each, live end to end. Steps before k replay from that side's own cached run. Judging: rescue repairs if the hybrid passes ≥2/3, and break reproduces if old ≥2/3 and the hybrid ≤1/3 (the same rule). Output goes to `reports/overnight/stepswap_<model>.json`, and `thin_e2e.py` merges it into `public/results.json` as `causes[]` ("step X causes N%…") plus a top-level `step_finder` block (additive; still passes the dashboard's `validate()`).
+- **gpt-5.6-sol:** t07 rescue: classify 0/3, **decide 3/3**, draft 0/3, tone 0/3. Break: classify 3/3, **decide 0/3**, draft 3/3, tone 3/3. → **"step decide causes 100% of failures (1/1; 1 confirmed by break)"**. That matches the planted step-2 line.
+- **gpt-5.6-terra:** 0 broken tickets, so there was nothing to localize.
+- Caveat: it's 1 broken ticket, so "100%" rests on n=1. A wider benchmark of 9 planted breaks / 39 tickets is in `reports/agent_bench/RESULTS.md` (from Oct 7, using compare.py's rule).
+- Spend: $0.15 for the 9 break-test runs that weren't cached. The 12 rescue runs were already cached.
