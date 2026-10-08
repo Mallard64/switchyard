@@ -128,3 +128,8 @@ Spend after task 2: **$10.59**.
   - **PR card:** summary (where / what / proof / cost) and 2 changes, the model swap and tone line 3, each with Accept / Edit / Reject. An edit is marked "re-run needed" and is never shown as verified.
 - Fixed while checking: the demo cards were white on the dark theme, and `p95 NaN` appeared in the existing candidate cards (`latency_p95_ms` added, additively).
 - Screenshots: `docs/demo/savings.png`, `evidence.png`, `pr.png` (headless Chrome).
+
+## Task 5: demo mode (done; works offline)
+- `python demo.py --demo` narrates the real recorded migration in 5 stages: switch, which step, which line, fix, held-out. It replays the cached rows with their recorded relative timing, squeezed into about 1 minute (`--speed` changes that). It starts the dashboard on :4173 unless one is already running.
+- It imports no model client, reads only `results/*.jsonl` and `reports/*.json`, and exits with a clear message if a cached file is missing.
+- **Offline check:** I ran it with `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` unset and `http(s)_proxy` pointed at a dead port, and it completed (13 s at `--speed 4`). With the server path, `/api/reports` lists `demo` first. The dashboard page loads no external URLs.
