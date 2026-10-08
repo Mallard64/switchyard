@@ -34,7 +34,9 @@ TICKETS = HERE / "inputs" / "agent.jsonl"  # inputs/<task>.jsonl, as compare.loa
 # use one set, so adding a set never makes an existing cached flow spend.
 TICKET_SETS = {"agent": TICKETS, "agent_hard": HERE / "inputs" / "agent_hard.jsonl",
                # Oct 8: 12 fresh held-out tickets, committed before any model ran on them.
-               "agent_holdout2": HERE / "inputs" / "agent_holdout2.jsonl"}
+               "agent_holdout2": HERE / "inputs" / "agent_holdout2.jsonl",
+               # Oct 8: 8 more fresh tickets for a cheap retest of the luna + llama mix, committed before any run.
+               "agent_fresh3": HERE / "inputs" / "agent_fresh3.jsonl"}
 OPENAI_BASE = "https://api.openai.com/v1"
 PROTECTED = {"agent__gpt-4.jsonl", "agent__gpt-4__hard.jsonl"}
 TODAY = "2026-10-06"  # fixed so the tools and prompts are deterministic
