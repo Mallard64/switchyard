@@ -1,0 +1,1481 @@
+{
+  "pool": [
+    {
+      "model": "ollama/llama3.2:3b",
+      "params": {
+        "temperature": 0.0
+      },
+      "hosting": "self-hosted"
+    },
+    {
+      "model": "ollama/qwen2.5:7b",
+      "params": {
+        "temperature": 0.0
+      },
+      "hosting": "self-hosted"
+    },
+    {
+      "model": "ollama/llama3.1:8b",
+      "params": {
+        "temperature": 0.0
+      },
+      "hosting": "self-hosted"
+    },
+    {
+      "model": "gpt-5-nano",
+      "params": {},
+      "hosting": "api"
+    },
+    {
+      "model": "gpt-4.1-nano",
+      "params": {
+        "temperature": 0.0
+      },
+      "hosting": "api"
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "params": {},
+      "hosting": "api"
+    },
+    {
+      "model": "gpt-5.4-mini",
+      "params": {},
+      "hosting": "api"
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "params": {},
+      "hosting": "api"
+    }
+  ],
+  "base": "gpt-5.6-sol",
+  "patch_tag": "87f14ffb",
+  "screening": [
+    {
+      "model": "gpt-5.6-sol",
+      "hosting": "api",
+      "params": {},
+      "sets": {
+        "dev": {
+          "verdict_counts": {
+            "REGRESSED": 4,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 20
+          },
+          "regressed": [
+            "t01",
+            "t11",
+            "t21",
+            "t24"
+          ],
+          "passed_all": 0.8056,
+          "gold": 1.0,
+          "tickets": 24,
+          "errors": 0
+        },
+        "hard": {
+          "verdict_counts": {
+            "REGRESSED": 3,
+            "IMPROVED": 2,
+            "CHANGED": 0,
+            "SAME": 7
+          },
+          "regressed": [
+            "t27",
+            "t29",
+            "t36"
+          ],
+          "passed_all": 0.7778,
+          "gold": 1.0,
+          "tickets": 12,
+          "errors": 0
+        },
+        "holdout2": {
+          "verdict_counts": {
+            "REGRESSED": 3,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 9
+          },
+          "regressed": [
+            "t37",
+            "t38",
+            "t42"
+          ],
+          "passed_all": 0.7778,
+          "gold": 1.0,
+          "tickets": 12,
+          "errors": 0
+        }
+      },
+      "per_step": {
+        "classify": {
+          "model": "gpt-5.6-sol",
+          "calls": 144,
+          "prompt_tokens": 186.3,
+          "completion_tokens": 18.0,
+          "usd_per_1k": 1.1049
+        },
+        "decide": {
+          "model": "gpt-5.6-sol",
+          "calls": 144,
+          "prompt_tokens": 276.6,
+          "completion_tokens": 45.6,
+          "usd_per_1k": 2.0177
+        },
+        "draft": {
+          "model": "gpt-5.6-sol",
+          "calls": 144,
+          "prompt_tokens": 293.0,
+          "completion_tokens": 62.3,
+          "usd_per_1k": 2.4187
+        },
+        "tone": {
+          "model": "gpt-5.6-sol",
+          "calls": 144,
+          "prompt_tokens": 248.3,
+          "completion_tokens": 111.3,
+          "usd_per_1k": 3.2187
+        }
+      },
+      "usd_per_1k": 8.76,
+      "tokens_per_ticket": 1241.4,
+      "price": [
+        4.0,
+        20.0
+      ]
+    },
+    {
+      "model": "ollama/llama3.2:3b",
+      "hosting": "self-hosted",
+      "params": {
+        "temperature": 0.0
+      },
+      "sets": {
+        "dev": {
+          "verdict_counts": {
+            "REGRESSED": 14,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 10
+          },
+          "regressed": [
+            "t01",
+            "t02",
+            "t03",
+            "t04",
+            "t05",
+            "t08",
+            "t11",
+            "t12",
+            "t14",
+            "t15",
+            "t16",
+            "t18",
+            "t19",
+            "t23"
+          ],
+          "passed_all": 0.8333,
+          "gold": 0.8264,
+          "tickets": 24,
+          "errors": 0
+        },
+        "hard": {
+          "verdict_counts": {
+            "REGRESSED": 7,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 5
+          },
+          "regressed": [
+            "t25",
+            "t27",
+            "t29",
+            "t30",
+            "t33",
+            "t34",
+            "t36"
+          ],
+          "passed_all": 0.6667,
+          "gold": 0.7292,
+          "tickets": 12,
+          "errors": 0
+        },
+        "holdout2": {
+          "verdict_counts": {
+            "REGRESSED": 7,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 5
+          },
+          "regressed": [
+            "t37",
+            "t38",
+            "t39",
+            "t41",
+            "t42",
+            "t45",
+            "t48"
+          ],
+          "passed_all": 0.6667,
+          "gold": 0.875,
+          "tickets": 12,
+          "errors": 0
+        }
+      },
+      "per_step": {
+        "classify": {
+          "model": "ollama/llama3.2:3b",
+          "calls": 144,
+          "prompt_tokens": 202.3,
+          "completion_tokens": 16,
+          "usd_per_1k": null
+        },
+        "decide": {
+          "model": "ollama/llama3.2:3b",
+          "calls": 144,
+          "prompt_tokens": 291.6,
+          "completion_tokens": 43.1,
+          "usd_per_1k": null
+        },
+        "draft": {
+          "model": "ollama/llama3.2:3b",
+          "calls": 144,
+          "prompt_tokens": 304.7,
+          "completion_tokens": 76.9,
+          "usd_per_1k": null
+        },
+        "tone": {
+          "model": "ollama/llama3.2:3b",
+          "calls": 144,
+          "prompt_tokens": 292.3,
+          "completion_tokens": 82.5,
+          "usd_per_1k": null
+        }
+      },
+      "usd_per_1k": null,
+      "tokens_per_ticket": 1309.4,
+      "price": null
+    },
+    {
+      "model": "ollama/qwen2.5:7b",
+      "hosting": "self-hosted",
+      "params": {
+        "temperature": 0.0
+      },
+      "sets": {
+        "dev": {
+          "verdict_counts": {
+            "REGRESSED": 19,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 5
+          },
+          "regressed": [
+            "t01",
+            "t02",
+            "t04",
+            "t05",
+            "t06",
+            "t07",
+            "t09",
+            "t10",
+            "t11",
+            "t14",
+            "t15",
+            "t16",
+            "t17",
+            "t19",
+            "t20",
+            "t21",
+            "t22",
+            "t23",
+            "t24"
+          ],
+          "passed_all": 0.4583,
+          "gold": 0.8229,
+          "tickets": 24,
+          "errors": 0
+        },
+        "hard": {
+          "verdict_counts": {
+            "REGRESSED": 10,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 2
+          },
+          "regressed": [
+            "t25",
+            "t27",
+            "t28",
+            "t29",
+            "t31",
+            "t32",
+            "t33",
+            "t34",
+            "t35",
+            "t36"
+          ],
+          "passed_all": 0.4167,
+          "gold": 0.75,
+          "tickets": 12,
+          "errors": 0
+        },
+        "holdout2": {
+          "verdict_counts": {
+            "REGRESSED": 9,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 3
+          },
+          "regressed": [
+            "t37",
+            "t38",
+            "t39",
+            "t40",
+            "t41",
+            "t42",
+            "t44",
+            "t46",
+            "t47"
+          ],
+          "passed_all": 0.5556,
+          "gold": 0.8542,
+          "tickets": 12,
+          "errors": 0
+        }
+      },
+      "per_step": {
+        "classify": {
+          "model": "ollama/qwen2.5:7b",
+          "calls": 144,
+          "prompt_tokens": 194.2,
+          "completion_tokens": 17.4,
+          "usd_per_1k": null
+        },
+        "decide": {
+          "model": "ollama/qwen2.5:7b",
+          "calls": 144,
+          "prompt_tokens": 296.4,
+          "completion_tokens": 38.9,
+          "usd_per_1k": null
+        },
+        "draft": {
+          "model": "ollama/qwen2.5:7b",
+          "calls": 144,
+          "prompt_tokens": 303.0,
+          "completion_tokens": 72.7,
+          "usd_per_1k": null
+        },
+        "tone": {
+          "model": "ollama/qwen2.5:7b",
+          "calls": 144,
+          "prompt_tokens": 273.9,
+          "completion_tokens": 56.3,
+          "usd_per_1k": null
+        }
+      },
+      "usd_per_1k": null,
+      "tokens_per_ticket": 1252.8,
+      "price": null
+    },
+    {
+      "model": "ollama/llama3.1:8b",
+      "hosting": "self-hosted",
+      "params": {
+        "temperature": 0.0
+      },
+      "sets": {
+        "dev": {
+          "verdict_counts": {
+            "REGRESSED": 7,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 17
+          },
+          "regressed": [
+            "t01",
+            "t02",
+            "t07",
+            "t08",
+            "t14",
+            "t19",
+            "t22"
+          ],
+          "passed_all": 0.8194,
+          "gold": 0.9028,
+          "tickets": 24,
+          "errors": 0
+        },
+        "hard": {
+          "verdict_counts": {
+            "REGRESSED": 3,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 9
+          },
+          "regressed": [
+            "t33",
+            "t34",
+            "t36"
+          ],
+          "passed_all": 0.9167,
+          "gold": 0.8958,
+          "tickets": 12,
+          "errors": 0
+        },
+        "holdout2": {
+          "verdict_counts": {
+            "REGRESSED": 3,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 9
+          },
+          "regressed": [
+            "t39",
+            "t41",
+            "t43"
+          ],
+          "passed_all": 0.8333,
+          "gold": 0.9375,
+          "tickets": 12,
+          "errors": 0
+        }
+      },
+      "per_step": {
+        "classify": {
+          "model": "ollama/llama3.1:8b",
+          "calls": 144,
+          "prompt_tokens": 192.3,
+          "completion_tokens": 19.1,
+          "usd_per_1k": null
+        },
+        "decide": {
+          "model": "ollama/llama3.1:8b",
+          "calls": 144,
+          "prompt_tokens": 283.9,
+          "completion_tokens": 49.4,
+          "usd_per_1k": null
+        },
+        "draft": {
+          "model": "ollama/llama3.1:8b",
+          "calls": 144,
+          "prompt_tokens": 298.2,
+          "completion_tokens": 80.3,
+          "usd_per_1k": null
+        },
+        "tone": {
+          "model": "ollama/llama3.1:8b",
+          "calls": 144,
+          "prompt_tokens": 287.1,
+          "completion_tokens": 79.2,
+          "usd_per_1k": null
+        }
+      },
+      "usd_per_1k": null,
+      "tokens_per_ticket": 1289.5,
+      "price": null
+    },
+    {
+      "model": "gpt-5-nano",
+      "hosting": "api",
+      "params": {},
+      "sets": {
+        "dev": {
+          "verdict_counts": {
+            "REGRESSED": 7,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 17
+          },
+          "regressed": [
+            "t04",
+            "t11",
+            "t14",
+            "t21",
+            "t22",
+            "t23",
+            "t24"
+          ],
+          "passed_all": 0.7917,
+          "gold": 0.9583,
+          "tickets": 24,
+          "errors": 0
+        },
+        "hard": {
+          "verdict_counts": {
+            "REGRESSED": 1,
+            "IMPROVED": 2,
+            "CHANGED": 0,
+            "SAME": 9
+          },
+          "regressed": [
+            "t27"
+          ],
+          "passed_all": 0.8611,
+          "gold": 0.9931,
+          "tickets": 12,
+          "errors": 0
+        },
+        "holdout2": {
+          "verdict_counts": {
+            "REGRESSED": 2,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 10
+          },
+          "regressed": [
+            "t38",
+            "t42"
+          ],
+          "passed_all": 0.8056,
+          "gold": 0.9931,
+          "tickets": 12,
+          "errors": 0
+        }
+      },
+      "per_step": {
+        "classify": {
+          "model": "gpt-5-nano",
+          "calls": 144,
+          "prompt_tokens": 186.3,
+          "completion_tokens": 189.0,
+          "usd_per_1k": 0.0849
+        },
+        "decide": {
+          "model": "gpt-5-nano",
+          "calls": 144,
+          "prompt_tokens": 277.2,
+          "completion_tokens": 636.8,
+          "usd_per_1k": 0.2686
+        },
+        "draft": {
+          "model": "gpt-5-nano",
+          "calls": 144,
+          "prompt_tokens": 295.3,
+          "completion_tokens": 1240.4,
+          "usd_per_1k": 0.5109
+        },
+        "tone": {
+          "model": "gpt-5-nano",
+          "calls": 144,
+          "prompt_tokens": 264.3,
+          "completion_tokens": 2124.7,
+          "usd_per_1k": 0.8631
+        }
+      },
+      "usd_per_1k": 1.7275,
+      "tokens_per_ticket": 5214.0,
+      "price": [
+        0.05,
+        0.4
+      ]
+    },
+    {
+      "model": "gpt-4.1-nano",
+      "hosting": "api",
+      "params": {
+        "temperature": 0.0
+      },
+      "sets": {
+        "dev": {
+          "verdict_counts": {
+            "REGRESSED": 11,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 13
+          },
+          "regressed": [
+            "t03",
+            "t06",
+            "t07",
+            "t08",
+            "t14",
+            "t15",
+            "t16",
+            "t17",
+            "t18",
+            "t20",
+            "t23"
+          ],
+          "passed_all": 0.7361,
+          "gold": 0.875,
+          "tickets": 24,
+          "errors": 0
+        },
+        "hard": {
+          "verdict_counts": {
+            "REGRESSED": 4,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 8
+          },
+          "regressed": [
+            "t26",
+            "t30",
+            "t33",
+            "t35"
+          ],
+          "passed_all": 0.75,
+          "gold": 0.8472,
+          "tickets": 12,
+          "errors": 0
+        },
+        "holdout2": {
+          "verdict_counts": {
+            "REGRESSED": 3,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 9
+          },
+          "regressed": [
+            "t37",
+            "t44",
+            "t45"
+          ],
+          "passed_all": 0.8611,
+          "gold": 0.8958,
+          "tickets": 12,
+          "errors": 0
+        }
+      },
+      "per_step": {
+        "classify": {
+          "model": "gpt-4.1-nano",
+          "calls": 144,
+          "prompt_tokens": 187.3,
+          "completion_tokens": 14.8,
+          "usd_per_1k": 0.0246
+        },
+        "decide": {
+          "model": "gpt-4.1-nano",
+          "calls": 144,
+          "prompt_tokens": 278.6,
+          "completion_tokens": 43.9,
+          "usd_per_1k": 0.0454
+        },
+        "draft": {
+          "model": "gpt-4.1-nano",
+          "calls": 144,
+          "prompt_tokens": 291.3,
+          "completion_tokens": 53.8,
+          "usd_per_1k": 0.0507
+        },
+        "tone": {
+          "model": "gpt-4.1-nano",
+          "calls": 144,
+          "prompt_tokens": 257,
+          "completion_tokens": 22.8,
+          "usd_per_1k": 0.0348
+        }
+      },
+      "usd_per_1k": 0.1555,
+      "tokens_per_ticket": 1149.5,
+      "price": [
+        0.1,
+        0.4
+      ]
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "hosting": "api",
+      "params": {},
+      "sets": {
+        "dev": {
+          "verdict_counts": {
+            "REGRESSED": 5,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 19
+          },
+          "regressed": [
+            "t01",
+            "t04",
+            "t11",
+            "t21",
+            "t24"
+          ],
+          "passed_all": 0.75,
+          "gold": 0.9861,
+          "tickets": 24,
+          "errors": 0
+        },
+        "hard": {
+          "verdict_counts": {
+            "REGRESSED": 3,
+            "IMPROVED": 2,
+            "CHANGED": 0,
+            "SAME": 7
+          },
+          "regressed": [
+            "t27",
+            "t29",
+            "t36"
+          ],
+          "passed_all": 0.75,
+          "gold": 1.0,
+          "tickets": 12,
+          "errors": 0
+        },
+        "holdout2": {
+          "verdict_counts": {
+            "REGRESSED": 3,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 9
+          },
+          "regressed": [
+            "t37",
+            "t38",
+            "t42"
+          ],
+          "passed_all": 0.8333,
+          "gold": 0.9375,
+          "tickets": 12,
+          "errors": 0
+        }
+      },
+      "per_step": {
+        "classify": {
+          "model": "gpt-5.6-luna",
+          "calls": 144,
+          "prompt_tokens": 186.3,
+          "completion_tokens": 15.6,
+          "usd_per_1k": 0.056
+        },
+        "decide": {
+          "model": "gpt-5.6-luna",
+          "calls": 144,
+          "prompt_tokens": 275.1,
+          "completion_tokens": 69.2,
+          "usd_per_1k": 0.1381
+        },
+        "draft": {
+          "model": "gpt-5.6-luna",
+          "calls": 144,
+          "prompt_tokens": 291.9,
+          "completion_tokens": 58.8,
+          "usd_per_1k": 0.129
+        },
+        "tone": {
+          "model": "gpt-5.6-luna",
+          "calls": 144,
+          "prompt_tokens": 246.7,
+          "completion_tokens": 132.1,
+          "usd_per_1k": 0.2078
+        }
+      },
+      "usd_per_1k": 0.5309,
+      "tokens_per_ticket": 1275.7,
+      "price": [
+        0.2,
+        1.2
+      ]
+    },
+    {
+      "model": "gpt-5.4-mini",
+      "hosting": "api",
+      "params": {},
+      "sets": {
+        "dev": {
+          "verdict_counts": {
+            "REGRESSED": 4,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 20
+          },
+          "regressed": [
+            "t01",
+            "t04",
+            "t11",
+            "t21"
+          ],
+          "passed_all": 0.8472,
+          "gold": 0.9931,
+          "tickets": 24,
+          "errors": 0
+        },
+        "hard": {
+          "verdict_counts": {
+            "REGRESSED": 4,
+            "IMPROVED": 1,
+            "CHANGED": 0,
+            "SAME": 7
+          },
+          "regressed": [
+            "t26",
+            "t27",
+            "t28",
+            "t30"
+          ],
+          "passed_all": 0.8333,
+          "gold": 0.875,
+          "tickets": 12,
+          "errors": 0
+        },
+        "holdout2": {
+          "verdict_counts": {
+            "REGRESSED": 2,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 10
+          },
+          "regressed": [
+            "t37",
+            "t42"
+          ],
+          "passed_all": 0.9167,
+          "gold": 0.9375,
+          "tickets": 12,
+          "errors": 0
+        }
+      },
+      "per_step": {
+        "classify": {
+          "model": "gpt-5.4-mini",
+          "calls": 144,
+          "prompt_tokens": 186.3,
+          "completion_tokens": 16.5,
+          "usd_per_1k": 0.214
+        },
+        "decide": {
+          "model": "gpt-5.4-mini",
+          "calls": 144,
+          "prompt_tokens": 275.4,
+          "completion_tokens": 46.0,
+          "usd_per_1k": 0.4135
+        },
+        "draft": {
+          "model": "gpt-5.4-mini",
+          "calls": 144,
+          "prompt_tokens": 294.0,
+          "completion_tokens": 48.4,
+          "usd_per_1k": 0.4381
+        },
+        "tone": {
+          "model": "gpt-5.4-mini",
+          "calls": 144,
+          "prompt_tokens": 252.4,
+          "completion_tokens": 57.5,
+          "usd_per_1k": 0.4481
+        }
+      },
+      "usd_per_1k": 1.5137,
+      "tokens_per_ticket": 1176.5,
+      "price": [
+        0.75,
+        4.5
+      ]
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "hosting": "api",
+      "params": {},
+      "sets": {
+        "dev": {
+          "verdict_counts": {
+            "REGRESSED": 2,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 22
+          },
+          "regressed": [
+            "t04",
+            "t21"
+          ],
+          "passed_all": 0.8889,
+          "gold": 1.0,
+          "tickets": 24,
+          "errors": 0
+        },
+        "hard": {
+          "verdict_counts": {
+            "REGRESSED": 0,
+            "IMPROVED": 2,
+            "CHANGED": 0,
+            "SAME": 10
+          },
+          "regressed": [],
+          "passed_all": 0.9444,
+          "gold": 1.0,
+          "tickets": 12,
+          "errors": 0
+        },
+        "holdout2": {
+          "verdict_counts": {
+            "REGRESSED": 1,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 11
+          },
+          "regressed": [
+            "t42"
+          ],
+          "passed_all": 0.9444,
+          "gold": 1.0,
+          "tickets": 12,
+          "errors": 0
+        }
+      },
+      "per_step": {
+        "classify": {
+          "model": "gpt-5.6-terra",
+          "calls": 144,
+          "prompt_tokens": 186.3,
+          "completion_tokens": 15.5,
+          "usd_per_1k": 0.559
+        },
+        "decide": {
+          "model": "gpt-5.6-terra",
+          "calls": 144,
+          "prompt_tokens": 276.6,
+          "completion_tokens": 44.4,
+          "usd_per_1k": 1.0863
+        },
+        "draft": {
+          "model": "gpt-5.6-terra",
+          "calls": 144,
+          "prompt_tokens": 291.4,
+          "completion_tokens": 45.0,
+          "usd_per_1k": 1.1233
+        },
+        "tone": {
+          "model": "gpt-5.6-terra",
+          "calls": 144,
+          "prompt_tokens": 244.6,
+          "completion_tokens": 44.8,
+          "usd_per_1k": 1.0267
+        }
+      },
+      "usd_per_1k": 3.7953,
+      "tokens_per_ticket": 1148.6,
+      "price": [
+        2.0,
+        12.0
+      ]
+    }
+  ],
+  "ladder": {
+    "classify": {
+      "order": [
+        "ollama/llama3.2:3b",
+        "ollama/qwen2.5:7b",
+        "ollama/llama3.1:8b",
+        "gpt-4.1-nano",
+        "gpt-5.6-luna",
+        "gpt-5-nano",
+        "gpt-5.4-mini",
+        "gpt-5.6-terra"
+      ],
+      "tried": [
+        {
+          "model": "ollama/llama3.2:3b",
+          "file": "agent__gpt-5.6-sol-npp__classify-ollama-llama3.2-3b-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 2,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 22
+          },
+          "regressed": [
+            "t14",
+            "t23"
+          ],
+          "passed_all": 0.9583,
+          "gold": 0.9583,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "ollama/qwen2.5:7b",
+          "file": "agent__gpt-5.6-sol-npp__classify-ollama-qwen2.5-7b-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 1,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 23
+          },
+          "regressed": [
+            "t14"
+          ],
+          "passed_all": 0.9583,
+          "gold": 0.9792,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "ollama/llama3.1:8b",
+          "file": "agent__gpt-5.6-sol-npp__classify-ollama-llama3.1-8b-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 1,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 23
+          },
+          "regressed": [
+            "t14"
+          ],
+          "passed_all": 0.9583,
+          "gold": 0.9792,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "gpt-4.1-nano",
+          "file": "agent__gpt-5.6-sol-npp__classify-gpt-4.1-nano-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 2,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 22
+          },
+          "regressed": [
+            "t14",
+            "t17"
+          ],
+          "passed_all": 0.9583,
+          "gold": 0.9722,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "file": "agent__gpt-5.6-sol-npp__classify-gpt-5.6-luna-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 0,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 24
+          },
+          "regressed": [],
+          "passed_all": 0.9583,
+          "gold": 0.9931,
+          "tickets": 24,
+          "errors": 0,
+          "passed": true
+        }
+      ]
+    },
+    "decide": {
+      "order": [
+        "ollama/llama3.2:3b",
+        "ollama/qwen2.5:7b",
+        "ollama/llama3.1:8b",
+        "gpt-4.1-nano",
+        "gpt-5.6-luna",
+        "gpt-5-nano",
+        "gpt-5.4-mini",
+        "gpt-5.6-terra"
+      ],
+      "tried": [
+        {
+          "model": "ollama/llama3.2:3b",
+          "file": "agent__gpt-5.6-sol-npp__decide-ollama-llama3.2-3b-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 11,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 13
+          },
+          "regressed": [
+            "t02",
+            "t03",
+            "t04",
+            "t05",
+            "t08",
+            "t11",
+            "t12",
+            "t15",
+            "t16",
+            "t18",
+            "t19"
+          ],
+          "passed_all": 0.875,
+          "gold": 0.8715,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "ollama/qwen2.5:7b",
+          "file": "agent__gpt-5.6-sol-npp__decide-ollama-qwen2.5-7b-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 4,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 20
+          },
+          "regressed": [
+            "t01",
+            "t02",
+            "t21",
+            "t22"
+          ],
+          "passed_all": 1.0,
+          "gold": 0.9271,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "ollama/llama3.1:8b",
+          "file": "agent__gpt-5.6-sol-npp__decide-ollama-llama3.1-8b-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 3,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 21
+          },
+          "regressed": [
+            "t02",
+            "t08",
+            "t19"
+          ],
+          "passed_all": 0.9583,
+          "gold": 0.9618,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "gpt-4.1-nano",
+          "file": "agent__gpt-5.6-sol-npp__decide-gpt-4.1-nano-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 3,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 21
+          },
+          "regressed": [
+            "t15",
+            "t16",
+            "t18"
+          ],
+          "passed_all": 0.9444,
+          "gold": 0.9549,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "file": "agent__gpt-5.6-sol-npp__decide-gpt-5.6-luna-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 0,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 24
+          },
+          "regressed": [],
+          "passed_all": 0.9583,
+          "gold": 1.0,
+          "tickets": 24,
+          "errors": 0,
+          "passed": true
+        }
+      ]
+    },
+    "draft": {
+      "order": [
+        "ollama/llama3.2:3b",
+        "ollama/qwen2.5:7b",
+        "ollama/llama3.1:8b",
+        "gpt-4.1-nano",
+        "gpt-5.6-luna",
+        "gpt-5.4-mini",
+        "gpt-5-nano",
+        "gpt-5.6-terra"
+      ],
+      "tried": [
+        {
+          "model": "ollama/llama3.2:3b",
+          "file": "agent__gpt-5.6-sol-npp__draft-ollama-llama3.2-3b-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 3,
+            "IMPROVED": 1,
+            "CHANGED": 0,
+            "SAME": 20
+          },
+          "regressed": [
+            "t01",
+            "t06",
+            "t07"
+          ],
+          "passed_all": 0.9444,
+          "gold": 0.9618,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "ollama/qwen2.5:7b",
+          "file": "agent__gpt-5.6-sol-npp__draft-ollama-qwen2.5-7b-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 10,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 14
+          },
+          "regressed": [
+            "t01",
+            "t04",
+            "t06",
+            "t07",
+            "t11",
+            "t15",
+            "t17",
+            "t20",
+            "t21",
+            "t24"
+          ],
+          "passed_all": 0.7361,
+          "gold": 0.9479,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "ollama/llama3.1:8b",
+          "file": "agent__gpt-5.6-sol-npp__draft-ollama-llama3.1-8b-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 2,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 22
+          },
+          "regressed": [
+            "t06",
+            "t22"
+          ],
+          "passed_all": 0.9306,
+          "gold": 0.9826,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "gpt-4.1-nano",
+          "file": "agent__gpt-5.6-sol-npp__draft-gpt-4.1-nano-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 2,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 22
+          },
+          "regressed": [
+            "t03",
+            "t17"
+          ],
+          "passed_all": 0.8333,
+          "gold": 0.9653,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "file": "agent__gpt-5.6-sol-npp__draft-gpt-5.6-luna-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 0,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 24
+          },
+          "regressed": [],
+          "passed_all": 0.9583,
+          "gold": 0.9965,
+          "tickets": 24,
+          "errors": 0,
+          "passed": true
+        }
+      ]
+    },
+    "tone": {
+      "order": [
+        "ollama/llama3.2:3b",
+        "ollama/qwen2.5:7b",
+        "ollama/llama3.1:8b",
+        "gpt-4.1-nano",
+        "gpt-5.6-luna",
+        "gpt-5.4-mini",
+        "gpt-5-nano",
+        "gpt-5.6-terra"
+      ],
+      "tried": [
+        {
+          "model": "ollama/llama3.2:3b",
+          "file": "agent__gpt-5.6-sol-npp__tone-ollama-llama3.2-3b-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 2,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 22
+          },
+          "regressed": [
+            "t14",
+            "t19"
+          ],
+          "passed_all": 0.875,
+          "gold": 0.9896,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "ollama/qwen2.5:7b",
+          "file": "agent__gpt-5.6-sol-npp__tone-ollama-qwen2.5-7b-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 11,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 13
+          },
+          "regressed": [
+            "t02",
+            "t04",
+            "t05",
+            "t06",
+            "t08",
+            "t09",
+            "t10",
+            "t14",
+            "t16",
+            "t19",
+            "t23"
+          ],
+          "passed_all": 0.5,
+          "gold": 0.9965,
+          "tickets": 24,
+          "errors": 0,
+          "passed": false
+        },
+        {
+          "model": "ollama/llama3.1:8b",
+          "file": "agent__gpt-5.6-sol-npp__tone-ollama-llama3.1-8b-npp.jsonl",
+          "verdict_counts": {
+            "REGRESSED": 0,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 24
+          },
+          "regressed": [],
+          "passed_all": 0.9444,
+          "gold": 0.9965,
+          "tickets": 24,
+          "errors": 0,
+          "passed": true
+        }
+      ]
+    }
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "assignment": {
+        "classify": "gpt-5.6-luna",
+        "decide": "gpt-5.6-luna",
+        "draft": "gpt-5.6-luna",
+        "tone": "ollama/llama3.1:8b"
+      },
+      "file": "agent__pool-mix-clluna-deluna-drluna-to8b.jsonl",
+      "verdict_counts": {
+        "REGRESSED": 0,
+        "IMPROVED": 0,
+        "CHANGED": 0,
+        "SAME": 24
+      },
+      "regressed": [],
+      "passed_all": 0.9583,
+      "gold": 0.9896,
+      "tickets": 24,
+      "errors": 0
+    }
+  ],
+  "synthetic": {
+    "tickets": true,
+    "regression": false
+  },
+  "sol_patch_holdout2": {
+    "verdict_counts": {
+      "REGRESSED": 0,
+      "IMPROVED": 0,
+      "CHANGED": 0,
+      "SAME": 12
+    },
+    "regressed": [],
+    "passed_all": 1.0,
+    "gold": 1.0,
+    "tickets": 12,
+    "errors": 0,
+    "file": "agent__gpt-5.6-sol-np__patch-87f14ffb__holdout2.jsonl"
+  },
+  "mix": {
+    "assignment": {
+      "classify": "gpt-5.6-luna",
+      "decide": "gpt-5.6-luna",
+      "draft": "gpt-5.6-luna",
+      "tone": "ollama/llama3.1:8b"
+    },
+    "holdout2": {
+      "verdict_counts": {
+        "REGRESSED": 1,
+        "IMPROVED": 0,
+        "CHANGED": 0,
+        "SAME": 11
+      },
+      "regressed": [
+        "t42"
+      ],
+      "passed_all": 1.0,
+      "gold": 0.9375,
+      "tickets": 12,
+      "errors": 0,
+      "file": "agent__pool-mix-clluna-deluna-drluna-to8b__holdout2.jsonl",
+      "gold_old": 1.0,
+      "noise_floor": 0.0
+    },
+    "accepted": false,
+    "per_step": {
+      "classify": {
+        "model": "gpt-5.6-luna",
+        "calls": 108,
+        "prompt_tokens": 185.1,
+        "completion_tokens": 15.0,
+        "usd_per_1k": 0.055
+      },
+      "decide": {
+        "model": "gpt-5.6-luna",
+        "calls": 108,
+        "prompt_tokens": 271.0,
+        "completion_tokens": 64.7,
+        "usd_per_1k": 0.1319
+      },
+      "draft": {
+        "model": "gpt-5.6-luna",
+        "calls": 108,
+        "prompt_tokens": 287.5,
+        "completion_tokens": 51.5,
+        "usd_per_1k": 0.1193
+      },
+      "tone": {
+        "model": "ollama/llama3.1:8b",
+        "calls": 108,
+        "prompt_tokens": 282.2,
+        "completion_tokens": 77.8,
+        "usd_per_1k": null
+      }
+    },
+    "api_usd_per_1k": 0.3062,
+    "self_hosted_steps": [
+      "tone"
+    ],
+    "self_hosted_tokens_per_ticket": 360.0
+  },
+  "generated_at": "2026-10-08T21:20:41.861625+00:00"
+}

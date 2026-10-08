@@ -67,9 +67,16 @@ def price(model, usage):
     return (usage.get("prompt_tokens") or 0) / 1e6 * p[0] + (usage.get("completion_tokens") or 0) / 1e6 * p[1]
 
 
+OLLAMA_BASE = os.environ.get("OLLAMA_BASE", "http://localhost:11434")
+
+
 def _completion(model, params, messages, api_base):
     import litellm
     litellm.telemetry = False
+    if model.startswith("ollama/"):
+        # Open-weight models served locally by Ollama: no key, no per-token price (config/prices.yml has null).
+        return litellm.completion(model="ollama_chat/" + model.split("/", 1)[1], messages=messages,
+                                  api_base=OLLAMA_BASE, num_retries=1, timeout=300, **(params or {}))
     # "openai/" pins the provider: LiteLLM's model map doesn't know gpt-5.6-* names yet.
     return litellm.completion(model=f"openai/{model}", messages=messages, api_base=api_base,
                               api_key=os.environ.get("OPENAI_API_KEY"), num_retries=3, timeout=120, **(params or {}))

@@ -234,6 +234,30 @@ def main():
             "monthly_requests_note": "assumption for the savings calculator; edit it on the page",
         },
     }
+    pool_path = HERE / "reports" / "model_pool" / "result.json"
+    if pool_path.exists():
+        pool = json.loads(pool_path.read_text())
+        count = lambda v: {"regressed": v["verdict_counts"]["REGRESSED"], "of": v["tickets"], "passed_all": v["passed_all"],
+                           "gold": v["gold"], "errors": v.get("errors", 0)}
+        models = [{"model": OLD, "hosting": "api", "role": "today", "usd_per_1k": old_cost, "tokens_per_ticket": None,
+                   "sets": {}, "synthetic": False}]
+        for r in pool["screening"]:
+            models.append({"model": r["model"], "hosting": r["hosting"], "role": "candidate", "usd_per_1k": r["usd_per_1k"],
+                           "tokens_per_ticket": r["tokens_per_ticket"], "synthetic": False,
+                           "sets": {s: count(v) for s, v in r["sets"].items()}})
+        data["demo"]["models"] = models
+        data["demo"]["pool"] = {
+            "synthetic": False, "base": pool["base"],
+            "rule": "per step: the validated config (sol + patch) everywhere, the candidate at that step only; passes "
+                    "with 0 regressions vs gpt-4 on 24 dev tickets x 3 runs. Self-hosted first, then API by cost.",
+            "ladder": {s: [{"model": t["model"], "passed": t["passed"], "regressed": t["verdict_counts"]["REGRESSED"],
+                            "errors": t["errors"]} for t in v["tried"]] for s, v in pool["ladder"].items()},
+            "rounds": [{k: r[k] for k in ("round", "assignment", "verdict_counts", "regressed") if k in r}
+                       | {"guilty_step": r.get("guilty_step")} for r in pool["rounds"]],
+            "mix": pool["mix"], "sol_patch_holdout2": count(pool["sol_patch_holdout2"]),
+            "self_hosted_note": "Self-hosted models ran locally through Ollama (Q4, Apple M4). They have no list price, so "
+                                "their steps show tokens, not dollars; hardware and power are not counted.",
+        }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(data, indent=2, default=str) + "\n")
     s = sol["summary"]

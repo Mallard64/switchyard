@@ -179,3 +179,55 @@ python model_only.py
 python assign.py
 python results_demo.py
 ```
+
+## Follow-up (Oct 8): a bigger model pool, including open-weight models
+**Added:**
+- **Four cheap OpenAI models**, prices verified on the OpenAI pricing page and added to `config/prices.yml`:
+  - gpt-5-nano $0.05/$0.40
+  - gpt-4.1-nano $0.10/$0.40
+  - gpt-5.6-luna $0.20/$1.20
+  - gpt-5.4-mini $0.75/$4.50
+- **Three open-weight models run locally** through Ollama (Q4, Apple M4 16 GB): Llama 3.2 3B, Qwen 2.5 7B and Llama 3.1 8B. There's no account, and there's no list price, so `prices.yml` has `null` for them and the UI shows tokens per ticket, not dollars. Hardware and power aren't counted.
+- `llm.py` routes `ollama/<model>` to the local server. `support_agent.safe()` makes `/` and `:` file-safe; existing labels are unchanged.
+- Sampling matches gpt-4 (temperature 0) wherever the model accepts it (gpt-4.1-nano and the local models). The gpt-5.x models reject 0 and run at their default.
+- **A fresh held-out set:** `inputs/agent_holdout2.jsonl` has 12 tickets (t37–t48), committed (3323f4f) **before any model ran on them**. The old 12 hard tickets had already been used once for a mix decision.
+
+**Screening, model-only** (clean prompts, regressed vs gpt-4, dev 24 / hard 12 / fresh 12, cost per 1k ticket runs):
+
+| Model | dev | hard | fresh | cost |
+|---|---|---|---|---|
+| gpt-5.6-terra | 2 | 0 | 1 | $3.80 |
+| gpt-5.6-sol | 4 | 3 | 3 | $8.76 |
+| gpt-5.4-mini | 4 | 4 | 2 | $1.51 |
+| gpt-5.6-luna | 5 | 3 | 3 | $0.53 |
+| gpt-5-nano | 7 | 1 | 2 | $1.73 (about 5,200 tokens/ticket, mostly reasoning) |
+| ollama/llama3.1:8b | 7 | 3 | 3 | self-hosted, 1,290 tokens/ticket |
+| gpt-4.1-nano | 11 | 4 | 3 | $0.16 |
+| ollama/llama3.2:3b | 14 | 7 | 7 | self-hosted, 1,309 tokens/ticket |
+| ollama/qwen2.5:7b | 19 | 10 | 9 | self-hosted, 1,253 tokens/ticket |
+
+None of them is safe alone, which is why the per-step ladder exists.
+
+**Per-step ladder (`model_pool.py`):**
+- Background: sol + patch everywhere, the candidate at one step. Self-hosted models are tried first, then API models by cost. Pass means 0 regressions on dev 24 × 3.
+
+| Step | Result |
+|---|---|
+| classify | 3 local models and gpt-4.1-nano fail; **gpt-5.6-luna passes** |
+| decide | **luna passes** (local: 11 / 4 / 3 worse) |
+| draft | **luna passes** |
+| tone | llama3.2:3b and qwen2.5:7b fail; **llama3.1:8b (local) passes** |
+
+**Mix (luna, luna, luna, local Llama 3.1 8B on tone):**
+- Dev end to end: 0 regressed.
+- **Fresh held-out: 1 regressed (t42) → not accepted.**
+- It would have cost $0.31 per 1k in API calls plus about 360 self-hosted tokens per ticket.
+- **Cause, real:** t42 types the order ID in lowercase ("a1005"). gpt-5.6-luna's classify step returns `order_id: null` in 3/3 runs, both in the mix and running alone, because it reads "uppercase (e.g. A1234)" as a validity rule. gpt-4 normalizes it to A1005. The dev set has no lowercase IDs, so only the fresh held-out set could catch this.
+
+**The recommendation stays gpt-5.6-sol + the 1-line tone patch.** It now has **0 regressions on a second, pre-registered fresh held-out set** (12/12 same), on top of the earlier 3 → 0.
+
+**Spend:** $16.22 total (+$5.63 for this follow-up: holdout2 baselines about $1.6, ladder and mix about $3.3, cheap-model screening about $0.7). Local models cost $0 in API calls.
+
+**Open:**
+- A luna-based mix needs a classify fix for lowercase IDs (a one-line prompt clarification, or normalizing the ID in code), and then a *third* fresh held-out set.
+- Self-hosted cost should be measured (latency × hardware cost) before it's quoted as a saving.

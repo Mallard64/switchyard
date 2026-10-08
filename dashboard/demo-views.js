@@ -70,6 +70,48 @@ function savingsView(data) {
       <tfoot><tr><th scope="row">Total</th><td></td><td></td><td class="dm-num">${usd(old)}</td><td class="dm-num">${usd(rec.usd_per_1k)}</td><td class="dm-num dm-good">−${Math.round((1 - rec.usd_per_1k / old) * 100)}%</td><td></td></tr></tfoot>
     </table></div>
     <p class="dm-foot">Also tested: the cheapest model per step (${Object.entries(mix.assignment).map(([s, m]) => `${esc(s)} → ${esc(m)}`).join(', ')}) at ${usd(d.totals_usd_per_1k.mix)} per 1,000. It is <strong>not recommended</strong>: ${mix.heldout.REGRESSED} held-out ticket${mix.heldout.REGRESSED === 1 ? '' : 's'} (${mix.heldout_regressed.map(esc).join(', ')}) got worse.</p>
+  </section>
+  ${poolMix(d)}
+  ${modelTable(d)}`;
+}
+
+// Cost cell: dollars for API models; tokens for self-hosted ones (no list price, so no dollar figure).
+const costCell = m => m.usd_per_1k != null ? usd(m.usd_per_1k) : m.tokens_per_ticket != null ? `${Math.round(m.tokens_per_ticket).toLocaleString('en-US')} tokens/ticket` : 'n/a';
+const worse = v => v ? `<span class="${v.regressed ? 'dm-bad' : 'dm-good'}">${v.regressed}</span><span class="dm-of">/${v.of}</span>${v.errors ? ` <span class="dm-pill warn">${v.errors} errors</span>` : ''}` : '–';
+
+function modelTable(d) {
+  if (!d.models) return '';
+  const rank = m => m.role === 'today' ? -1 : m.usd_per_1k ?? -0.5;
+  const rows = [...d.models].sort((a, b) => rank(a) - rank(b)).map(m => `<tr${m.role === 'today' ? ' class="dm-today"' : ''}>
+    <th scope="row" class="dm-mono">${esc(m.model)}${m.role === 'today' ? ' <span class="dm-pill">today</span>' : ''}</th>
+    <td>${m.hosting === 'self-hosted' ? 'Your hardware (open weights)' : 'OpenAI API'}</td>
+    <td class="dm-num">${costCell(m)}</td>
+    <td class="dm-num">${worse(m.sets.dev)}</td><td class="dm-num">${worse(m.sets.hard)}</td><td class="dm-num">${worse(m.sets.holdout2)}</td>
+    <td class="dm-num">${m.sets.dev ? pct(m.sets.dev.passed_all) : '–'}</td></tr>`).join('');
+  return `<section class="dm-card" aria-labelledby="dm-models">
+    <h3 id="dm-models">Every model we tested, alone</h3>
+    <div class="dm-scroll"><table class="dm-table">
+      <thead><tr><th scope="col">Model</th><th scope="col">Runs on</th><th scope="col" class="dm-num">Cost per 1,000 tickets</th>
+        <th scope="col" class="dm-num">Worse: dev</th><th scope="col" class="dm-num">hard</th><th scope="col" class="dm-num">fresh</th><th scope="col" class="dm-num">Passing every check (dev)</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <p class="dm-foot">Each model runs the whole agent with no prompt changes, 3 runs per ticket, compared with gpt-4 on 24 dev, 12 hard and 12 fresh tickets. ${esc(d.pool?.self_hosted_note || '')}</p>
+  </section>`;
+}
+
+function poolMix(d) {
+  const p = d.pool;
+  if (!p) return '';
+  const ladder = Object.entries(p.ladder).map(([s, tried]) => `<li><span class="dm-mono">${esc(s)}</span>: ${tried.map(t =>
+    `<span class="${t.passed ? 'dm-good' : 'dm-bad'}">${esc(t.model)} ${t.passed ? '✓' : `✗ (${t.regressed} worse${t.errors ? ', errors' : ''})`}</span>`).join(' → ')}${tried.some(t => t.passed) ? '' : ` → stays on ${esc(p.base)}`}</li>`).join('');
+  const m = p.mix;
+  const verdict = !m ? `<p><strong>No cheaper mix passed the dev tickets</strong>, so the recommendation stays ${esc(p.base)} + fix.</p>` :
+    `<p><strong>${m.accepted ? 'Passed' : 'Failed'}</strong> on 12 fresh tickets no selection step had seen: ${m.holdout2.verdict_counts.REGRESSED} got worse${m.holdout2.regressed.length ? ` (${m.holdout2.regressed.map(esc).join(', ')})` : ''}. Cost: ${usd(m.api_usd_per_1k)} per 1,000 tickets in API calls${m.self_hosted_steps.length ? ` plus ${Math.round(m.self_hosted_tokens_per_ticket).toLocaleString('en-US')} self-hosted tokens per ticket (${m.self_hosted_steps.map(esc).join(', ')})` : ''}.</p>
+     <p class="dm-foot">Mix: ${Object.entries(m.assignment).map(([s, x]) => `${esc(s)} → <span class="dm-mono">${esc(x)}</span>`).join(', ')}. For comparison, ${esc(p.base)} + fix alone on the same fresh tickets: ${p.sol_patch_holdout2.regressed} got worse.</p>`;
+  return `<section class="dm-card" aria-labelledby="dm-pool">
+    <h3 id="dm-pool">Cheapest model per step, from a wider pool</h3>
+    <ul class="dm-ladder">${ladder}</ul>
+    ${verdict}
+    <p class="dm-foot">${esc(p.rule)}</p>
   </section>`;
 }
 

@@ -395,8 +395,13 @@ def build_plan(model, model_config, overrides):
     return plan
 
 
+def safe(name):
+    """Model name -> file-safe label: 'ollama/llama3.2:3b' -> 'ollama-llama3.2-3b' (OpenAI names are unchanged)."""
+    return name.replace("/", "-").replace(":", "-")
+
+
 def config_label(model, overrides):
-    return model + "".join(f"__{s}-{m}" for s, m in sorted(overrides.items(), key=lambda kv: STEPS.index(kv[0])))
+    return safe(model) + "".join(f"__{s}-{safe(m)}" for s, m in sorted(overrides.items(), key=lambda kv: STEPS.index(kv[0])))
 
 
 def dry_run(args, tickets, plan):

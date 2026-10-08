@@ -174,3 +174,5 @@ i.old{background:#d9d9de}i.new{background:#c58a63}
 .dm-diff .del{color:#f5b4a3;background:#3a201b}.dm-diff .add{color:#a5e8cc;background:#173328}
 .dm-actions{display:flex;flex-wrap:wrap;gap:8px}.dm-actions .button{min-height:44px}.dm-reject{color:var(--dm-bad)!important}
 @media (max-width:600px){.dm-card{padding:18px}.dm-kpi strong{font-size:24px}.dm-table{font-size:14px}.dm-table td,.dm-table th{padding:9px 8px}.dm-money dd{white-space:nowrap}}
+.dm-of{color:var(--dm-mute,#a1a1a6)}.dm-bad{color:var(--dm-warn,#eeb67b);font-weight:650}.dm-today{background:#1f1f22}
+.dm-ladder{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:15px;color:var(--dm-soft,#d2d2d7)}

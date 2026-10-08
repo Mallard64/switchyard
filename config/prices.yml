@@ -38,3 +38,47 @@ models:
     tier: standard
     source: https://developers.openai.com/api/docs/pricing
     checked: 2026-10-08
+  gpt-5.6-luna:
+    input_per_1m: 0.20
+    output_per_1m: 1.20
+    tier: standard, short context
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-5.4-mini:
+    input_per_1m: 0.75
+    output_per_1m: 4.50
+    tier: standard, short context
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-4.1-nano:
+    input_per_1m: 0.10
+    output_per_1m: 0.40
+    tier: standard
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  gpt-5-nano:
+    input_per_1m: 0.05
+    output_per_1m: 0.40
+    tier: standard
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-10-08
+  # Open-weight models run locally through Ollama (Q4 quantized, Apple M4, 16 GB). There is no list price for
+  # self-hosted inference, so these stay null and reports show tokens; hardware and power are not counted.
+  ollama/llama3.2:3b:
+    input_per_1m: null
+    output_per_1m: null
+    tier: self-hosted (Ollama, default Q4_K_M)
+    source: https://ollama.com/library/llama3.2
+    checked: 2026-10-08
+  ollama/qwen2.5:7b:
+    input_per_1m: null
+    output_per_1m: null
+    tier: self-hosted (Ollama, default Q4_K_M)
+    source: https://ollama.com/library/qwen2.5
+    checked: 2026-10-08
+  ollama/llama3.1:8b:
+    input_per_1m: null
+    output_per_1m: null
+    tier: self-hosted (Ollama, default Q4_K_M)
+    source: https://ollama.com/library/llama3.1
+    checked: 2026-10-08
