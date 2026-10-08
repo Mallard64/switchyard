@@ -16,7 +16,7 @@ export const demoState = {
 function headline(d) {
   const rec = d.recommended, old = d.totals_usd_per_1k.all_old;
   return `Switch to <span class="dm-mono">${esc(rec.assignment.classify)}</span> with a 1-line prompt fix: ` +
-    `${Math.round((1 - rec.usd_per_1k / old) * 100)}% lower model cost, 0 regressions on ${d.confidence.dev_tickets + d.confidence.heldout_tickets} tickets`;
+    `${Math.round((1 - rec.usd_per_1k / old) * 100)}% lower model cost, and none of ${d.confidence.dev_tickets + d.confidence.heldout_tickets} test tickets got worse`;
 }
 
 function savingsView(data) {
@@ -59,7 +59,7 @@ function savingsView(data) {
       ${qbar('gpt-4 (today)', q.old.passed_all, 'old')}
       ${qbar(esc(rec.assignment.classify) + ', no fix', q.new_as_is.passed_all, 'warn')}
       ${qbar(esc(rec.assignment.classify) + ' + fix', q.new_fixed.passed_all, 'new')}
-      <p class="dm-foot">Share of ${q.new_fixed.runs} runs passing every hard check. Gold score (right category, order, action, reply content): ${q.old.gold.toFixed(3)} today, ${q.new_fixed.gold.toFixed(3)} after.</p>
+      <p class="dm-foot">Share of ${q.new_fixed.runs} runs passing every check. Correct-answer score (right category, order, action and reply content): ${q.old.gold.toFixed(3)} today, ${q.new_fixed.gold.toFixed(3)} after.</p>
     </section>
   </div>
   <section class="dm-card" aria-labelledby="dm-steps">
@@ -69,7 +69,7 @@ function savingsView(data) {
       <tbody>${rows}</tbody>
       <tfoot><tr><th scope="row">Total</th><td></td><td></td><td class="dm-num">${usd(old)}</td><td class="dm-num">${usd(rec.usd_per_1k)}</td><td class="dm-num dm-good">−${Math.round((1 - rec.usd_per_1k / old) * 100)}%</td><td></td></tr></tfoot>
     </table></div>
-    <p class="dm-foot">Also tested: the cheapest model per step (${Object.entries(mix.assignment).map(([s, m]) => `${esc(s)} → ${esc(m)}`).join(', ')}) at ${usd(d.totals_usd_per_1k.mix)} per 1,000. It is <strong>not recommended</strong>: ${mix.heldout.REGRESSED} held-out ticket${mix.heldout.REGRESSED === 1 ? '' : 's'} (${mix.heldout_regressed.map(esc).join(', ')}) got worse.</p>
+    <p class="dm-foot">Also tested: the cheapest model per step (${Object.entries(mix.assignment).map(([s, m]) => `${esc(s)} → ${esc(m)}`).join(', ')}) at ${usd(d.totals_usd_per_1k.mix)} per 1,000. It is <strong>not recommended</strong>: ${mix.heldout.REGRESSED} fresh test ticket${mix.heldout.REGRESSED === 1 ? '' : 's'} (${mix.heldout_regressed.map(esc).join(', ')}) got worse.</p>
   </section>
   ${poolMix(d)}
   ${modelTable(d)}`;
@@ -84,7 +84,7 @@ function modelTable(d) {
   const rank = m => m.role === 'today' ? -1 : m.usd_per_1k ?? -0.5;
   const rows = [...d.models].sort((a, b) => rank(a) - rank(b)).map(m => `<tr${m.role === 'today' ? ' class="dm-today"' : ''}>
     <th scope="row" class="dm-mono">${esc(m.model)}${m.role === 'today' ? ' <span class="dm-pill">today</span>' : ''}</th>
-    <td>${m.hosting === 'self-hosted' ? 'Your hardware (open weights)' : 'OpenAI API'}</td>
+    <td>${m.hosting === 'self-hosted' ? 'Your own computer (open-source model)' : 'OpenAI API'}</td>
     <td class="dm-num">${costCell(m)}</td>
     <td class="dm-num">${worse(m.sets.dev)}</td><td class="dm-num">${worse(m.sets.hard)}</td><td class="dm-num">${worse(m.sets.holdout2)}</td>
     <td class="dm-num">${m.sets.dev ? pct(m.sets.dev.passed_all) : '–'}</td></tr>`).join('');
@@ -92,9 +92,9 @@ function modelTable(d) {
     <h3 id="dm-models">Every model we tested, alone</h3>
     <div class="dm-scroll"><table class="dm-table">
       <thead><tr><th scope="col">Model</th><th scope="col">Runs on</th><th scope="col" class="dm-num">Cost per 1,000 tickets</th>
-        <th scope="col" class="dm-num">Worse: dev</th><th scope="col" class="dm-num">hard</th><th scope="col" class="dm-num">fresh</th><th scope="col" class="dm-num">Passing every check (dev)</th></tr></thead>
+        <th scope="col" class="dm-num">Got worse: practice</th><th scope="col" class="dm-num">hard</th><th scope="col" class="dm-num">fresh</th><th scope="col" class="dm-num">Passing every check (practice)</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
-    <p class="dm-foot">Each model runs the whole agent with no prompt changes, 3 runs per ticket, compared with gpt-4 on 24 dev, 12 hard and 12 fresh tickets. ${esc(d.pool?.self_hosted_note || '')}</p>
+    <p class="dm-foot">Each model runs the whole agent with no prompt changes, 3 runs per ticket, compared with gpt-4 on 24 practice, 12 hard and 12 fresh test tickets. ${esc(d.pool?.self_hosted_note || '')}</p>
   </section>`;
 }
 
@@ -104,13 +104,20 @@ function poolMix(d) {
   const ladder = Object.entries(p.ladder).map(([s, tried]) => `<li><span class="dm-mono">${esc(s)}</span>: ${tried.map(t =>
     `<span class="${t.passed ? 'dm-good' : 'dm-bad'}">${esc(t.model)} ${t.passed ? '✓' : `✗ (${t.regressed} worse${t.errors ? ', errors' : ''})`}</span>`).join(' → ')}${tried.some(t => t.passed) ? '' : ` → stays on ${esc(p.base)}`}</li>`).join('');
   const m = p.mix;
-  const verdict = !m ? `<p><strong>No cheaper mix passed the dev tickets</strong>, so the recommendation stays ${esc(p.base)} + fix.</p>` :
-    `<p><strong>${m.accepted ? 'Passed' : 'Failed'}</strong> on 12 fresh tickets no selection step had seen: ${m.holdout2.verdict_counts.REGRESSED} got worse${m.holdout2.regressed.length ? ` (${m.holdout2.regressed.map(esc).join(', ')})` : ''}. Cost: ${usd(m.api_usd_per_1k)} per 1,000 tickets in API calls${m.self_hosted_steps.length ? ` plus ${Math.round(m.self_hosted_tokens_per_ticket).toLocaleString('en-US')} self-hosted tokens per ticket (${m.self_hosted_steps.map(esc).join(', ')})` : ''}.</p>
+  const verdict = !m ? `<p><strong>No cheaper mix passed the practice tickets</strong>, so the recommendation stays ${esc(p.base)} + fix.</p>` :
+    `<p><strong>${m.accepted ? 'Passed' : 'Failed'}</strong> on 12 fresh tickets no selection step had seen: ${m.holdout2.verdict_counts.REGRESSED} got worse${m.holdout2.regressed.length ? ` (${m.holdout2.regressed.map(esc).join(', ')})` : ''}. Cost: ${usd(m.api_usd_per_1k)} per 1,000 tickets in API calls${m.self_hosted_steps.length ? ` plus ${Math.round(m.self_hosted_tokens_per_ticket).toLocaleString('en-US')} tokens per ticket run on your own computer (${m.self_hosted_steps.map(esc).join(', ')})` : ''}.</p>
      <p class="dm-foot">Mix: ${Object.entries(m.assignment).map(([s, x]) => `${esc(s)} → <span class="dm-mono">${esc(x)}</span>`).join(', ')}. For comparison, ${esc(p.base)} + fix alone on the same fresh tickets: ${p.sol_patch_holdout2.regressed} got worse.</p>`;
+  const r = p.retest;
+  const retest = !r ? '' : `<p><strong>After a one-line fix</strong> to how the classify step reads order IDs (lowercase like “a1005” now counts):
+     practice tickets ${r.dev.regressed} of ${r.dev.of} got worse; ${r.fresh3.tickets} brand-new test tickets ${r.fresh3.mix.regressed} got worse${r.fresh3.mix.regressed_ids.length ? ` (${r.fresh3.mix.regressed_ids.map(esc).join(', ')})` : ''}
+     → <strong>${r.fresh3.mix.accepted ? 'passed' : 'failed'}</strong>. ${esc(p.base)} + fix on the same ${r.fresh3.tickets}: ${r.fresh3.sol_patch.regressed} got worse.
+     Cost: ${usd(r.cost.api_usd_per_1k)} per 1,000 tickets in API calls plus ${Math.round(r.cost.self_hosted_tokens_per_ticket).toLocaleString('en-US')} tokens per ticket on your own computer.</p>
+     <p class="dm-foot">Small test (${r.fresh3.tickets} tickets × 3 runs) to keep cost down: a pass here is encouraging, not proof.</p>`;
   return `<section class="dm-card" aria-labelledby="dm-pool">
-    <h3 id="dm-pool">Cheapest model per step, from a wider pool</h3>
+    <h3 id="dm-pool">Cheapest model for each step, from a bigger list</h3>
     <ul class="dm-ladder">${ladder}</ul>
     ${verdict}
+    ${retest}
     <p class="dm-foot">${esc(p.rule)}</p>
   </section>`;
 }
@@ -121,7 +128,7 @@ function evidenceView(data) {
     <td class="dm-num">${frac(s.repair)}</td><td class="dm-num">${s.guilty ? frac(s.reproduce) : '–'}</td></tr>`).join('');
   const lineRows = lines.results.map(r => `<li class="${r.repairs ? 'dm-guilty' : ''}"><span class="dm-ln">${r.line_index + 1}</span><span class="dm-mono">${esc(r.line)}</span><strong class="dm-num">${r.repairs}/${r.of}</strong></li>`).join('');
   const ex = d.examples.map(e => `<article class="dm-example">
-    <h4>${esc(e.input_id)} · ${e.split === 'heldout' ? 'held-out ticket (the fixer never saw it)' : 'dev ticket'}</h4>
+    <h4>${esc(e.input_id)} · ${e.split === 'heldout' ? 'fresh test ticket (the fix was written without seeing it)' : 'practice ticket'}</h4>
     <p class="dm-ticket">“${esc(e.text)}”</p>
     <div class="dm-three">
       <div><span class="dm-col">gpt-4 (today)</span><p>${esc(e.old.final_reply)}</p></div>
@@ -129,23 +136,23 @@ function evidenceView(data) {
       <div class="good"><span class="dm-col">${esc(d.pair.new)} + fix</span><p>${esc(e.fixed.final_reply)}</p></div>
     </div></article>`).join('');
   return `
-  <p class="dm-strip">${c.runs_per_ticket} runs per ticket · ${c.dev_tickets} dev tickets · ${c.heldout_tickets} held-out tickets · gpt-4 gave different results between runs on ${c.old_model_unstable_tickets} tickets · real model runs, hand-written tickets</p>
+  <p class="dm-strip">${c.runs_per_ticket} runs per ticket · ${c.dev_tickets} practice tickets · ${c.heldout_tickets} fresh test tickets · gpt-4 gave different results between runs on ${c.old_model_unstable_tickets} tickets · real model runs, hand-written tickets</p>
   <div class="dm-grid">
     <section class="dm-card" aria-labelledby="dm-which">
       <h3 id="dm-which">Which step broke</h3>
-      <table class="dm-table"><thead><tr><th scope="col">Step</th><th scope="col" class="dm-num">Repair</th><th scope="col" class="dm-num">Reproduce</th></tr></thead><tbody>${steps}</tbody></table>
-      <p class="dm-foot"><strong>Repair:</strong> new model everywhere, gpt-4 put back at this step only; how many of the ${c.regressed_dev} broken dev tickets pass again. <strong>Reproduce:</strong> gpt-4 everywhere, the new model at this step only; how many break again. 3 runs each.</p>
+      <table class="dm-table"><thead><tr><th scope="col">Step</th><th scope="col" class="dm-num">Swap gpt-4 back here: fixed</th><th scope="col" class="dm-num">New model here only: broke again</th></tr></thead><tbody>${steps}</tbody></table>
+      <p class="dm-foot"><strong>First column:</strong> the new model runs every step except this one, which goes back to gpt-4. It counts how many of the ${c.regressed_dev} broken practice tickets work again. <strong>Second column:</strong> the reverse. gpt-4 runs every step except this one, which uses the new model. It counts how many break again. Each test runs 3 times.</p>
     </section>
     <section class="dm-card" aria-labelledby="dm-lines">
       <h3 id="dm-lines">Which line in <span class="dm-mono">${esc(lines.step)}</span></h3>
       <ol class="dm-lines">${lineRows}</ol>
-      <p class="dm-foot">Each line removed on its own, new model everywhere, 3 runs: how many broken tickets it repairs.</p>
+      <p class="dm-foot">Each line removed on its own, new model everywhere, 3 runs: how many broken tickets work again without it.</p>
     </section>
   </div>
   <section class="dm-card" aria-labelledby="dm-ex"><h3 id="dm-ex">Before and after</h3>${ex}</section>
   <section class="dm-card dm-synthetic" aria-labelledby="dm-bench">
-    <h3 id="dm-bench">How often the step-finder is right <span class="dm-pill">synthetic benchmark</span></h3>
-    <p>On ${b.held_out_exact.of} tickets broken by 9 planted prompt bugs, held out: exact step <strong>${frac(b.held_out_exact)}</strong>, confirmed both ways <strong>${frac(b.two_way_confirmed)}</strong>, wrong step <strong>${frac(b.wrong_step)}</strong>.</p>
+    <h3 id="dm-bench">How often the step-finder is right <span class="dm-pill">practice test with planted bugs</span></h3>
+    <p>On ${b.held_out_exact.of} tickets broken on purpose with 9 planted prompt bugs, on tickets it hadn't been tuned on: exact step <strong>${frac(b.held_out_exact)}</strong>, confirmed both ways <strong>${frac(b.two_way_confirmed)}</strong>, wrong step <strong>${frac(b.wrong_step)}</strong>.</p>
     <p class="dm-foot">Planted bugs, not real migrations (${esc(b.source)}).</p>
   </section>`;
 }
@@ -184,9 +191,9 @@ function prView(data) {
     <div class="dm-change-head"><div><span class="dm-col">Draft pull request · ${changes.length} changes</span><h3 id="dm-pr-title">${esc(data.pr.title)}</h3></div>
       <span class="dm-pill ${ready ? 'accepted' : 'pending'}" aria-live="polite">${ready ? 'Ready to merge' : 'Needs review'}</span></div>
     <ul class="dm-summary">
-      <li><strong>Where:</strong> the <span class="dm-mono">${esc(p.step)}</span> step. Putting ${esc(d.pair.old)} back at that step alone repairs ${frac(d.per_step.find(s => s.guilty).repair)} broken tickets; no other step repairs any.</li>
-      <li><strong>What:</strong> ${p.edits.length} prompt line, written by ${esc(p.fixer)} from the dev tickets only.</li>
-      <li><strong>Proof:</strong> tickets that got worse ${d.confidence.regressed_dev + d.confidence.regressed_heldout_before} → ${data.candidates[0].summary.verdict_counts_after_fix?.REGRESSED} of ${total}, including ${p.heldout_before.REGRESSED} → ${p.heldout_after.REGRESSED} on ${d.confidence.heldout_tickets} held-out tickets the fixer never saw.</li>
+      <li><strong>Where:</strong> the <span class="dm-mono">${esc(p.step)}</span> step. Putting ${esc(d.pair.old)} back at that step alone fixes ${frac(d.per_step.find(s => s.guilty).repair)} broken tickets; no other step fixes any.</li>
+      <li><strong>What:</strong> ${p.edits.length} prompt line, written by ${esc(p.fixer)} from the practice tickets only.</li>
+      <li><strong>Proof:</strong> tickets that got worse ${d.confidence.regressed_dev + d.confidence.regressed_heldout_before} → ${data.candidates[0].summary.verdict_counts_after_fix?.REGRESSED} of ${total}, including ${p.heldout_before.REGRESSED} → ${p.heldout_after.REGRESSED} on ${d.confidence.heldout_tickets} fresh test tickets the fix was written without seeing.</li>
       <li><strong>Cost:</strong> ${usd(d.totals_usd_per_1k.all_old)} → ${usd(d.recommended.usd_per_1k)} per 1,000 tickets.</li>
     </ul>
     ${items}

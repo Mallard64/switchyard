@@ -231,3 +231,42 @@ None of them is safe alone, which is why the per-step ladder exists.
 **Open:**
 - A luna-based mix needs a classify fix for lowercase IDs (a one-line prompt clarification, or normalizing the ID in code), and then a *third* fresh held-out set.
 - Self-hosted cost should be measured (latency × hardware cost) before it's quoted as a saving.
+
+## Follow-up 2 (Oct 8): cheap retest of the luna + local Llama mix, plain wording, PR
+**Fix:** one line of the classify prompt, used by the mix only:
+> Extract the order ID if the ticket gives one: the letter A followed by 4 digits (e.g. A1234). Customers may type it in lowercase or with a #; return it in uppercase without the # (a1234 -> A1234). Use null if there is none.
+
+This was an engineer edit, written from the t42 failure.
+
+**Results (`mix_retest.py`, `reports/mix_retest/result.json`):**
+
+| Ticket set | Fixed mix: got worse | sol + fix: got worse |
+|---|---|---|
+| Practice (24 × 3) | 0 | – |
+| holdout2 (12 × 3; **not fresh any more**, it exposed the bug) | 0 (t42 fixed) | – |
+| **fresh3: 8 new tickets** (committed in 6e101d4 before any run, 2 with lowercase IDs) × 3 | **0 → passes** | 0 |
+
+- Cost of the mix: **$0.31 per 1k tickets in API calls** plus about 363 tokens per ticket on local Llama 3.1 8B (tone).
+- Small on purpose to save cost: 8 tickets is encouraging, not proof. The recommendation stays sol + fix until the mix passes a larger fresh set and self-hosted cost is measured.
+- Spend for the retest: $1.10. **Total: $17.32** (gpt-4 baseline on fresh3 about $0.95, sol about $0.10, luna about $0.05; Llama local).
+
+**Plain wording:** replaced jargon in what people read: dashboard labels (`app.js`, `demo-views.js`), README, DEMO.md, and the PR-report text.
+
+| Before | After |
+|---|---|
+| spurious | extra (not in the answer key) |
+| boundary | span too long or too short |
+| regressed / regressions | got worse |
+| held-out / dev | fresh test / practice tickets |
+| repair / reproduce | swap gpt-4 back here: fixed / new model here only: broke again |
+| gold score | correct-answer score |
+| intermittent | failed in some runs only |
+| unstable inputs | inputs changed between runs |
+| localize | trace to a step |
+| hybrid | mixed |
+| line ablation | removing one line at a time |
+| noise floor | how much the old model varies on its own |
+| synthetic benchmark | practice test with planted bugs |
+| open weights | open-source model on your own computer |
+
+Code names and JSON fields are unchanged, so the frontend contract holds. Committed older reports (`reports/*/PR.md`) keep their old wording until they're regenerated.

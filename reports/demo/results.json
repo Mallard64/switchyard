@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "_note": "Real runs of the 4-step support agent (clean prompts, nothing planted). Tickets are hand-written (synthetic); model behavior is real. cost_per_1k_calls_usd = per 1k ticket runs (4 calls).",
-  "run_id": "2026-10-08T21:21:20Z",
+  "run_id": "2026-10-08T23:28:39Z",
   "repo": {
     "name": "samegrade support agent (demo)",
     "call_site": "support_agent.py: PROMPTS['tone']"
@@ -2315,7 +2315,7 @@
     "pool": {
       "synthetic": false,
       "base": "gpt-5.6-sol",
-      "rule": "per step: the validated config (sol + patch) everywhere, the candidate at that step only; passes with 0 regressions vs gpt-4 on 24 dev tickets x 3 runs. Self-hosted first, then API by cost.",
+      "rule": "How each step was tested: gpt-5.6-sol with the fix runs every other step, and the cheaper model runs this one. It passes if none of the 24 practice tickets get worse than gpt-4 (3 runs each). Models on your own computer are tried first, then paid models from cheapest up.",
       "ladder": {
         "classify": [
           {
@@ -2522,7 +2522,53 @@
         "gold": 1.0,
         "errors": 0
       },
-      "self_hosted_note": "Self-hosted models ran locally through Ollama (Q4, Apple M4). They have no list price, so their steps show tokens, not dollars; hardware and power are not counted."
+      "retest": {
+        "fix": {
+          "step": "classify",
+          "line_index": 3,
+          "old": "Extract the order ID if the ticket gives one: the letter A followed by 4 digits, in uppercase (e.g. A1234). Use null if there is none.",
+          "new": "Extract the order ID if the ticket gives one: the letter A followed by 4 digits (e.g. A1234). Customers may type it in lowercase or with a #; return it in uppercase without the # (a1234 -> A1234). Use null if there is none.",
+          "written_by": "engineer edit, from the t42 failure"
+        },
+        "dev": {
+          "regressed": 0,
+          "of": 24,
+          "passed_all": 0.9583,
+          "gold": 1.0,
+          "errors": 0
+        },
+        "holdout2_seen": {
+          "regressed": 0,
+          "of": 12,
+          "passed_all": 1.0,
+          "gold": 1.0,
+          "errors": 0
+        },
+        "fresh3": {
+          "tickets": 8,
+          "mix": {
+            "regressed": 0,
+            "of": 8,
+            "passed_all": 1.0,
+            "gold": 1.0,
+            "errors": 0,
+            "accepted": true,
+            "regressed_ids": []
+          },
+          "sol_patch": {
+            "regressed": 0,
+            "of": 8,
+            "passed_all": 1.0,
+            "gold": 1.0,
+            "errors": 0
+          }
+        },
+        "cost": {
+          "api_usd_per_1k": 0.3096,
+          "self_hosted_tokens_per_ticket": 362.6
+        }
+      },
+      "self_hosted_note": "Open-source models ran on a laptop (Apple M4) through Ollama, in a compressed 4-bit version. There is no price list for running them yourself, so they show tokens, not dollars; hardware and electricity are not counted."
     }
   }
 }

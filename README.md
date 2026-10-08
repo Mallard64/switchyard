@@ -22,7 +22,7 @@ There are two variants per task:
 - **`shipped`** runs the configs as published: `spacy.GPT-3-5.v1` for NER (no temperature set) and `spacy.GPT-3-5.v2` for textcat (temperature 0).
 - **`gpt-4`** runs `spacy.GPT-4.v3` at its default model, `"gpt-4"`.
 
-The inputs in `inputs/` are 20 texts per task, each with gold labels. About a third are flagged `tricky`: sarcasm, backhanded compliments, flavor vs. ingredient, a verb that looks like equipment ("Microwave the curry"). Those are where models tend to diverge.
+The inputs in `inputs/` are 20 texts per task, each with a hand-written correct answer. About a third are flagged `tricky`: sarcasm, backhanded compliments, flavor vs. ingredient, a verb that looks like equipment ("Microwave the curry"). Those are where models tend to diverge.
 
 ## Setup (any machine)
 
@@ -74,7 +74,7 @@ Each row holds:
 - the exact prompt and raw response
 - the parsed result, meaning entities with character offsets, or category scores
 - the resolved model ID, token usage, latency and cost
-- the hard checks and a score against the gold labels
+- the hard checks and a score against the correct answers
 
 ## Hard checks
 
@@ -91,9 +91,9 @@ Each hard check enforces one line of the prompt, so a failure points straight at
 | textcat | `bare_answer` | "Do not put any other text in your answer" |
 | textcat | `single_label` | "The task is exclusive, so only choose one label" |
 
-Gold scores (F1 for NER, accuracy for textcat) are reported separately.
+Correct-answer scores (F1, a standard match score, for NER; accuracy for textcat) are reported separately.
 
-The summary also reports **how many inputs changed output between runs**. That run-to-run variation in the old model is your noise floor: a candidate model only counts as having regressed on an input if it differs from the baseline by more than that.
+The summary also reports **how many inputs changed output between runs**. That run-to-run variation in the old model is the baseline wobble: a candidate model only counts as worse on an input if it differs from the baseline by more than that.
 
 ## After it runs
 
@@ -109,19 +109,19 @@ Prices in `PRICES` are list rates as I understand them. Verify them on your Open
 python compare.py results/ner__gpt-4__gpt-4.jsonl results/ner__gpt-4__gpt-5.6-sol.jsonl --json reports/ner_sol.json
 ```
 
-Each input gets one verdict:
+Each input gets one result:
 
-- **REGRESSED** means a hard check fails in most candidate runs, or accuracy falls below the baseline's worst run in most candidate runs.
+- **REGRESSED** (got worse) means a hard check fails in most candidate runs, or accuracy falls below the baseline's worst run in most candidate runs.
 - **IMPROVED** is the reverse.
 - **CHANGED** means the output differs from the baseline but isn't worse. These need a human or LLM judge to review.
 - **SAME** covers everything else.
 
-The candidate is ready to merge when no input regressed. Comparing the baseline against itself gives 0 regressions, so the method doesn't raise false alarms.
+The candidate is ready to merge when no input got worse. Comparing the baseline against itself finds 0 worse inputs, so the method doesn't raise false alarms.
 
 The report also lists:
 
-- **Intermittent hard-check failures:** a check failed, but only in a minority of runs. Each one names the prompt instruction it broke.
-- **NER errors by type:** boundary (`dry pan` vs `pan`), wrong label, missed, or spurious. Accuracy uses a lenient F1 that counts boundary differences as correct, so a longer or shorter span isn't treated as a wrong answer.
+- **Checks that failed in some runs only:** a check failed, but in fewer than half the runs. Each one names the prompt instruction it broke.
+- **NER errors by type:** span too long or too short (`dry pan` vs `pan`), wrong label, missed, or extra (found something that isn't in the answer key). Accuracy uses a forgiving match score that counts length differences as correct, so a longer or shorter span isn't treated as a wrong answer.
 
 The `--json` report is the format the dashboard reads. See `reports/` for examples, which compare gpt-4 against gpt-3.5-turbo as a stand-in for a bad migration.
 
@@ -132,10 +132,10 @@ python migrate.py --task ner --candidates gpt-5.6-sol gpt-5.6-terra --model-conf
 ```
 
 1. **Record** each candidate on the baseline inputs. Results are cached, so a re-run only does missing work. A model your key can't use is skipped and marked unavailable.
-2. **Compare and rank** candidates by regressions, then accuracy, then check pass rate, then cost, then latency. The best one is chosen.
-3. **Cause.** Each regression is mapped to the prompt components it implicates:
+2. **Compare and rank** candidates by how many inputs got worse, then accuracy, then check pass rate, then cost, then latency. The best one is chosen.
+3. **Cause.** Each input that got worse is traced to the prompt parts it points to:
    - a failed hard check points to its instruction in the template
-   - a wrong, spurious or missed label points to that label's definition
+   - a wrong, extra or missed label points to that label's definition
    - a span-boundary error points to the task description
 4. **Fix.** An LLM (by default the chosen model; change it with `--fixer-model`) rewrites one implicated component. The full suite is re-run with that patch (`results/*__fixN.jsonl`), and the fix is accepted only if no input regresses against the baseline. A rejected attempt is fed back to the fixer, up to `--max-fix-attempts` (default 3). A cause is marked **confirmed** when editing that component alone removes the regression.
 5. **PR.** The script writes a patched copy of the upstream example config, `pr.diff`, and `PR.md` with evidence, causes and limits. It doesn't open a PR. Posting to explosion/spacy-llm is your call: `gh pr create --repo explosion/spacy-llm --body-file reports/migration_ner/PR.md`.

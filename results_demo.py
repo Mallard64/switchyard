@@ -248,15 +248,25 @@ def main():
         data["demo"]["models"] = models
         data["demo"]["pool"] = {
             "synthetic": False, "base": pool["base"],
-            "rule": "per step: the validated config (sol + patch) everywhere, the candidate at that step only; passes "
-                    "with 0 regressions vs gpt-4 on 24 dev tickets x 3 runs. Self-hosted first, then API by cost.",
+            "rule": "How each step was tested: gpt-5.6-sol with the fix runs every other step, and the cheaper model runs "
+                    "this one. It passes if none of the 24 practice tickets get worse than gpt-4 (3 runs each). Models on your "
+                    "own computer are tried first, then paid models from cheapest up.",
             "ladder": {s: [{"model": t["model"], "passed": t["passed"], "regressed": t["verdict_counts"]["REGRESSED"],
                             "errors": t["errors"]} for t in v["tried"]] for s, v in pool["ladder"].items()},
             "rounds": [{k: r[k] for k in ("round", "assignment", "verdict_counts", "regressed") if k in r}
                        | {"guilty_step": r.get("guilty_step")} for r in pool["rounds"]],
             "mix": pool["mix"], "sol_patch_holdout2": count(pool["sol_patch_holdout2"]),
-            "self_hosted_note": "Self-hosted models ran locally through Ollama (Q4, Apple M4). They have no list price, so "
-                                "their steps show tokens, not dollars; hardware and power are not counted.",
+            "retest": (lambda r: {"fix": r["fix"], "dev": count(r["dev"]), "holdout2_seen": count(r["holdout2_seen"]),
+                                  "fresh3": {"tickets": r["fresh3"]["tickets"], "mix": count(r["fresh3"]["mix"])
+                                             | {"accepted": r["fresh3"]["mix"]["accepted"], "regressed_ids": r["fresh3"]["mix"]["regressed"]},
+                                             "sol_patch": count(r["fresh3"]["sol_patch"])},
+                                  "cost": {"api_usd_per_1k": r["cost"]["api_usd_per_1k"],
+                                           "self_hosted_tokens_per_ticket": r["cost"]["self_hosted_tokens_per_ticket"]}})(
+                json.loads((HERE / "reports" / "mix_retest" / "result.json").read_text()))
+                if (HERE / "reports" / "mix_retest" / "result.json").exists() else None,
+            "self_hosted_note": "Open-source models ran on a laptop (Apple M4) through Ollama, in a compressed 4-bit "
+                                "version. There is no price list for running them yourself, so they show tokens, not "
+                                "dollars; hardware and electricity are not counted.",
         }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(data, indent=2, default=str) + "\n")

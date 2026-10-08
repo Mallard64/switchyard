@@ -349,7 +349,7 @@ def migration_view(task, chosen, cand_rep, shown_rep, causes, fixes, candidates,
         nf = js["noise_floor"]
         other.append(f"Judge `{js['model']}` (Anthropic, a different provider from the candidates) compared each CHANGED "
                      f"output with the old one in both orders. On {nf['pairs']} pairs of the old model's own outputs it "
-                     f"preferred one side {nf['false_preference_rate']:.0%} of the time (its noise floor).")
+                     f"preferred one side {nf['false_preference_rate']:.0%} of the time (how often it disagrees with itself).")
     other += [f"Other candidate `{cd['model']}`: {cd['regressed']} regressed, {cd['accuracy_metric']} {cd['accuracy']:.2f}"
               for cd in candidates if cd.get("model") != chosen and "regressed" in cd]
     cfg = json.dumps(args.model_config if args.model_config is not None else {"temperature": 0.0})
@@ -452,7 +452,7 @@ def main():
         print(f"        suspects: {[s['component'] for s in cs['suspects']]}")
     if causes and not args.no_ablate:
         from ablation import ablate
-        print(f"      ablation: removing one sentence at a time, {len(causes)} input(s) x {args.runs} runs on {chosen}")
+        print(f"      line test: removing one sentence at a time, {len(causes)} input(s) x {args.runs} runs on {chosen}")
         ablate(args.task, base_path, components, causes, variant=args.variant, name=chosen,
                model_config=args.model_config, runs=args.runs, results_dir=Path(args.results),
                patch_dir=out / "ablation_patches", api_base=args.api_base)

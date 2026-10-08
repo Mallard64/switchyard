@@ -6,8 +6,8 @@ tickets the fixer never saw. Everything replays from cache, offline.
 
 **What's real and what isn't.** The model outputs, costs and token counts are real recorded runs. The 36 support
 tickets are hand-written, with hand-written expected outcomes. Nothing was planted in this migration: the
-regression is gpt-5.6-sol's own behavior. The step-finder accuracy figure (34/39) comes from a separate,
-**synthetic** benchmark of planted bugs, and the dashboard labels it that way.
+problem is gpt-5.6-sol's own behavior. The step-finder accuracy figure (34/39) comes from a separate
+**practice test with planted bugs**, and the dashboard labels it that way.
 
 ## Commands
 
@@ -80,7 +80,7 @@ reply, the new model dropping the timeline, the fixed reply keeping it."
 **1:35 · Savings tab.**
 "And the reason to switch at all: model cost per 1,000 tickets goes from $39 to $7.84, 80% lower, with the same
 pass rate on every check. Type in your own volume: at 100,000 tickets a month that's about $3,100 a month. We also
-tried the cheapest model on every step. It looked cheaper but broke a held-out ticket, so we don't recommend it."
+tried the cheapest model on every step. It looked cheaper but broke a test ticket it hadn't seen, so we don't recommend it."
 
 **1:50 · Pull request tab.**
 "The output is a pull request: the model swap and one prompt line, each accepted, edited or rejected by your
@@ -96,7 +96,7 @@ engineer. We investigate; you decide."
 | $39.32 → $7.84 per 1,000 tickets (−80%) | Mean real tokens per step × list prices in `config/prices.yml` (OpenAI pricing page, checked Oct 8) | Infra, engineering or caching costs. Model cost only. |
 | Monthly savings | The viewer's own volume × the measured cost per ticket | The default 100,000/month is an assumption, labelled on the page |
 | 97.2% → 97.2% replies passing every check (79.6% without the fix) | All 108 runs (36 tickets × 3) | Quality on real customer traffic |
-| Cheapest-per-step mix rejected | `assign.py`: terra passed classify, decide and draft on their own, but the mix broke held-out t33 | That a cheaper safe mix doesn't exist. It needs a fresh held-out set to test. |
+| Cheapest-per-step mix rejected | `assign.py`: terra passed classify, decide and draft on their own, but the mix broke fresh test ticket t33 | That a cheaper safe mix doesn't exist. See "Bigger model list" below. |
 
 ### Evidence (`#evidence`), for the engineer
 ![Evidence view](docs/demo/evidence.png)
@@ -104,9 +104,9 @@ engineer. We investigate; you decide."
 | Shows | Comes from |
 |---|---|
 | Tone step repairs 4/4, reproduces 2/4; other steps repair 0/4 | `model_only.py` step-finder, 3 runs per experiment |
-| Tone line 3 alone repairs 4/4; other lines 0/4 | Line ablation, 3 runs per line |
-| Before/after replies for t21 (dev) and t36 (held-out) | First recorded run of each configuration |
-| Step-finder accuracy: 34/39 exact, 38/39 confirmed both ways, 0 wrong | **Synthetic** planted-bug benchmark, held-out numbers (`reports/agent_bench/RESULTS.md`). The 37/39 figure in that file comes after a fix designed on the same tickets, so it isn't quoted. |
+| Removing tone line 3 alone fixes 4/4; other lines 0/4 | Removing one line at a time, 3 runs per line |
+| Before/after replies for t21 (practice ticket) and t36 (fresh test ticket) | First recorded run of each configuration |
+| Step-finder accuracy: 34/39 exact, 38/39 confirmed both ways, 0 wrong | **Practice test with planted bugs**, numbers from tickets it wasn't tuned on (`reports/agent_bench/RESULTS.md`). The 37/39 figure in that file comes after a fix designed on the same tickets, so it isn't quoted. |
 
 Reproduce is 2/4, not 4/4: on t21 and t24, the new model's tone step only drops the timeline when the new model also
 wrote the draft. Say so if asked.
@@ -120,11 +120,24 @@ edit as verified. Nothing is posted anywhere; the PR is a draft on this page.
 
 ## Likely questions
 
-- **"Is the regression real?"** Yes. Only the model changed (plus the forced sampling default). gpt-4 failed the
+- **"Is the problem real?"** Yes. Only the model changed (plus the forced sampling default). gpt-4 failed the
   timeline check 0 of 3 times on every one of those tickets.
 - **"Are the tickets real customers?"** No. They're 36 hand-written tickets with expected outcomes. The model behavior
   on them is real.
-- **"How do you know the fix generalizes?"** It was written from 4 dev tickets and checked once on 12 held-out tickets
-  it never saw: 3 → 0 regressions. That's a small sample. The next step is a design partner's real traffic.
-- **"Why not just use the cheapest model everywhere?"** We tried, step by step. The cheap mix broke a held-out ticket
+- **"How do you know the fix generalizes?"** It was written from 4 practice tickets and checked once on 12 fresh test tickets
+  it never saw: 3 → 0 got worse. That's a small sample. The next step is a design partner's real traffic.
+- **"Why not just use the cheapest model everywhere?"** We tried, step by step. The cheap mix broke a fresh test ticket
   (t33: tone step returned non-JSON), so it isn't recommended.
+
+## Bigger model list
+
+We also tried 7 cheaper models: 4 low-cost OpenAI models and 3 open-source models running on a laptop through
+Ollama. Each one, used alone for the whole agent, made some tickets worse than gpt-4. One step at a time worked
+better: gpt-5.6-luna handled classify, decide and draft, and the open-source Llama 3.1 8B handled tone.
+
+That mix first failed one fresh ticket (t42), because luna ignored order IDs typed in lowercase ("a1005"). After a
+one-line fix to the classify prompt, the mix passed 8 brand-new test tickets (0 got worse), at **$0.31 per 1,000
+tickets** in API calls plus the cost of running Llama on your own hardware (not measured yet).
+
+Eight tickets is a small test, chosen to save cost. Treat the mix as a promising cheaper option. The recommendation
+stays gpt-5.6-sol + the 1-line fix until the mix passes a bigger test and the self-hosted cost is measured.
