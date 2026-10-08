@@ -68,3 +68,37 @@ Checked on Oct 8 against https://developers.openai.com/api/docs/pricing (Standar
 **Real app (spacy-llm NER, from earlier cached runs, model-only apart from the forced `{}` sampling):** sol regresses on ner-16 ("bowl" tagged EQUIPMENT), and terra on 3 of 50 inputs. The fix is in `reports/migration_ner/`. Textcat: no regressions.
 
 Spend after task 1: **$7.11** (logged in `results/llm_calls.jsonl`).
+
+## Task 2: per-step model assignment (done; the mix is NOT accepted, and the log says so)
+**Method (`assign.py`):**
+- Ladder per step, cheapest first: terra ($2/$12), then sol ($4/$20), with gpt-4 as the fallback.
+- Test for step k: gpt-4 everywhere, the candidate at step k only, 24 dev tickets × 3 runs, steps before k replayed from gpt-4's run. Pass means 0 regressions (compare.py's rule).
+- New-model steps carry the task-1 tone patch. The chosen mix then runs end to end on dev **and** on the 12 held-out tickets.
+
+| Step | terra | sol | Chosen |
+|---|---|---|---|
+| classify | PASS (0/24 regressed) | – | terra |
+| decide | PASS (0/24) | – | terra |
+| draft | PASS (0/24) | – | terra |
+| tone | fail (t07, t20) | fail (t07) | gpt-4 |
+
+**Mix end to end (terra, terra, terra, gpt-4):**
+- Dev: 0 regressed.
+- **Held-out: 1 regressed (t33)**. gpt-4's tone step, given terra drafts, returned non-JSON on 2/3 runs. Gold score went from 0.958 to 1.000.
+- Under the brief's rule (≥ old minus noise, 0 regressions) **the mix is not accepted**. Steps that each pass on their own did not compose.
+
+**Per-step cost from real usage** (mean tokens per ticket run, `config/prices.yml`, $ per 1k ticket runs):
+
+| Step | all gpt-4 | all sol + patch | mix |
+|---|---|---|---|
+| classify | $6.58 (190 in / 15 out) | $1.13 | $0.57 (terra) |
+| decide | $10.83 | $2.05 | $1.11 (terra) |
+| draft | $12.78 | $2.48 | $1.15 (terra) |
+| tone | $9.13 | $2.17 | $8.68 (gpt-4) |
+| **Total** | **$39.32** | **$7.84** | $11.50 |
+
+**Recommendation:** all gpt-5.6-sol + the 1-line tone patch. It's validated on held-out in task 1 (0 regressions) and costs **$7.84 per 1k ticket runs, −80.1% vs gpt-4**. The mix saves 70.7% vs gpt-4 but costs 46.6% more than all-sol, because tone stays on gpt-4, and it isn't accepted anyway.
+
+**Not done, on purpose:** I didn't try terra×3 + sol-tone on held-out after seeing the mix fail there, because that would tune on the held-out set. It's the obvious next candidate; it needs a fresh held-out set.
+
+Spend after task 2: **$10.59**.
