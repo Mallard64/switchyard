@@ -32,3 +32,11 @@
 - **gpt-5.6-terra:** 0 broken tickets, so there was nothing to localize.
 - Caveat: it's 1 broken ticket, so "100%" rests on n=1. A wider benchmark of 9 planted breaks / 39 tickets is in `reports/agent_bench/RESULTS.md` (from Oct 7, using compare.py's rule).
 - Spend: $0.15 for the 9 break-test runs that weren't cached. The 12 rescue runs were already cached.
+
+## Task 5: unit tests (done, 18/18 passing)
+- `python -m unittest discover tests`: stdlib only (pytest isn't installed, and the brief says not to install things). No key, no network, no repo data touched.
+- What they cover:
+  - **Noise rule:** inclusive thresholds, old-model noise can't flag a ticket, the "fixed" mirror case, 5-run fractions, missing runs.
+  - **Hard checks:** valid JSON (fenced JSON still parses), missing field, label mismatch, errored run.
+  - **Step swap:** rescue/break plans put the other model at exactly step k with the right sampling params, replay side and `first_live`; cache labels match stepfinder.py's; the repaired threshold; summary sentences; `--no-plant` removes exactly one line.
+  - **Hash cache:** a repeat call is free, each run is a separate sample, and the spend cap blocks only uncached calls.
