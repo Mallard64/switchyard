@@ -14,7 +14,7 @@ problem is gpt-5.6-sol's own behavior. The step-finder accuracy figure (34/39) c
 One-time setup (any machine; needs Python 3.11+ and Node 18+):
 
 ```bash
-git clone https://github.com/Mallard64/switchyard upshift && cd upshift
+git clone https://github.com/Mallard64/upshift && cd upshift
 git checkout demo
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
