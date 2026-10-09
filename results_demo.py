@@ -239,11 +239,13 @@ def main():
         pool = json.loads(pool_path.read_text())
         count = lambda v: {"regressed": v["verdict_counts"]["REGRESSED"], "of": v["tickets"], "passed_all": v["passed_all"],
                            "gold": v["gold"], "errors": v.get("errors", 0)}
+        step_cost = lambda per: {st: {"usd_per_1k": v["usd_per_1k"], "tokens": round(v["prompt_tokens"] + v["completion_tokens"])}
+                                 for st, v in per.items()}
         models = [{"model": OLD, "hosting": "api", "role": "today", "usd_per_1k": old_cost, "tokens_per_ticket": None,
-                   "sets": {}, "synthetic": False}]
+                   "per_step": step_cost(costs["all_old"]), "sets": {}, "synthetic": False}]
         for r in pool["screening"]:
             models.append({"model": r["model"], "hosting": r["hosting"], "role": "candidate", "usd_per_1k": r["usd_per_1k"],
-                           "tokens_per_ticket": r["tokens_per_ticket"], "synthetic": False,
+                           "tokens_per_ticket": r["tokens_per_ticket"], "per_step": step_cost(r["per_step"]), "synthetic": False,
                            "sets": {s: count(v) for s, v in r["sets"].items()}})
         data["demo"]["models"] = models
         data["demo"]["pool"] = {

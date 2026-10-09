@@ -1,162 +1,146 @@
-// Savings, evidence and pull-request views for reports that carry a `demo` block (results_demo.py).
-// app.js inserts demoSection() under the report intro and calls bindDemo() after each render.
-// Every number shown comes from data.demo / data.candidates; the only input the viewer supplies is request volume.
+// Slideshow for reports that carry a `demo` block (results_demo.py). app.js renders this instead of the usual
+// report when data.demo exists: four slides, one at a time, with Back/Next, numbered slide buttons and arrow keys.
+//   1 The result  ·  2 Every model we tried  ·  3 Cheapest safe choice + the fixes  ·  4 The pull request
+// Every number comes from data; the only thing the viewer types is a ticket volume (slide 1).
 
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 const usd = (n, d = 2) => typeof n === 'number' ? '$' + n.toLocaleString('en-US', {minimumFractionDigits: d, maximumFractionDigits: d}) : 'n/a';
 const pct = n => typeof n === 'number' ? `${(n * 100).toFixed(1)}%` : 'n/a';
 const frac = o => o ? `${o.n}/${o.of}` : '–';
-const TABS = [['savings', 'Savings'], ['evidence', 'Evidence'], ['pr', 'Pull request']];
+const STEPS = ['classify', 'decide', 'draft', 'tone'];
 
-export const demoState = {
-  tab: TABS.some(([id]) => location.hash === '#' + id) ? location.hash.slice(1) : 'savings',
-  volume: null, decisions: {}, editing: null, edits: {},
-};
+const SLIDES = [
+  {id: 'results', title: 'The result'},
+  {id: 'models', title: 'Every model we tried'},
+  {id: 'choice', title: 'Cheapest safe choice + fixes'},
+  {id: 'pr', title: 'The pull request'},
+];
+// Links from the earlier tab layout keep working.
+const OLD_LINKS = {savings: 'results', evidence: 'choice'};
 
-function headline(d) {
-  const rec = d.recommended, old = d.totals_usd_per_1k.all_old;
-  return `Switch to <span class="dm-mono">${esc(rec.assignment.classify)}</span> with a 1-line prompt fix: ` +
-    `${Math.round((1 - rec.usd_per_1k / old) * 100)}% lower model cost, and none of ${d.confidence.dev_tickets + d.confidence.heldout_tickets} test tickets got worse`;
+function slideFromHash() {
+  const h = location.hash.slice(1);
+  const id = OLD_LINKS[h] || h;
+  const i = SLIDES.findIndex((s, n) => s.id === id || String(n + 1) === id);
+  return i < 0 ? 0 : i;
 }
 
-function savingsView(data) {
-  const d = data.demo, old = d.totals_usd_per_1k.all_old, rec = d.recommended, q = d.quality;
-  const recKey = rec.config === 'mix' ? 'mix' : rec.config === 'all_new' ? 'all_new' : 'all_old';
+export const demoState = {slide: slideFromHash(), volume: null, decisions: {}, editing: null, edits: {}};
+
+// ---- Slide 1: the result ---------------------------------------------------------------------------
+function slideResults(data) {
+  const d = data.demo, old = d.totals_usd_per_1k.all_old, rec = d.recommended, q = d.quality, c = d.confidence;
+  const before = c.regressed_dev + c.regressed_heldout_before;
+  const after = data.candidates[0].summary.verdict_counts_after_fix?.REGRESSED;
+  const later = [d.pool?.sol_patch_holdout2, d.pool?.retest?.fresh3?.sol_patch].filter(Boolean);
   const vol = demoState.volume ?? d.monthly_requests_default;
-  const max = Math.max(...d.per_step.map(s => s.all_old?.usd_per_1k || 0));
-  const bar = (v, cls) => `<span class="dm-bar ${cls}" style="width:${Math.max(1, (v || 0) / max * 100)}%"></span>`;
-  const rows = d.per_step.map(s => {
-    const after = s[recKey];
-    const save = s.all_old && after ? 1 - after.usd_per_1k / s.all_old.usd_per_1k : null;
-    return `<tr><th scope="row" class="dm-mono">${esc(s.step)}</th>
-      <td>${esc(s.all_old?.model)}</td><td>${esc(after?.model)}</td>
-      <td class="dm-num">${usd(s.all_old?.usd_per_1k)}</td><td class="dm-num">${usd(after?.usd_per_1k)}</td>
-      <td class="dm-num dm-good">${save === null ? 'n/a' : '−' + Math.round(save * 100) + '%'}</td>
-      <td class="dm-bars" aria-hidden="true">${bar(s.all_old?.usd_per_1k, 'old')}${bar(after?.usd_per_1k, 'new')}</td></tr>`;
-  }).join('');
-  const qbar = (label, v, cls) => `<div class="dm-qrow"><span>${label}</span><span class="dm-qtrack"><span class="dm-qfill ${cls}" style="width:${v * 100}%"></span></span><strong>${pct(v)}</strong></div>`;
-  const mix = d.mix;
+  const price = Object.values(d.prices)[0] || {};
   return `
-  <div class="dm-kpis">
-    <div class="dm-kpi"><span>Model cost per 1,000 tickets</span><strong>${usd(old)} → ${usd(rec.usd_per_1k)}</strong><small>gpt-4 today → ${esc(rec.assignment.classify)} + fix</small></div>
-    <div class="dm-kpi"><span>Tickets that got worse</span><strong>${d.confidence.regressed_dev + d.confidence.regressed_heldout_before} → ${data.candidates[0].summary.verdict_counts_after_fix?.REGRESSED ?? '–'}</strong><small>of ${d.confidence.dev_tickets + d.confidence.heldout_tickets}, before → after the fix</small></div>
-    <div class="dm-kpi"><span>Replies passing every check</span><strong>${pct(q.old.passed_all)} → ${pct(q.new_fixed.passed_all)}</strong><small>${pct(q.new_as_is.passed_all)} if you switch without the fix</small></div>
+  <p class="sl-kicker">${esc(d.pair.old)} → ${esc(d.pair.new)} · 4-step support agent · gpt-4 shuts down Oct 23</p>
+  <h2 class="sl-title" tabindex="-1">Switch to <span class="dm-mono">${esc(rec.assignment.classify)}</span> with a one-line prompt fix</h2>
+  <div class="sl-kpis">
+    <div class="sl-kpi">
+      <span class="sl-label">Tickets that got worse</span>
+      <strong>${before} → ${after}</strong>
+      <small>out of ${c.dev_tickets + c.heldout_tickets} test tickets, before → after the fix.${later.length ? ` Later fresh tests: ${later.map(x => `${x.regressed} of ${x.of}`).join(' and ')}.` : ''}</small>
+    </div>
+    <div class="sl-kpi">
+      <span class="sl-label">Accuracy</span>
+      <strong>${pct(q.old.passed_all)} → ${pct(q.new_fixed.passed_all)}</strong>
+      <small>replies passing every check (${pct(q.new_as_is.passed_all)} without the fix). Correct-answer score ${q.old.gold.toFixed(3)} → ${q.new_fixed.gold.toFixed(3)}.</small>
+    </div>
+    <div class="sl-kpi sl-kpi-good">
+      <span class="sl-label">Model cost per 1,000 tickets</span>
+      <strong>${usd(old)} → ${usd(rec.usd_per_1k)}</strong>
+      <small>${Math.round((1 - rec.usd_per_1k / old) * 100)}% lower</small>
+    </div>
   </div>
-  <div class="dm-grid">
-    <section class="dm-card" aria-labelledby="dm-calc">
-      <h3 id="dm-calc">Your monthly savings</h3>
-      <label class="dm-label" for="dm-volume">Tickets per month</label>
-      <input id="dm-volume" class="dm-input" type="number" min="0" step="1000" inputmode="numeric" value="${vol}">
-      <dl class="dm-money" aria-live="polite">
-        <div><dt>Today (gpt-4)</dt><dd id="dm-today">${usd(vol * old / 1000, 0)}</dd></div>
-        <div><dt>After the switch</dt><dd id="dm-after">${usd(vol * rec.usd_per_1k / 1000, 0)}</dd></div>
-        <div class="dm-save"><dt>You save</dt><dd><span id="dm-save">${usd(vol * (old - rec.usd_per_1k) / 1000, 0)}</span> / month</dd></div>
-      </dl>
-      <p class="dm-foot">Volume is your number. Cost per ticket is measured: real token counts per step × list prices (${esc(Object.values(d.prices)[0]?.source)}, checked ${esc(Object.values(d.prices)[0]?.checked)}). Model cost only.</p>
-    </section>
-    <section class="dm-card" aria-labelledby="dm-quality">
-      <h3 id="dm-quality">Quality stays where it was</h3>
-      ${qbar('gpt-4 (today)', q.old.passed_all, 'old')}
-      ${qbar(esc(rec.assignment.classify) + ', no fix', q.new_as_is.passed_all, 'warn')}
-      ${qbar(esc(rec.assignment.classify) + ' + fix', q.new_fixed.passed_all, 'new')}
-      <p class="dm-foot">Share of ${q.new_fixed.runs} runs passing every check. Correct-answer score (right category, order, action and reply content): ${q.old.gold.toFixed(3)} today, ${q.new_fixed.gold.toFixed(3)} after.</p>
-    </section>
+  <div class="sl-calc">
+    <label for="dm-volume">Tickets per month</label>
+    <input id="dm-volume" class="dm-input" type="number" min="0" step="1000" inputmode="numeric" value="${vol}">
+    <p aria-live="polite">Today <strong id="dm-today">${usd(vol * old / 1000, 0)}</strong> → after <strong id="dm-after">${usd(vol * rec.usd_per_1k / 1000, 0)}</strong>.
+      You save <strong class="dm-good" id="dm-save">${usd(vol * (old - rec.usd_per_1k) / 1000, 0)}</strong> a month.</p>
   </div>
-  <section class="dm-card" aria-labelledby="dm-steps">
-    <h3 id="dm-steps">Cost per step, per 1,000 tickets</h3>
-    <div class="dm-scroll"><table class="dm-table">
-      <thead><tr><th scope="col">Step</th><th scope="col">Model today</th><th scope="col">Model after</th><th scope="col" class="dm-num">Today</th><th scope="col" class="dm-num">After</th><th scope="col" class="dm-num">Saving</th><th scope="col"><span class="dm-key old"></span>today <span class="dm-key new"></span>after</th></tr></thead>
-      <tbody>${rows}</tbody>
-      <tfoot><tr><th scope="row">Total</th><td></td><td></td><td class="dm-num">${usd(old)}</td><td class="dm-num">${usd(rec.usd_per_1k)}</td><td class="dm-num dm-good">−${Math.round((1 - rec.usd_per_1k / old) * 100)}%</td><td></td></tr></tfoot>
-    </table></div>
-    <p class="dm-foot">Also tested: the cheapest model per step (${Object.entries(mix.assignment).map(([s, m]) => `${esc(s)} → ${esc(m)}`).join(', ')}) at ${usd(d.totals_usd_per_1k.mix)} per 1,000. It is <strong>not recommended</strong>: ${mix.heldout.REGRESSED} fresh test ticket${mix.heldout.REGRESSED === 1 ? '' : 's'} (${mix.heldout_regressed.map(esc).join(', ')}) got worse.</p>
-  </section>
-  ${poolMix(d)}
-  ${modelTable(d)}`;
+  <p class="sl-foot">Real model runs on hand-written tickets, ${c.runs_per_ticket} runs each. Same prompts, tools and tickets on both sides; only the model changed.
+    Cost = measured tokens × list prices (${esc(price.source)}, checked ${esc(price.checked)}); model cost only. The volume is your number.</p>`;
 }
 
-// Cost cell: dollars for API models; tokens for self-hosted ones (no list price, so no dollar figure).
-const costCell = m => m.usd_per_1k != null ? usd(m.usd_per_1k) : m.tokens_per_ticket != null ? `${Math.round(m.tokens_per_ticket).toLocaleString('en-US')} tokens/ticket` : 'n/a';
-const worse = v => v ? `<span class="${v.regressed ? 'dm-bad' : 'dm-good'}">${v.regressed}</span><span class="dm-of">/${v.of}</span>${v.errors ? ` <span class="dm-pill warn">${v.errors} errors</span>` : ''}` : '–';
+// ---- Slide 2: every model ----------------------------------------------------------------------------
+const stepCell = v => !v ? '–' : v.usd_per_1k != null ? usd(v.usd_per_1k) : `${v.tokens.toLocaleString('en-US')} tok`;
+const worse = v => v ? `<span class="${v.regressed ? 'dm-bad' : 'dm-good'}">${v.regressed}</span><span class="dm-of">/${v.of}</span>` : '–';
 
-function modelTable(d) {
-  if (!d.models) return '';
-  const rank = m => m.role === 'today' ? -1 : m.usd_per_1k ?? -0.5;
-  const rows = [...d.models].sort((a, b) => rank(a) - rank(b)).map(m => `<tr${m.role === 'today' ? ' class="dm-today"' : ''}>
-    <th scope="row" class="dm-mono">${esc(m.model)}${m.role === 'today' ? ' <span class="dm-pill">today</span>' : ''}</th>
-    <td>${m.hosting === 'self-hosted' ? 'Your own computer (open-source model)' : 'OpenAI API'}</td>
-    <td class="dm-num">${costCell(m)}</td>
-    <td class="dm-num">${worse(m.sets.dev)}</td><td class="dm-num">${worse(m.sets.hard)}</td><td class="dm-num">${worse(m.sets.holdout2)}</td>
-    <td class="dm-num">${m.sets.dev ? pct(m.sets.dev.passed_all) : '–'}</td></tr>`).join('');
-  return `<section class="dm-card" aria-labelledby="dm-models">
-    <h3 id="dm-models">Every model we tested, alone</h3>
-    <div class="dm-scroll"><table class="dm-table">
-      <thead><tr><th scope="col">Model</th><th scope="col">Runs on</th><th scope="col" class="dm-num">Cost per 1,000 tickets</th>
-        <th scope="col" class="dm-num">Got worse: practice</th><th scope="col" class="dm-num">hard</th><th scope="col" class="dm-num">fresh</th><th scope="col" class="dm-num">Passing every check (practice)</th></tr></thead>
-      <tbody>${rows}</tbody></table></div>
-    <p class="dm-foot">Each model runs the whole agent with no prompt changes, 3 runs per ticket, compared with gpt-4 on 24 practice, 12 hard and 12 fresh test tickets. ${esc(d.pool?.self_hosted_note || '')}</p>
-  </section>`;
+function chosenPerStep(d) {
+  return Object.fromEntries(Object.entries(d.pool?.ladder || {}).map(([s, tried]) => [s, (tried.find(t => t.passed) || {}).model]));
 }
 
-function poolMix(d) {
-  const p = d.pool;
-  if (!p) return '';
-  const ladder = Object.entries(p.ladder).map(([s, tried]) => `<li><span class="dm-mono">${esc(s)}</span>: ${tried.map(t =>
-    `<span class="${t.passed ? 'dm-good' : 'dm-bad'}">${esc(t.model)} ${t.passed ? '✓' : `✗ (${t.regressed} worse${t.errors ? ', errors' : ''})`}</span>`).join(' → ')}${tried.some(t => t.passed) ? '' : ` → stays on ${esc(p.base)}`}</li>`).join('');
-  const m = p.mix;
-  const verdict = !m ? `<p><strong>No cheaper mix passed the practice tickets</strong>, so the recommendation stays ${esc(p.base)} + fix.</p>` :
-    `<p><strong>${m.accepted ? 'Passed' : 'Failed'}</strong> on 12 fresh tickets no selection step had seen: ${m.holdout2.verdict_counts.REGRESSED} got worse${m.holdout2.regressed.length ? ` (${m.holdout2.regressed.map(esc).join(', ')})` : ''}. Cost: ${usd(m.api_usd_per_1k)} per 1,000 tickets in API calls${m.self_hosted_steps.length ? ` plus ${Math.round(m.self_hosted_tokens_per_ticket).toLocaleString('en-US')} tokens per ticket run on your own computer (${m.self_hosted_steps.map(esc).join(', ')})` : ''}.</p>
-     <p class="dm-foot">Mix: ${Object.entries(m.assignment).map(([s, x]) => `${esc(s)} → <span class="dm-mono">${esc(x)}</span>`).join(', ')}. For comparison, ${esc(p.base)} + fix alone on the same fresh tickets: ${p.sol_patch_holdout2.regressed} got worse.</p>`;
-  const r = p.retest;
-  const retest = !r ? '' : `<p><strong>After a one-line fix</strong> to how the classify step reads order IDs (lowercase like “a1005” now counts):
-     practice tickets ${r.dev.regressed} of ${r.dev.of} got worse; ${r.fresh3.tickets} brand-new test tickets ${r.fresh3.mix.regressed} got worse${r.fresh3.mix.regressed_ids.length ? ` (${r.fresh3.mix.regressed_ids.map(esc).join(', ')})` : ''}
-     → <strong>${r.fresh3.mix.accepted ? 'passed' : 'failed'}</strong>. ${esc(p.base)} + fix on the same ${r.fresh3.tickets}: ${r.fresh3.sol_patch.regressed} got worse.
-     Cost: ${usd(r.cost.api_usd_per_1k)} per 1,000 tickets in API calls plus ${Math.round(r.cost.self_hosted_tokens_per_ticket).toLocaleString('en-US')} tokens per ticket on your own computer.</p>
-     <p class="dm-foot">Small test (${r.fresh3.tickets} tickets × 3 runs) to keep cost down: a pass here is encouraging, not proof.</p>`;
-  return `<section class="dm-card" aria-labelledby="dm-pool">
-    <h3 id="dm-pool">Cheapest model for each step, from a bigger list</h3>
-    <ul class="dm-ladder">${ladder}</ul>
-    ${verdict}
-    ${retest}
-    <p class="dm-foot">${esc(p.rule)}</p>
-  </section>`;
-}
-
-function evidenceView(data) {
-  const d = data.demo, c = d.confidence, lines = d.lines, b = d.benchmark;
-  const steps = d.per_step.map(s => `<tr class="${s.guilty ? 'dm-guilty' : ''}"><th scope="row" class="dm-mono">${esc(s.step)}${s.guilty ? ' <span class="dm-pill warn">cause</span>' : ''}</th>
-    <td class="dm-num">${frac(s.repair)}</td><td class="dm-num">${s.guilty ? frac(s.reproduce) : '–'}</td></tr>`).join('');
-  const lineRows = lines.results.map(r => `<li class="${r.repairs ? 'dm-guilty' : ''}"><span class="dm-ln">${r.line_index + 1}</span><span class="dm-mono">${esc(r.line)}</span><strong class="dm-num">${r.repairs}/${r.of}</strong></li>`).join('');
-  const ex = d.examples.map(e => `<article class="dm-example">
-    <h4>${esc(e.input_id)} · ${e.split === 'heldout' ? 'fresh test ticket (the fix was written without seeing it)' : 'practice ticket'}</h4>
-    <p class="dm-ticket">“${esc(e.text)}”</p>
-    <div class="dm-three">
-      <div><span class="dm-col">gpt-4 (today)</span><p>${esc(e.old.final_reply)}</p></div>
-      <div class="bad"><span class="dm-col">${esc(d.pair.new)}, no fix</span><p>${esc(e.new.final_reply)}</p></div>
-      <div class="good"><span class="dm-col">${esc(d.pair.new)} + fix</span><p>${esc(e.fixed.final_reply)}</p></div>
-    </div></article>`).join('');
+function slideModels(data) {
+  const d = data.demo, chosen = chosenPerStep(d);
+  const rank = m => m.role === 'today' ? -2 : m.usd_per_1k ?? 1e9;
+  const rows = [...(d.models || [])].sort((a, b) => rank(a) - rank(b)).map(m => `
+    <tr${m.role === 'today' ? ' class="dm-today"' : ''}>
+      <th scope="row"><span class="dm-mono">${esc(m.model)}</span>${m.role === 'today' ? ' <span class="dm-pill">today</span>' : ''}
+        <small class="sl-host">${m.hosting === 'self-hosted' ? 'your own computer · open-source' : 'OpenAI API'}</small></th>
+      ${STEPS.map(s => `<td class="dm-num${chosen[s] === m.model ? ' sl-pick' : ''}">${stepCell(m.per_step?.[s])}${chosen[s] === m.model ? ' <span aria-label="chosen for this step">✓</span>' : ''}</td>`).join('')}
+      <td class="dm-num sl-total">${m.usd_per_1k != null ? usd(m.usd_per_1k) : `${Math.round(m.tokens_per_ticket || 0).toLocaleString('en-US')} tok`}</td>
+      <td class="dm-num">${m.role === 'today' ? '<span class="dm-of">baseline</span>' : `${worse(m.sets.dev)} · ${worse(m.sets.hard)} · ${worse(m.sets.holdout2)}`}</td>
+    </tr>`).join('');
   return `
-  <p class="dm-strip">${c.runs_per_ticket} runs per ticket · ${c.dev_tickets} practice tickets · ${c.heldout_tickets} fresh test tickets · gpt-4 gave different results between runs on ${c.old_model_unstable_tickets} tickets · real model runs, hand-written tickets</p>
-  <div class="dm-grid">
-    <section class="dm-card" aria-labelledby="dm-which">
-      <h3 id="dm-which">Which step broke</h3>
-      <table class="dm-table"><thead><tr><th scope="col">Step</th><th scope="col" class="dm-num">Swap gpt-4 back here: fixed</th><th scope="col" class="dm-num">New model here only: broke again</th></tr></thead><tbody>${steps}</tbody></table>
-      <p class="dm-foot"><strong>First column:</strong> the new model runs every step except this one, which goes back to gpt-4. It counts how many of the ${c.regressed_dev} broken practice tickets work again. <strong>Second column:</strong> the reverse. gpt-4 runs every step except this one, which uses the new model. It counts how many break again. Each test runs 3 times.</p>
-    </section>
-    <section class="dm-card" aria-labelledby="dm-lines">
-      <h3 id="dm-lines">Which line in <span class="dm-mono">${esc(lines.step)}</span></h3>
-      <ol class="dm-lines">${lineRows}</ol>
-      <p class="dm-foot">Each line removed on its own, new model everywhere, 3 runs: how many broken tickets work again without it.</p>
-    </section>
-  </div>
-  <section class="dm-card" aria-labelledby="dm-ex"><h3 id="dm-ex">Before and after</h3>${ex}</section>
-  <section class="dm-card dm-synthetic" aria-labelledby="dm-bench">
-    <h3 id="dm-bench">How often the step-finder is right <span class="dm-pill">practice test with planted bugs</span></h3>
-    <p>On ${b.held_out_exact.of} tickets broken on purpose with 9 planted prompt bugs, on tickets it hadn't been tuned on: exact step <strong>${frac(b.held_out_exact)}</strong>, confirmed both ways <strong>${frac(b.two_way_confirmed)}</strong>, wrong step <strong>${frac(b.wrong_step)}</strong>.</p>
-    <p class="dm-foot">Planted bugs, not real migrations (${esc(b.source)}).</p>
-  </section>`;
+  <p class="sl-kicker">Candidates</p>
+  <h2 class="sl-title" tabindex="-1">Cost per step, and how each model did on its own</h2>
+  <div class="dm-scroll"><table class="dm-table sl-table">
+    <thead><tr><th scope="col">Model</th>${STEPS.map(s => `<th scope="col" class="dm-num">${s}</th>`).join('')}
+      <th scope="col" class="dm-num">Total per 1,000 tickets</th><th scope="col" class="dm-num">Got worse alone<br><small>practice · hard · fresh</small></th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>
+  <p class="sl-foot">Costs are per 1,000 tickets. "Got worse alone": each model ran the whole agent with no prompt changes, 3 runs per ticket, against gpt-4 on 24 practice, 12 hard and 12 fresh tickets.
+    ✓ marks the cheapest model that passed that step (next slide). ${esc(d.pool?.self_hosted_note || '')}</p>`;
 }
 
+// ---- Slide 3: cheapest safe choice + fixes -------------------------------------------------------------
+const diff = (a, b) => `<pre class="dm-diff"><span class="del">− ${esc(a)}</span>\n<span class="add">+ ${esc(b)}</span></pre>`;
+
+function slideChoice(data) {
+  const d = data.demo, p = d.pool, patch = d.patch, rec = d.recommended, r = p?.retest;
+  const guilty = d.per_step.find(s => s.guilty), line = d.lines.results.find(x => x.repairs);
+  const ladder = !p ? '' : `<ol class="sl-ladder">${STEPS.map(s => `<li><span class="dm-mono sl-step">${s}</span>${(p.ladder[s] || []).map(t =>
+    `<span class="sl-chip ${t.passed ? 'ok' : 'no'}">${esc(t.model)} ${t.passed ? '✓' : `✗ ${t.regressed}`}</span>`).join('')}</li>`).join('')}</ol>`;
+  const recResults = [`${data.candidates[0].summary.verdict_counts_after_fix?.REGRESSED} of ${d.confidence.dev_tickets + d.confidence.heldout_tickets}`,
+    p?.sol_patch_holdout2 && `${p.sol_patch_holdout2.regressed} of ${p.sol_patch_holdout2.of}`,
+    r && `${r.fresh3.sol_patch.regressed} of ${r.fresh3.sol_patch.of}`].filter(Boolean).join(', ');
+  const optionB = !r ? '' : `
+    <section class="sl-option" aria-labelledby="sl-b">
+      <span class="dm-pill warn">Cheapest option · small test</span>
+      <h3 id="sl-b">${STEPS.map(s => `${s} → <span class="dm-mono">${esc(p.mix.assignment[s])}</span>`).join(', ')}</h3>
+      <p class="sl-price">${usd(r.cost.api_usd_per_1k)} <small>per 1,000 tickets in API calls, plus about ${Math.round(r.cost.self_hosted_tokens_per_ticket)} tokens per ticket on your own computer</small></p>
+      <p><strong>First try:</strong> ${p.mix.holdout2.regressed.map(esc).join(', ')} got worse. The order ID was typed in lowercase ("a1005") and the classify step dropped it.</p>
+      <p><strong>Fix, classify prompt:</strong></p>
+      ${diff(r.fix.old, r.fix.new)}
+      <p><strong>After the fix:</strong> ${r.dev.regressed} of ${r.dev.of} practice tickets and ${r.fresh3.mix.regressed} of ${r.fresh3.mix.of} brand-new tickets got worse.
+        Encouraging, but 8 tickets is a small test, and the cost of running the model yourself isn't measured.</p>
+    </section>`;
+  return `
+  <p class="sl-kicker">Cheapest safe choice</p>
+  <h2 class="sl-title" tabindex="-1">Pick the cheapest model that passes each step, then fix what breaks</h2>
+  ${p ? `<div class="sl-ladder-box"><p class="sl-label">Each step, cheapest first (✗ n = tickets that got worse)</p>${ladder}</div>` : ''}
+  <div class="sl-options">
+    <section class="sl-option sl-option-rec" aria-labelledby="sl-a">
+      <span class="dm-pill accepted">Recommended</span>
+      <h3 id="sl-a"><span class="dm-mono">${esc(rec.assignment.classify)}</span> on every step + a tone fix</h3>
+      <p class="sl-price">${usd(rec.usd_per_1k)} <small>per 1,000 tickets</small></p>
+      <p><strong>What broke:</strong> the tone step deleted the "5–7 business days" refund timeline.
+        Putting gpt-4 back at <span class="dm-mono">${esc(guilty.step)}</span> alone fixes ${frac(guilty.repair)} broken tickets; no other step fixes any.
+        Removing line ${line ? line.line_index + 1 : '?'} alone fixes ${line ? `${line.repairs}/${line.of}` : '–'}.</p>
+      <p><strong>Fix, tone prompt</strong> (written by ${esc(patch.fixer)} from the practice tickets only):</p>
+      ${patch.edits.map(e => diff(e.old, e.new)).join('')}
+      <p><strong>Got worse after the fix:</strong> ${recResults}, including tickets the fix never saw.</p>
+    </section>
+    ${optionB}
+  </div>
+  <p class="sl-foot">How often the step-finder names the right step: ${frac(d.benchmark.held_out_exact)} exactly, ${frac(d.benchmark.wrong_step)} wrong,
+    on a practice test with planted bugs (${esc(d.benchmark.source)}).</p>`;
+}
+
+// ---- Slide 4: the pull request -------------------------------------------------------------------------
 function prChanges(data) {
   const d = data.demo, p = d.patch;
   return [
@@ -167,7 +151,7 @@ function prChanges(data) {
   ];
 }
 
-function prView(data) {
+function slidePR(data) {
   const d = data.demo, p = d.patch, changes = prChanges(data);
   const total = d.confidence.dev_tickets + d.confidence.heldout_tickets;
   const status = id => demoState.decisions[id] || 'pending';
@@ -187,45 +171,61 @@ function prView(data) {
   }).join('');
   const ready = changes.every(ch => status(ch.id) === 'accepted');
   return `
-  <section class="dm-card dm-pr" aria-labelledby="dm-pr-title">
-    <div class="dm-change-head"><div><span class="dm-col">Draft pull request · ${changes.length} changes</span><h3 id="dm-pr-title">${esc(data.pr.title)}</h3></div>
-      <span class="dm-pill ${ready ? 'accepted' : 'pending'}" aria-live="polite">${ready ? 'Ready to merge' : 'Needs review'}</span></div>
-    <ul class="dm-summary">
-      <li><strong>Where:</strong> the <span class="dm-mono">${esc(p.step)}</span> step. Putting ${esc(d.pair.old)} back at that step alone fixes ${frac(d.per_step.find(s => s.guilty).repair)} broken tickets; no other step fixes any.</li>
-      <li><strong>What:</strong> ${p.edits.length} prompt line, written by ${esc(p.fixer)} from the practice tickets only.</li>
-      <li><strong>Proof:</strong> tickets that got worse ${d.confidence.regressed_dev + d.confidence.regressed_heldout_before} → ${data.candidates[0].summary.verdict_counts_after_fix?.REGRESSED} of ${total}, including ${p.heldout_before.REGRESSED} → ${p.heldout_after.REGRESSED} on ${d.confidence.heldout_tickets} fresh test tickets the fix was written without seeing.</li>
-      <li><strong>Cost:</strong> ${usd(d.totals_usd_per_1k.all_old)} → ${usd(d.recommended.usd_per_1k)} per 1,000 tickets.</li>
-    </ul>
-    ${items}
-  </section>`;
+  <div class="dm-change-head"><div><p class="sl-kicker">Draft pull request · ${changes.length} changes</p>
+    <h2 class="sl-title" tabindex="-1">${esc(data.pr.title)}</h2></div>
+    <span class="dm-pill ${ready ? 'accepted' : 'pending'}" aria-live="polite">${ready ? 'Ready to merge' : 'Needs review'}</span></div>
+  <ul class="dm-summary">
+    <li><strong>Where:</strong> the <span class="dm-mono">${esc(p.step)}</span> step.</li>
+    <li><strong>What:</strong> the model swap and ${p.edits.length} prompt line.</li>
+    <li><strong>Proof:</strong> tickets that got worse ${d.confidence.regressed_dev + d.confidence.regressed_heldout_before} → ${data.candidates[0].summary.verdict_counts_after_fix?.REGRESSED} of ${total}, including ${p.heldout_before.REGRESSED} → ${p.heldout_after.REGRESSED} on ${d.confidence.heldout_tickets} fresh test tickets the fix never saw.</li>
+    <li><strong>Cost:</strong> ${usd(d.totals_usd_per_1k.all_old)} → ${usd(d.recommended.usd_per_1k)} per 1,000 tickets.</li>
+  </ul>
+  ${items}`;
 }
+
+// ---- Deck ------------------------------------------------------------------------------------------------
+const RENDER = [slideResults, slideModels, slideChoice, slidePR];
 
 export function demoSection(data) {
   if (!data?.demo) return '';
-  const d = data.demo, t = demoState.tab;
-  const view = t === 'evidence' ? evidenceView(data) : t === 'pr' ? prView(data) : savingsView(data);
-  return `<section id="demo-panel" class="dm-panel" aria-labelledby="dm-title">
-    <p class="eyebrow">Migration plan · ${esc(d.pair.old)} → ${esc(d.pair.new)}</p>
-    <h2 id="dm-title" class="dm-title">${headline(d)}</h2>
-    <p class="dm-prov"><span class="dm-pill">Real model runs</span> <span class="dm-pill">Hand-written tickets</span> Same prompts, tools and tickets on both sides; only the model changed.</p>
-    <div class="dm-tabs" role="tablist" aria-label="Report views">${TABS.map(([id, name]) =>
-      `<button role="tab" id="dm-tab-${id}" aria-controls="dm-view" aria-selected="${id === t}" tabindex="${id === t ? 0 : -1}" data-tab="${id}">${name}</button>`).join('')}</div>
-    <div id="dm-view" role="tabpanel" aria-labelledby="dm-tab-${t}">${view}</div>
+  const i = demoState.slide, s = SLIDES[i];
+  return `<section id="demo-panel" class="sl-deck" aria-roledescription="slideshow" aria-label="Migration report">
+    <nav class="sl-dots" aria-label="Slides"><ol>${SLIDES.map((x, j) =>
+      `<li><button class="sl-dot" data-go="${j}"${j === i ? ' aria-current="step"' : ''}><span>${j + 1}</span>${esc(x.title)}</button></li>`).join('')}</ol></nav>
+    <article class="sl-slide" aria-roledescription="slide" aria-label="${i + 1} of ${SLIDES.length}: ${esc(s.title)}">${RENDER[i](data)}</article>
+    <div class="sl-nav">
+      <button class="button" data-go="${i - 1}"${i === 0 ? ' disabled' : ''}>← Back</button>
+      <span class="sl-count" aria-live="polite">${i + 1} / ${SLIDES.length} · ${esc(s.title)}</span>
+      <button class="button primary" data-go="${i + 1}"${i === SLIDES.length - 1 ? ' disabled' : ''}>Next →</button>
+    </div>
   </section>`;
 }
+
+let keysBound = false;
 
 export function bindDemo(root, data) {
   const panel = root.querySelector('#demo-panel');
   if (!panel) return;
   const redraw = () => { panel.outerHTML = demoSection(data); bindDemo(root, data); };
-  const tabs = [...panel.querySelectorAll('[role=tab]')];
-  tabs.forEach((b, i) => {
-    b.onclick = () => { demoState.tab = b.dataset.tab; history.replaceState(null, '', '#' + b.dataset.tab); redraw(); root.querySelector(`#dm-tab-${demoState.tab}`)?.focus(); };
-    b.onkeydown = e => {
-      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-      tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length].click();
-    };
-  });
+  const go = n => {
+    if (n < 0 || n >= SLIDES.length || n === demoState.slide) return;
+    demoState.slide = n;
+    demoState.editing = null;
+    history.replaceState(null, '', '#' + SLIDES[n].id);
+    redraw();
+    root.querySelector('.sl-title')?.focus({preventScroll: true});
+    window.scrollTo({top: 0});
+  };
+  panel.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(Number(b.dataset.go)));
+  if (!keysBound) {
+    keysBound = true;
+    document.addEventListener('keydown', e => {
+      if (!document.querySelector('#demo-panel') || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.target.closest('input, textarea, select, [contenteditable], dialog[open]')) return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); go(demoState.slide + 1); }
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(demoState.slide - 1); }
+    });
+  }
   const vol = panel.querySelector('#dm-volume');
   if (vol) vol.oninput = () => {
     const d = data.demo, v = Math.max(0, Number(vol.value) || 0), old = d.totals_usd_per_1k.all_old, rec = d.recommended.usd_per_1k;

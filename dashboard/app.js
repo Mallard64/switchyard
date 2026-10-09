@@ -266,6 +266,8 @@ function renderMigration() {
  if(m.pr) banner.insertAdjacentHTML('afterend', `<section class="panel migration-section pr-section"><div class="panel-heading"><div><p class="eyebrow">04 / Proposed code change</p><h2>Pull request preview</h2><p>${esc(m.pr.title)}</p></div></div><div class="repair-body"><p class="provider">${esc(m.pr.target_path)}</p><details class="record"><summary>View proposed diff</summary><pre class="diff code-diff">${esc(m.pr.diff||'No diff supplied.')}</pre></details><p class="provider">${safeURL(m.pr.url)?`<a href="${esc(safeURL(m.pr.url))}" target="_blank" rel="noopener noreferrer">Open pull request ↗</a>`:'No published PR link is included. This is the recorded proposal.'}</p></div></section>`);
 }
 function render() {
+ // Reports with a `demo` block are shown as a four-slide deck (demo-views.js) instead of the usual report.
+ if(data.demo){app.classList.remove('full-report-view');app.innerHTML=demoSection(data);bindDemo(app,data);return;}
  app.classList.toggle('full-report-view',reportView);
  if(reportView)motionCleanup();
  if(data.migration && !reportView){renderVisualDashboard();return;}
@@ -275,7 +277,6 @@ function render() {
  const retirement=days===null?'':`<span class="pill warn">${days} days to retirement at report time</span>`;
  app.innerHTML=`<section class="intro"><div><p class="eyebrow">Migration report / ${esc(data.repo.call_site)}</p><h1>${esc(data.repo.name)}</h1><div class="subline"><span>Baseline</span><strong>${esc(data.baseline.model)}</strong>${retirement}</div></div><div class="actions"><button class="button" id="reset">↺ Reset</button><button class="button primary" id="run" ${phase==='running'?'disabled':''}>${phase==='running'?'Running replay…':phase==='complete'?'↻ Replay run':'▶ Run comparison'}</button></div></section>
  ${data._note?`<div class="sample"><span>◈</span><span>${esc(data._note)} This dashboard replays recorded results; no live model calls.</span></div>`:''}
- ${demoSection(data)}
  <section class="cards" aria-label="Model comparison">${data.candidates.map((c,ci)=>{
  const repaired=c.results.filter(isFixed).length;
  const passed=done?c.summary.passed+repaired:c.summary.passed;
@@ -292,7 +293,6 @@ function render() {
  ${data._format==='ner'?`<section class="pr-banner ${data.ner.ready_to_merge?'':'merge-blocked'}" role="status"><div><h2><span class="pr-icon">${data.ner.ready_to_merge?'✓':'!'}</span>${data.ner.ready_to_merge?'Ready to merge':'Not ready to merge'}</h2><p>${esc(data.ner.verdict_counts.REGRESSED??0)} got worse · ${esc(data.ner.verdict_counts.IMPROVED??0)} improved · ${esc(data.ner.verdict_counts.CHANGED??0)} changed · ${esc(data.ner.verdict_counts.SAME??0)} same</p><span class="pill">${esc(data.ner.inputs_compared)} inputs compared · ${esc(data.ner.candidate.unstable_inputs)} inputs changed between runs</span></div><span class="provider">${data.ner.ready_to_merge?'All merge checks passed':'Review the examples that got worse or changed'}</span></section>`:done&&remaining===0?`<section class="pr-banner" role="status"><div><h2><span class="pr-icon">⑂</span>Migration ready for review</h2><p>${esc(data.pr.title)}</p><span class="pill">${esc(data.pr.status)} · ${esc(data.pr.lines_changed)} lines changed</span></div>${safeURL(data.pr.url)?`<a class="button" href="${esc(safeURL(data.pr.url))}" target="_blank" rel="noopener noreferrer">Open pull request ↗</a>`:'<span class="provider">PR link not available in this report</span>'}</section>`:''}
  <footer><span>UPSHIFT / Inspect. Repair. Migrate.</span><span>Report ${esc(data.run_id)} · Recorded replay</span></footer>`;
  if(data.migration) {renderMigration(); app.querySelector('.actions').insertAdjacentHTML('afterbegin','<button class="button" id="demo-view">← Dashboard</button>'); app.querySelector('#demo-view').onclick=()=>{clearTimers();reportView=false;render();};}
- bindDemo(app,data);
  document.querySelector('#run').onclick=start;
  document.querySelector('#reset').onclick=reset;
  app.querySelectorAll('[data-ci]').forEach(b=>b.onclick=()=>openDetail(+b.dataset.ci,+b.dataset.ri));

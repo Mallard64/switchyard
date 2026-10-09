@@ -1,6 +1,6 @@
 """Demo mode: replay the real gpt-4 -> gpt-5.6-sol migration from cache, paced like the real run, fully offline.
 
-  python demo.py --demo                  # narrated replay (~2 min) + dashboard at http://localhost:4173/#savings
+  python demo.py --demo                  # narrated replay (~2 min) + dashboard at http://localhost:4173/#results
   python demo.py --demo --speed 2        # twice as fast
   python demo.py --demo --no-server      # terminal only
 
@@ -102,7 +102,7 @@ def main():
                 if port_open(args.port):
                     break
                 time.sleep(0.1)
-        print(f"Dashboard: {BOLD}http://localhost:{args.port}/#savings{RESET}  (offline replay; no model calls)")
+        print(f"Dashboard: {BOLD}http://localhost:{args.port}/#results{RESET}  (offline replay; no model calls)")
 
     s = args.speed
     c = demo["confidence"]
