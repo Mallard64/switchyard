@@ -223,7 +223,7 @@
   },
   "pr": {
     "title": "Demo: the `u3` regression shows up downstream, but the cause is one `classify` line",
-    "target_repo": "samegrade \u00b7 4-step support agent",
+    "target_repo": "upshift \u00b7 4-step support agent",
     "target_path": "support_agent.py PROMPTS['classify']",
     "diff": "--- a/classify prompt\n+++ b/classify prompt\n@@ -1 +0,0 @@\n-Tickets about late or missing orders are cancel requests.\n",
     "url": null

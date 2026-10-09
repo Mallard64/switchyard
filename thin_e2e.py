@@ -223,7 +223,7 @@ def build(old, candidates, tickets, results=RESULTS, stepswap_dir=STEPSWAP):
         "_note": "Real cached runs of the 4-step support agent (support_agent.py), not sample data. "
                  "cost_per_1k_calls_usd is per 1k ticket runs (4 calls each).",
         "run_id": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "repo": {"name": "samegrade support agent (demo)", "call_site": "support_agent.py: PROMPTS / run_ticket"},
+        "repo": {"name": "upshift support agent (demo)", "call_site": "support_agent.py: PROMPTS / run_ticket"},
         "baseline": {"model": old, "provider": "OpenAI", "retires_on": "2026-10-23", "runs_per_input": 3,
                      "noise_rate": round(noisy / len(tickets), 4), "cost_per_1k_calls_usd": ost["cost_per_1k"],
                      "latency_p50_ms": ost["p50_ms"]},

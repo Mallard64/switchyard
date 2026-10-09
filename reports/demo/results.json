@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "_note": "Real runs of the 4-step support agent (clean prompts, nothing planted). Tickets are hand-written (synthetic); model behavior is real. cost_per_1k_calls_usd = per 1k ticket runs (4 calls).",
-  "run_id": "2026-10-08T23:28:39Z",
+  "run_id": "2026-10-09T06:26:31Z",
   "repo": {
-    "name": "samegrade support agent (demo)",
+    "name": "upshift support agent (demo)",
     "call_site": "support_agent.py: PROMPTS['tone']"
   },
   "baseline": {

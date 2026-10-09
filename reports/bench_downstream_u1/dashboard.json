@@ -135,7 +135,7 @@
   },
   "pr": {
     "title": "Planted break u1: classify calls damaged-item tickets refunds (symptom: decide refunds instead of replacing)",
-    "target_repo": "samegrade \u00b7 4-step support agent",
+    "target_repo": "upshift \u00b7 4-step support agent",
     "target_path": "support_agent.py ",
     "diff": "",
     "url": null

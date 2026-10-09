@@ -303,7 +303,7 @@ def main():
     (OUT / "prompts.diff").write_text("".join(diff))
     (OUT / "migration.json").write_text(json.dumps(m, indent=2, default=list))
     import dashboard_export
-    dashboard_export.export_dir(OUT)  # Switchyard dashboard view of the same report
+    dashboard_export.export_dir(OUT)  # Upshift dashboard view of the same report
     print(f"[4/4] PR -> {OUT / 'PR.md'}  (fixes: " + ", ".join(f"{f['id']}={f['decision']}" for f in fix_list)
           + f")  ready to merge: {m['ready_to_merge']}")
 

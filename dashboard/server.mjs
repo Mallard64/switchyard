@@ -4,8 +4,9 @@ import { fileURLToPath } from 'node:url';
 import { open, readFile, readdir, stat } from 'node:fs/promises';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-// The migration backend (samegrade, this folder's parent repo). Reports and live run results are read from it; nothing is written.
-const SAMEGRADE = path.resolve(process.env.SAMEGRADE_DIR || path.join(here, '..'));
+// The upshift backend (this folder's parent repo). Reports and live run results are read from it; nothing is written.
+// UPSHIFT_DIR overrides the location; the old SAMEGRADE_DIR name still works.
+const BACKEND = path.resolve(process.env.UPSHIFT_DIR || process.env.SAMEGRADE_DIR || path.join(here, '..'));
 const files = {'/':'index.html','/index.html':'index.html','/app.js':'app.js','/demo-views.js':'demo-views.js','/styles.css':'styles.css','/results.json':'results.json'};
 const types = {html:'text/html; charset=utf-8',js:'text/javascript; charset=utf-8',css:'text/css; charset=utf-8',json:'application/json'};
 const port = Number(process.env.PORT || 4173);
@@ -16,7 +17,7 @@ const port = Number(process.env.PORT || 4173);
 // shape with a `demo` block (results_demo.py).
 const ORDER = ['migration_agent', 'demo_e2e', 'migration_ner'];
 async function listReports() {
-  const dir = path.join(SAMEGRADE, 'reports');
+  const dir = path.join(BACKEND, 'reports');
   let names = [];
   try { names = await readdir(dir); } catch { return []; }
   const out = [];
@@ -43,7 +44,7 @@ async function listReports() {
 }
 
 // ---- Live results ------------------------------------------------------------------------
-// Polls samegrade/results/*.jsonl once a second and streams rows appended after the server started.
+// Polls results/*.jsonl once a second and streams rows appended after the server started.
 // Files present at startup are history (read from their end); files created later stream from the start.
 const clients = new Set(), offsets = new Map(), recent = [];
 let started = false;
@@ -60,7 +61,7 @@ function summarize(file, row) {
 }
 function send(res, event, payload) { res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`); }
 async function scan() {
-  const dir = path.join(SAMEGRADE, 'results');
+  const dir = path.join(BACKEND, 'results');
   let names = [];
   try { names = (await readdir(dir)).filter(n => n.endsWith('.jsonl')); } catch { return; }
   for (const name of names) {
@@ -120,7 +121,7 @@ async function reportRuns(id) {
   }
   const out = [];
   for (const [file, role] of seen) {
-    try { const n = (await readFile(path.join(SAMEGRADE, 'results', file), 'utf8')).split('\n').filter(Boolean).length; out.push({file, role, rows: n}); }
+    try { const n = (await readFile(path.join(BACKEND, 'results', file), 'utf8')).split('\n').filter(Boolean).length; out.push({file, role, rows: n}); }
     catch { /* run file not present */ }
   }
   const order = {'baseline run': 0, 'candidate run': 1};
@@ -137,7 +138,7 @@ function stopReplay(state = 'stopped') {
   replay = null;
 }
 async function startReplay(file, seconds) {
-  const text = await readFile(path.join(SAMEGRADE, 'results', file), 'utf8');
+  const text = await readFile(path.join(BACKEND, 'results', file), 'utf8');
   const rows = text.split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
   // Recorded time a row was finished: its start (ts) plus the pipeline's own latency.
   const done = r => Date.parse(r.ts || 0) + 1000 * ((r.steps || []).reduce((t, s) => t + (s.replayed ? 0 : s.latency_s || 0), 0) || r.latency_s || 0);
@@ -208,7 +209,7 @@ http.createServer(async (req, res) => {
   }
   if (url.pathname === '/api/live') {
     res.writeHead(200, {'Content-Type': 'text/event-stream', 'Cache-Control': 'no-store', Connection: 'keep-alive'});
-    send(res, 'hello', {backend: SAMEGRADE, recent: recent.slice(-60), replay: publicReplay()});
+    send(res, 'hello', {backend: BACKEND, recent: recent.slice(-60), replay: publicReplay()});
     clients.add(res);
     req.on('close', () => clients.delete(res));
     return;
@@ -220,4 +221,4 @@ http.createServer(async (req, res) => {
     res.writeHead(200, {'Content-Type': types[file.split('.').pop()], 'Cache-Control': 'no-store'});
     res.end(body);
   } catch { res.writeHead(500); res.end('Could not read project file'); }
-}).listen(port, '127.0.0.1', () => console.log(`Switchyard preview: http://localhost:${port}  (backend: ${SAMEGRADE})`));
+}).listen(port, '127.0.0.1', () => console.log(`Upshift preview: http://localhost:${port}  (backend: ${BACKEND})`));

@@ -1,5 +1,5 @@
 
-samegrade · support agent · gpt-4 → gpt-5.6-sol · replaying a real recorded run (hand-written tickets, real model outputs)
+upshift · support agent · gpt-4 → gpt-5.6-sol · replaying a real recorded run (hand-written tickets, real model outputs)
 
 [1/5] Only the model changes. 24 tickets × 3 runs on gpt-5.6-sol, same prompts, tools and tickets as gpt-4.
    sol t01 run 1  refund/refund  ✗ draft.states_timeline

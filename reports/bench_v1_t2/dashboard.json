@@ -279,7 +279,7 @@
   },
   "pr": {
     "title": "Planted break t2: tone: JSON wrapped in a code block",
-    "target_repo": "samegrade \u00b7 4-step support agent",
+    "target_repo": "upshift \u00b7 4-step support agent",
     "target_path": "support_agent.py ",
     "diff": "",
     "url": null

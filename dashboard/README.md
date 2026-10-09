@@ -1,4 +1,4 @@
-# Switchyard
+# Upshift dashboard
 
 A frontend dashboard for reviewing AI model migrations: compare quality, cost and latency, inspect a prompt repair, and review the resulting code change.
 
@@ -37,24 +37,24 @@ The app loads `results.json` when the page opens. Replace that file with a compa
 
 The frontend supports the full migration schema, flat NER comparison schema, and original dashboard schema. See [the handoff guide](docs/HANDOFF.md) for data mapping and integration notes.
 
-### Live backend (samegrade)
+### Live backend (upshift)
 
-This folder lives at `dashboard/` inside the samegrade repo, and the server reads the migration backend from the parent
-folder (override with `SAMEGRADE_DIR=/path/to/samegrade npm start`). Nothing is written to it.
+This folder lives at `dashboard/` inside the upshift repo, and the server reads the migration backend from the parent
+folder (override with `UPSHIFT_DIR=/path/to/upshift npm start`). Nothing is written to it.
 
 | Endpoint | What it returns |
 | --- | --- |
 | `/api/reports` | Reports the backend has produced: `reports/<name>/dashboard.json` (agent migrations, exported by `dashboard_export.py`) and `reports/migration_ner/migration.json` |
 | `/api/report?id=<name>` | One of those reports (ids are whitelisted from the list; no file paths) |
-| `/api/live` | Server-Sent Events: every row a run appends to `samegrade/results/*.jsonl` after the server starts |
+| `/api/live` | Server-Sent Events: every row a run appends to `upshift/results/*.jsonl` after the server starts |
 
 The page then shows a **report picker** in the header and a **Live** button. The button reads "Live · N runs active"
 while runs are writing results; clicking it shows each run's progress (rows, hard checks passed/failed, errors) and the
-latest rows. Start a run in samegrade, for example `python demo_e2e.py --break u3`, and tickets appear as they finish.
+latest rows. Start a run in upshift, for example `python demo_e2e.py --break u3`, and tickets appear as they finish.
 "Reload report" re-reads the report once a run has rewritten it. **▶ Replay a run** streams a recorded run behind the current report (baseline, candidate or fix re-run) back
 through the live view, in recorded order and pacing, compressed to 20 s / 1 min or in real time. Replays make **no model
 calls** and work offline (`POST /api/replay`, accepted only from the dashboard page itself). Without the backend, the page falls back to
-`results.json` exactly as before. The report list follows whatever samegrade has produced (migrations, end-to-end demos and every
+`results.json` exactly as before. The report list follows whatever upshift has produced (migrations, end-to-end demos and every
 tested planted break, grouped in the picker); when a run or an export writes a report, open pages update the list and
 reload the report they are showing.
 
