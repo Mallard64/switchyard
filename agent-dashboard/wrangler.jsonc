@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "switchyard-agent-dashboard",
+  "main": "hosting/worker.mjs",
+  "compatibility_date": "2026-10-08",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./.hosting-assets",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "build": { "command": "node build-hosting.mjs" }
+}

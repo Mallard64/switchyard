@@ -1,0 +1,50 @@
+{"id": "tc-01", "text": "Thou art a boil, a plague-sore.", "gold": "INSULT", "tricky": false}
+{"id": "tc-02", "text": "Your presentation was clear, sharp and genuinely useful.", "gold": "COMPLIMENT", "tricky": false}
+{"id": "tc-03", "text": "Thou cream-faced loon!", "gold": "INSULT", "tricky": false}
+{"id": "tc-04", "text": "You have a gift for making people feel welcome.", "gold": "COMPLIMENT", "tricky": false}
+{"id": "tc-05", "text": "Wow, you finished on time for once.", "gold": "INSULT", "tricky": true}
+{"id": "tc-06", "text": "Thy face is not worth sunburning.", "gold": "INSULT", "tricky": false}
+{"id": "tc-07", "text": "She is the kind of colleague everyone hopes to work with.", "gold": "COMPLIMENT", "tricky": false}
+{"id": "tc-08", "text": "I've seen better code written by a cat walking on a keyboard.", "gold": "INSULT", "tricky": false}
+{"id": "tc-09", "text": "O, she doth teach the torches to burn bright!", "gold": "COMPLIMENT", "tricky": false}
+{"id": "tc-10", "text": "That outfit is certainly... a choice.", "gold": "INSULT", "tricky": true}
+{"id": "tc-11", "text": "You're smarter than you give yourself credit for.", "gold": "COMPLIMENT", "tricky": true}
+{"id": "tc-12", "text": "Thou art as fat as butter.", "gold": "INSULT", "tricky": false}
+{"id": "tc-13", "text": "Your cooking reminds me of my grandmother's, and I mean that in the best way.", "gold": "COMPLIMENT", "tricky": false}
+{"id": "tc-14", "text": "Great job breaking the build again.", "gold": "INSULT", "tricky": true}
+{"id": "tc-15", "text": "Her voice was ever soft, gentle, and low, an excellent thing in woman.", "gold": "COMPLIMENT", "tricky": false}
+{"id": "tc-16", "text": "You're not as dumb as you look.", "gold": "INSULT", "tricky": true}
+{"id": "tc-17", "text": "More of your conversation would infect my brain.", "gold": "INSULT", "tricky": false}
+{"id": "tc-18", "text": "The way you handled that customer was masterful.", "gold": "COMPLIMENT", "tricky": false}
+{"id": "tc-19", "text": "You're annoyingly good at this.", "gold": "COMPLIMENT", "tricky": true}
+{"id": "tc-20", "text": "I would not wish any companion in the world but you.", "gold": "COMPLIMENT", "tricky": false}
+{"id": "tc-21", "text": "Your code is so clean I could eat off it.", "gold": "COMPLIMENT", "tricky": false, "probes": "praise via exaggeration", "added": "2026-10-07"}
+{"id": "tc-22", "text": "You have the charm of a parking ticket.", "gold": "INSULT", "tricky": false, "probes": "insult via comparison", "added": "2026-10-07"}
+{"id": "tc-23", "text": "Wow, you finished on time for once.", "gold": "INSULT", "tricky": true, "probes": "backhanded compliment", "added": "2026-10-07"}
+{"id": "tc-24", "text": "I didn't expect much, but your talk was genuinely excellent.", "gold": "COMPLIMENT", "tricky": true, "probes": "compliment with negative framing", "added": "2026-10-07"}
+{"id": "tc-25", "text": "Nice of you to finally show up.", "gold": "INSULT", "tricky": true, "probes": "sarcasm", "added": "2026-10-07"}
+{"id": "tc-26", "text": "That's a brave choice of outfit.", "gold": "INSULT", "tricky": true, "probes": "veiled insult", "added": "2026-10-07"}
+{"id": "tc-27", "text": "You explain hard things so simply; it's a gift.", "gold": "COMPLIMENT", "tricky": false, "probes": "plain compliment", "added": "2026-10-07"}
+{"id": "tc-28", "text": "Your argument has more holes than a colander.", "gold": "INSULT", "tricky": false, "probes": "insult via comparison", "added": "2026-10-07"}
+{"id": "tc-29", "text": "Honestly, I've never seen anyone handle a crisis that calmly.", "gold": "COMPLIMENT", "tricky": true, "probes": "compliment with 'never'", "added": "2026-10-07"}
+{"id": "tc-30", "text": "You're not as dumb as you look.", "gold": "INSULT", "tricky": true, "probes": "backhanded", "added": "2026-10-07"}
+{"id": "tc-31", "text": "Your garden is the best on the street, no contest.", "gold": "COMPLIMENT", "tricky": false, "probes": "plain compliment", "added": "2026-10-07"}
+{"id": "tc-32", "text": "Great job breaking the build again.", "gold": "INSULT", "tricky": true, "probes": "sarcasm", "added": "2026-10-07"}
+{"id": "tc-33", "text": "You make it look effortless.", "gold": "COMPLIMENT", "tricky": false, "probes": "plain compliment", "added": "2026-10-07"}
+{"id": "tc-34", "text": "Even a broken clock is right twice a day, and so are you.", "gold": "INSULT", "tricky": true, "probes": "insult via idiom", "added": "2026-10-07"}
+{"id": "tc-35", "text": "Thank you for being so patient with me; you're wonderful.", "gold": "COMPLIMENT", "tricky": false, "probes": "plain compliment", "added": "2026-10-07"}
+{"id": "tc-36", "text": "Your singing could clear a stadium in seconds.", "gold": "INSULT", "tricky": true, "probes": "insult via exaggeration", "added": "2026-10-07"}
+{"id": "tc-37", "text": "You are a terrible influence, and I love it.", "gold": "COMPLIMENT", "tricky": true, "probes": "compliment with negative words", "added": "2026-10-07"}
+{"id": "tc-38", "text": "Bless your heart, you really tried.", "gold": "INSULT", "tricky": true, "probes": "veiled insult", "added": "2026-10-07"}
+{"id": "tc-39", "text": "Your attention to detail is unmatched.", "gold": "COMPLIMENT", "tricky": false, "probes": "plain compliment", "added": "2026-10-07"}
+{"id": "tc-40", "text": "You have a face made for radio.", "gold": "INSULT", "tricky": false, "probes": "insult idiom", "added": "2026-10-07"}
+{"id": "tc-41", "text": "Killer presentation today. You crushed it.", "gold": "COMPLIMENT", "tricky": true, "probes": "compliment with violent slang", "added": "2026-10-07"}
+{"id": "tc-42", "text": "I'd agree with you, but then we'd both be wrong.", "gold": "INSULT", "tricky": true, "probes": "insult via wit", "added": "2026-10-07"}
+{"id": "tc-43", "text": "Your cooking is dangerously good.", "gold": "COMPLIMENT", "tricky": true, "probes": "compliment with negative word", "added": "2026-10-07"}
+{"id": "tc-44", "text": "You're about as useful as a chocolate teapot.", "gold": "INSULT", "tricky": false, "probes": "insult via comparison", "added": "2026-10-07"}
+{"id": "tc-45", "text": "I admire how you never give up.", "gold": "COMPLIMENT", "tricky": false, "probes": "plain compliment", "added": "2026-10-07"}
+{"id": "tc-46", "text": "Somebody clearly skipped the meeting where they handed out manners.", "gold": "INSULT", "tricky": false, "probes": "insult indirect", "added": "2026-10-07"}
+{"id": "tc-47", "text": "That was sick! Best set of the night.", "gold": "COMPLIMENT", "tricky": true, "probes": "compliment slang", "added": "2026-10-07"}
+{"id": "tc-48", "text": "You light up every room you leave.", "gold": "INSULT", "tricky": true, "probes": "backhanded wordplay", "added": "2026-10-07"}
+{"id": "tc-49", "text": "Your feedback made my essay so much stronger.", "gold": "COMPLIMENT", "tricky": false, "probes": "plain compliment", "added": "2026-10-07"}
+{"id": "tc-50", "text": "Is your brain on airplane mode today?", "gold": "INSULT", "tricky": false, "probes": "insult as question", "added": "2026-10-07"}

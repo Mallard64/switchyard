@@ -1,0 +1,1331 @@
+{
+  "task": "ner",
+  "started": "2026-10-07T23:17:46.873625+00:00",
+  "finished": "2026-10-07T23:17:51.789956+00:00",
+  "baseline": {
+    "file": "ner__gpt-4__gpt-4.jsonl + ner__gpt-4__gpt-4__ext.jsonl",
+    "model": "gpt-4",
+    "resolved_model": [
+      "gpt-4-0613"
+    ],
+    "outputs": 60,
+    "passed_all": 1.0,
+    "checks": {
+      "format": 1.0,
+      "valid_labels": 1.0,
+      "spans_in_text": 1.0,
+      "no_pronouns": 1.0,
+      "nonempty": 1.0,
+      "in_order": 1.0
+    },
+    "accuracy": 0.9708,
+    "accuracy_metric": "lenient entity F1",
+    "unstable_inputs": 0,
+    "latency_p50_s": 2.888,
+    "latency_p95_s": 6.802,
+    "cost_per_1k_calls_usd": 15.63
+  },
+  "candidates": [
+    {
+      "model": "gpt-5.6-sol",
+      "resolved_model": [
+        "gpt-5.6-sol"
+      ],
+      "regressed": 1,
+      "verdict_counts": {
+        "REGRESSED": 1,
+        "IMPROVED": 2,
+        "CHANGED": 2,
+        "SAME": 15
+      },
+      "accuracy": 0.975,
+      "accuracy_metric": "lenient entity F1",
+      "passed_all": 1.0,
+      "unstable_inputs": 2,
+      "latency_p50_s": 3.657,
+      "cost_per_1k_calls_usd": 7.51,
+      "report": "compare_gpt-5.6-sol.json",
+      "rank": 1
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "resolved_model": [
+        "gpt-5.6-terra"
+      ],
+      "regressed": 3,
+      "verdict_counts": {
+        "REGRESSED": 3,
+        "IMPROVED": 3,
+        "CHANGED": 5,
+        "SAME": 39
+      },
+      "accuracy": 0.9573,
+      "accuracy_metric": "lenient entity F1",
+      "passed_all": 1.0,
+      "unstable_inputs": 12,
+      "latency_p50_s": 2.197,
+      "cost_per_1k_calls_usd": 2.56,
+      "report": "compare_gpt-5.6-terra.json",
+      "rank": 2
+    }
+  ],
+  "chosen": "gpt-5.6-sol",
+  "model_config": {},
+  "editable_components": {
+    "description": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs are not entities.\nPronouns are not entities.",
+    "label_definitions.DISH": "Known food dishes, e.g. Lobster Ravioli, garlic bread",
+    "label_definitions.INGREDIENT": "Individual parts of a food dish, including herbs and spices.",
+    "label_definitions.EQUIPMENT": "Any kind of cooking equipment. e.g. oven, cooking pot, grill"
+  },
+  "causes": [
+    {
+      "input_id": "ner-16",
+      "text": "Nothing beats a bowl of pho on a cold day.",
+      "baseline_output": [
+        "pho/DISH"
+      ],
+      "candidate_output": [
+        "bowl/EQUIPMENT",
+        "pho/DISH"
+      ],
+      "evidence": [
+        "spurious: predicted ('bowl', 'EQUIPMENT') (a NOUN)"
+      ],
+      "suspects": [
+        {
+          "component": "label_definitions.EQUIPMENT",
+          "score": 2,
+          "editable": true,
+          "text": "Any kind of cooking equipment. e.g. oven, cooking pot, grill"
+        },
+        {
+          "component": "description",
+          "score": 1,
+          "editable": true,
+          "text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs are not entities.\nPronouns are not entities."
+        }
+      ],
+      "status": "confirmed",
+      "confirmed_component": "label_definitions.EQUIPMENT",
+      "confirmed_by": "fix",
+      "confirmed_lines": [],
+      "lines": [
+        {
+          "unit_id": "label_definitions.EQUIPMENT#0",
+          "component": "label_definitions.EQUIPMENT",
+          "text": "Any kind of cooking equipment.",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-EQUIPMENT-0.jsonl"
+        },
+        {
+          "unit_id": "label_definitions.EQUIPMENT#1",
+          "component": "label_definitions.EQUIPMENT",
+          "text": "e.g. oven, cooking pot, grill",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-EQUIPMENT-1.jsonl"
+        },
+        {
+          "unit_id": "description#0",
+          "component": "description",
+          "text": "Entities are the names food dishes, ingredients, and any kind of cooking equipment.",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-description-0.jsonl"
+        },
+        {
+          "unit_id": "description#1",
+          "component": "description",
+          "text": "Adjectives, verbs, adverbs are not entities.",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-description-1.jsonl"
+        },
+        {
+          "unit_id": "description#2",
+          "component": "description",
+          "text": "Pronouns are not entities.",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-description-2.jsonl"
+        },
+        {
+          "unit_id": "label_definitions.DISH#0",
+          "component": "label_definitions.DISH",
+          "text": "Known food dishes",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-DISH-0.jsonl"
+        },
+        {
+          "unit_id": "label_definitions.DISH#1",
+          "component": "label_definitions.DISH",
+          "text": "e.g. Lobster Ravioli, garlic bread",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-DISH-1.jsonl"
+        },
+        {
+          "unit_id": "label_definitions.INGREDIENT#0",
+          "component": "label_definitions.INGREDIENT",
+          "text": "Individual parts of a food dish, including herbs and spices.",
+          "verdict": "REGRESSED",
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "repaired_runs": "0/3",
+          "status": "no_effect",
+          "file": "ner__gpt-4__gpt-5.6-sol__abl-INGREDIENT-0.jsonl"
+        }
+      ],
+      "ablation_control": {
+        "verdict": "REGRESSED",
+        "score_runs": [
+          0.6667,
+          0.6667,
+          0.6667
+        ],
+        "file": "ner__gpt-4__gpt-5.6-sol__abl-control.jsonl",
+        "stable": true
+      },
+      "fixed_output": [
+        "pho/DISH"
+      ],
+      "lines_tested": 8
+    }
+  ],
+  "fix_attempts": [
+    {
+      "attempt": 1,
+      "edit": {
+        "component": "label_definitions.EQUIPMENT",
+        "new_text": "Any kind of cooking equipment. e.g. oven, cooking pot, grill. Containers mentioned only as serving vessels or quantity expressions are not equipment.",
+        "rationale": "This excludes serving or portion containers while preserving bowls and other vessels actively used in food preparation as equipment.",
+        "old_text": "Any kind of cooking equipment. e.g. oven, cooking pot, grill"
+      },
+      "patch_file": "fix1_patch.json",
+      "report": "compare_gpt-5.6-sol_fix1.json",
+      "verdict_counts": {
+        "REGRESSED": 0,
+        "IMPROVED": 1,
+        "CHANGED": 2,
+        "SAME": 17
+      },
+      "still_regressed": [],
+      "newly_regressed": [],
+      "accepted": true,
+      "outcome": "accepted: 0 regressions"
+    }
+  ],
+  "fixes": [
+    {
+      "id": "fix1",
+      "step": "llm",
+      "component": "label_definitions.EQUIPMENT",
+      "kind": "edit",
+      "edit": {
+        "component": "label_definitions.EQUIPMENT",
+        "new_text": "Any kind of cooking equipment. e.g. oven, cooking pot, grill. Containers mentioned only as serving vessels or quantity expressions are not equipment.",
+        "rationale": "This excludes serving or portion containers while preserving bowls and other vessels actively used in food preparation as equipment.",
+        "old_text": "Any kind of cooking equipment. e.g. oven, cooking pot, grill"
+      },
+      "old_text": "Any kind of cooking equipment. e.g. oven, cooking pot, grill",
+      "new_text": "Any kind of cooking equipment. e.g. oven, cooking pot, grill. Containers mentioned only as serving vessels or quantity expressions are not equipment.",
+      "rationale": "This excludes serving or portion containers while preserving bowls and other vessels actively used in food preparation as equipment.",
+      "summary": "reword `label_definitions.EQUIPMENT`",
+      "source": "fixer LLM (`gpt-5.6-sol`), attempt 1",
+      "verification": {
+        "inputs": 20,
+        "runs": 3,
+        "verdict_counts": {
+          "REGRESSED": 0,
+          "IMPROVED": 1,
+          "CHANGED": 2,
+          "SAME": 17
+        },
+        "still_regressed": [],
+        "newly_regressed": [],
+        "passes": true,
+        "report_file": "compare_gpt-5.6-sol_fix1.json"
+      },
+      "decision": "pending",
+      "decided_at": null
+    }
+  ],
+  "edit_format": {
+    "fix": "fix id this edit replaces (optional)",
+    "component": "description | label_definitions.<LABEL>",
+    "new_text": "full new text of that component"
+  },
+  "judge": {
+    "skipped": "no Anthropic credentials",
+    "changed_items": 2
+  },
+  "pr_view": {
+    "title": "Move the `ner_v3_openai` example to `gpt-5.6-sol` before the Oct 23, 2026 model shutdowns",
+    "why": [
+      "This example uses `spacy.GPT-3-5.v1` (`gpt-3.5-turbo`), and the obvious upgrade, `spacy.GPT-4.v3`, defaults to `gpt-4` (`gpt-4-0613`). OpenAI shuts down both on **Oct 23, 2026** ([deprecations](https://developers.openai.com/api/docs/deprecations)). spacy-llm checks `/v1/models` when a pipeline loads and raises `ValueError` for a missing model, so the example stops loading."
+    ],
+    "model_change": [
+      "Model: `spacy.GPT-4.v3` with `name = \"gpt-5.6-sol\"` and `config = {}`.",
+      "`spacy.GPT-4.v3` sends `temperature: 0.0` by default, which `gpt-5.6-sol` rejects; changing only the model name makes every request fail, hence the empty config."
+    ],
+    "evidence": {
+      "table": [
+        [
+          "Passed all hard checks",
+          "100%",
+          "100%",
+          "100%"
+        ],
+        [
+          "lenient entity F1",
+          "0.97",
+          "0.97",
+          "0.98"
+        ],
+        [
+          "Inputs regressed vs baseline",
+          "\u2013",
+          1,
+          0
+        ],
+        [
+          "Inputs whose output varies between runs",
+          0,
+          2,
+          3
+        ],
+        [
+          "Latency p50",
+          "2.89s",
+          "3.66s",
+          "3.75s"
+        ],
+        [
+          "Cost per 1k calls",
+          "$15.63",
+          "$7.51",
+          "$7.48"
+        ]
+      ],
+      "noise_floor": "`gpt-4` changed its output between its own runs on 0/20 inputs. An input counts as regressed only if most new-model runs fail a hard check the old model passes, or score below the old model's worst run. A fresh `gpt-4` re-run judged by the same rule flags 0 regressions (false alarms)."
+    },
+    "other_differences": [
+      "improved: \"Sear the steak in a cast-iron skillet, then baste it with butter and thyme.\": `gpt-4` ['steak/DISH', 'cast-iron skillet/EQUIPMENT', 'butter/INGREDIENT', 'thyme/INGREDIENT'] \u2192 `gpt-5.6-sol` ['steak/INGREDIENT', 'cast-iron skillet/EQUIPMENT', 'butter/INGREDIENT', 'thyme/INGREDIENT']",
+      "changed: \"My grandmother's lasagna needs ricotta, mozzarella and a good marinara.\": `gpt-4` [\"grandmother's lasagna/DISH\", 'ricotta/INGREDIENT', 'mozzarella/INGREDIENT', 'marinara/INGREDIENT'] \u2192 `gpt-5.6-sol` ['lasagna/DISH', 'ricotta/INGREDIENT', 'mozzarella/INGREDIENT', 'marinara/INGREDIENT']",
+      "changed: \"Toast the cumin and coriander seeds in a dry pan, then grind them with a mortar and pestle.\": `gpt-4` ['cumin/INGREDIENT', 'coriander seeds/INGREDIENT', 'dry pan/EQUIPMENT', 'mortar and pestle/EQUIPMENT'] \u2192 `gpt-5.6-sol` ['cumin/INGREDIENT', 'coriander seeds/INGREDIENT', 'pan/EQUIPMENT', 'mortar and pestle/EQUIPMENT']",
+      "improved: \"Microwave the leftover curry for two minutes.\": `gpt-4` ['Microwave/EQUIPMENT', 'leftover curry/DISH'] \u2192 `gpt-5.6-sol` ['curry/DISH']",
+      "Other candidate `gpt-5.6-terra`: 3 regressed, lenient entity F1 0.96"
+    ],
+    "limits": [
+      "20 hand-labelled inputs; accuracy figures depend on those labels.",
+      "`gpt-5.6-sol` only accepts the default temperature, so its outputs vary between runs; an input counts as regressed only if most runs fail.",
+      "Line-level proof only finds lines that are present and over-applied; a missing instruction is proven at component level by the fix instead."
+    ]
+  },
+  "final": {
+    "ready_to_merge": false,
+    "model": "gpt-5.6-sol",
+    "prompt_edits": [],
+    "prompt_edit": null,
+    "report": "compare_gpt-5.6-sol.json",
+    "verdict_counts": {
+      "REGRESSED": 1,
+      "IMPROVED": 2,
+      "CHANGED": 2,
+      "SAME": 15
+    },
+    "candidate": {
+      "model": "gpt-5.6-sol",
+      "resolved_model": [
+        "gpt-5.6-sol"
+      ],
+      "outputs": 60,
+      "passed_all": 1.0,
+      "checks": {
+        "format": 1.0,
+        "valid_labels": 1.0,
+        "spans_in_text": 1.0,
+        "no_pronouns": 1.0,
+        "nonempty": 1.0,
+        "in_order": 1.0
+      },
+      "accuracy": 0.975,
+      "accuracy_metric": "lenient entity F1",
+      "unstable_inputs": 2,
+      "latency_p50_s": 3.657,
+      "latency_p95_s": 5.459,
+      "cost_per_1k_calls_usd": 7.51
+    }
+  },
+  "pr": {
+    "title": "Move the `ner_v3_openai` example to `gpt-5.6-sol` before the Oct 23, 2026 model shutdowns",
+    "body_file": "PR.md",
+    "diff_file": "pr.diff",
+    "config_file": "fewshot.cfg",
+    "target_repo": "explosion/spacy-llm",
+    "target_path": "usage_examples/ner_v3_openai/fewshot.cfg",
+    "diff": "--- a/usage_examples/ner_v3_openai/fewshot.cfg\n+++ b/usage_examples/ner_v3_openai/fewshot.cfg\n@@ -28,4 +28,6 @@\n path = \"${paths.examples}\"\n \n [components.llm.model]\n-@llm_models = \"spacy.GPT-3-5.v1\"\n+@llm_models = \"spacy.GPT-4.v3\"\n+name = \"gpt-5.6-sol\"\n+config = {}\n"
+  },
+  "comparison": {
+    "task": "ner",
+    "candidate_file": "ner__gpt-4__gpt-5.6-sol.jsonl",
+    "baseline_file": "ner__gpt-4__gpt-4.jsonl + ner__gpt-4__gpt-4__ext.jsonl",
+    "inputs_compared": 20,
+    "verdict_counts": {
+      "REGRESSED": 1,
+      "IMPROVED": 2,
+      "CHANGED": 2,
+      "SAME": 15
+    },
+    "ready_to_merge": false,
+    "baseline": {
+      "model": "gpt-4",
+      "resolved_model": [
+        "gpt-4-0613"
+      ],
+      "outputs": 60,
+      "passed_all": 1.0,
+      "checks": {
+        "format": 1.0,
+        "valid_labels": 1.0,
+        "spans_in_text": 1.0,
+        "no_pronouns": 1.0,
+        "nonempty": 1.0,
+        "in_order": 1.0
+      },
+      "accuracy": 0.9708,
+      "accuracy_metric": "lenient entity F1",
+      "unstable_inputs": 0,
+      "latency_p50_s": 2.888,
+      "latency_p95_s": 6.802,
+      "cost_per_1k_calls_usd": 15.63
+    },
+    "candidate": {
+      "model": "gpt-5.6-sol",
+      "resolved_model": [
+        "gpt-5.6-sol"
+      ],
+      "outputs": 60,
+      "passed_all": 1.0,
+      "checks": {
+        "format": 1.0,
+        "valid_labels": 1.0,
+        "spans_in_text": 1.0,
+        "no_pronouns": 1.0,
+        "nonempty": 1.0,
+        "in_order": 1.0
+      },
+      "accuracy": 0.975,
+      "accuracy_metric": "lenient entity F1",
+      "unstable_inputs": 2,
+      "latency_p50_s": 3.657,
+      "latency_p95_s": 5.459,
+      "cost_per_1k_calls_usd": 7.51
+    },
+    "instructions_implicated": {},
+    "items": [
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-01",
+        "text": "Sear the steak in a cast-iron skillet, then baste it with butter and thyme.",
+        "tricky": false,
+        "verdict": "IMPROVED",
+        "regressions": [],
+        "improvements": [
+          {
+            "kind": "accuracy",
+            "baseline": [
+              0.75,
+              0.75,
+              0.75
+            ],
+            "candidate": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          }
+        ],
+        "baseline": {
+          "output": [
+            "steak/DISH",
+            "cast-iron skillet/EQUIPMENT",
+            "butter/INGREDIENT",
+            "thyme/INGREDIENT"
+          ],
+          "score_runs": [
+            0.75,
+            0.75,
+            0.75
+          ],
+          "errors": [
+            {
+              "type": "wrong_label",
+              "gold": [
+                "steak",
+                "INGREDIENT"
+              ],
+              "pred": [
+                "steak",
+                "DISH"
+              ]
+            }
+          ],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "steak/INGREDIENT",
+            "cast-iron skillet/EQUIPMENT",
+            "butter/INGREDIENT",
+            "thyme/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-02",
+        "text": "My grandmother's lasagna needs ricotta, mozzarella and a good marinara.",
+        "tricky": false,
+        "verdict": "CHANGED",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "grandmother's lasagna/DISH",
+            "ricotta/INGREDIENT",
+            "mozzarella/INGREDIENT",
+            "marinara/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [
+            {
+              "type": "boundary",
+              "gold": [
+                "lasagna",
+                "DISH"
+              ],
+              "pred": [
+                "grandmother's lasagna",
+                "DISH"
+              ]
+            }
+          ],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "lasagna/DISH",
+            "ricotta/INGREDIENT",
+            "mozzarella/INGREDIENT",
+            "marinara/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-03",
+        "text": "Whisk the eggs and sugar in a stainless steel bowl until pale.",
+        "tricky": false,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "eggs/INGREDIENT",
+            "sugar/INGREDIENT",
+            "stainless steel bowl/EQUIPMENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "eggs/INGREDIENT",
+            "sugar/INGREDIENT",
+            "stainless steel bowl/EQUIPMENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-04",
+        "text": "We ordered pad thai and a green papaya salad for the table.",
+        "tricky": false,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "pad thai/DISH",
+            "green papaya salad/DISH"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "pad thai/DISH",
+            "green papaya salad/DISH"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-05",
+        "text": "Blend the chickpeas, tahini, lemon juice and garlic in a food processor to make hummus.",
+        "tricky": false,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "chickpeas/INGREDIENT",
+            "tahini/INGREDIENT",
+            "lemon juice/INGREDIENT",
+            "garlic/INGREDIENT",
+            "food processor/EQUIPMENT",
+            "hummus/DISH"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "chickpeas/INGREDIENT",
+            "tahini/INGREDIENT",
+            "lemon juice/INGREDIENT",
+            "garlic/INGREDIENT",
+            "food processor/EQUIPMENT",
+            "hummus/DISH"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-06",
+        "text": "It tastes a bit smoky, so maybe use less paprika next time.",
+        "tricky": true,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "paprika/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "paprika/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-07",
+        "text": "Proof the dough overnight, then bake it on a pizza stone at 500 degrees.",
+        "tricky": false,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "dough/INGREDIENT",
+            "pizza stone/EQUIPMENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "dough/INGREDIENT",
+            "pizza stone/EQUIPMENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-08",
+        "text": "This ice cream has a strong vanilla flavor.",
+        "tricky": true,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "ice cream/DISH"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "ice cream/DISH"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-09",
+        "text": "Use a mandoline to slice the potatoes thinly for the gratin.",
+        "tricky": false,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "mandoline/EQUIPMENT",
+            "potatoes/INGREDIENT",
+            "gratin/DISH"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "mandoline/EQUIPMENT",
+            "potatoes/INGREDIENT",
+            "gratin/DISH"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-10",
+        "text": "Season the broth with miso, soy sauce and a splash of mirin before adding the noodles.",
+        "tricky": false,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "broth/INGREDIENT",
+            "miso/INGREDIENT",
+            "soy sauce/INGREDIENT",
+            "mirin/INGREDIENT",
+            "noodles/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "broth/INGREDIENT",
+            "miso/INGREDIENT",
+            "soy sauce/INGREDIENT",
+            "mirin/INGREDIENT",
+            "noodles/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-11",
+        "text": "She grilled the corn on a charcoal grill and served it with mayo, cotija and chili powder.",
+        "tricky": false,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "corn/INGREDIENT",
+            "charcoal grill/EQUIPMENT",
+            "mayo/INGREDIENT",
+            "cotija/INGREDIENT",
+            "chili powder/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "corn/INGREDIENT",
+            "charcoal grill/EQUIPMENT",
+            "mayo/INGREDIENT",
+            "cotija/INGREDIENT",
+            "chili powder/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-12",
+        "text": "Can you hand me the slotted spoon? It's next to the stockpot.",
+        "tricky": true,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "slotted spoon/EQUIPMENT",
+            "stockpot/EQUIPMENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "slotted spoon/EQUIPMENT",
+            "stockpot/EQUIPMENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-13",
+        "text": "Tiramisu is easier than it looks: ladyfingers, espresso, mascarpone and cocoa.",
+        "tricky": false,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "Tiramisu/DISH",
+            "ladyfingers/INGREDIENT",
+            "espresso/INGREDIENT",
+            "mascarpone/INGREDIENT",
+            "cocoa/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "Tiramisu/DISH",
+            "ladyfingers/INGREDIENT",
+            "espresso/INGREDIENT",
+            "mascarpone/INGREDIENT",
+            "cocoa/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-14",
+        "text": "I burned the risotto because I didn't stir it enough.",
+        "tricky": true,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "risotto/DISH"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "risotto/DISH"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-15",
+        "text": "Line the sheet pan with parchment paper before roasting the brussels sprouts.",
+        "tricky": true,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "sheet pan/EQUIPMENT",
+            "parchment paper/EQUIPMENT",
+            "brussels sprouts/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "sheet pan/EQUIPMENT",
+            "parchment paper/EQUIPMENT",
+            "brussels sprouts/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-16",
+        "text": "Nothing beats a bowl of pho on a cold day.",
+        "tricky": true,
+        "verdict": "REGRESSED",
+        "regressions": [
+          {
+            "kind": "accuracy",
+            "baseline": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "candidate": [
+              0.6667,
+              0.6667,
+              0.6667
+            ]
+          }
+        ],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "pho/DISH"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "bowl/EQUIPMENT",
+            "pho/DISH"
+          ],
+          "score_runs": [
+            0.6667,
+            0.6667,
+            0.6667
+          ],
+          "errors": [
+            {
+              "type": "spurious",
+              "pred": [
+                "bowl",
+                "EQUIPMENT"
+              ]
+            }
+          ],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-17",
+        "text": "Toast the cumin and coriander seeds in a dry pan, then grind them with a mortar and pestle.",
+        "tricky": true,
+        "verdict": "CHANGED",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "cumin/INGREDIENT",
+            "coriander seeds/INGREDIENT",
+            "dry pan/EQUIPMENT",
+            "mortar and pestle/EQUIPMENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [
+            {
+              "type": "boundary",
+              "gold": [
+                "pan",
+                "EQUIPMENT"
+              ],
+              "pred": [
+                "dry pan",
+                "EQUIPMENT"
+              ]
+            }
+          ],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "cumin/INGREDIENT",
+            "coriander seeds/INGREDIENT",
+            "pan/EQUIPMENT",
+            "mortar and pestle/EQUIPMENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": false,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-18",
+        "text": "The chef plated the beef wellington with a red wine reduction.",
+        "tricky": true,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "beef wellington/DISH",
+            "red wine reduction/INGREDIENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "beef wellington/DISH",
+            "red wine reduction/INGREDIENT"
+          ],
+          "score_runs": [
+            0.5,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": false,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-19",
+        "text": "Microwave the leftover curry for two minutes.",
+        "tricky": true,
+        "verdict": "IMPROVED",
+        "regressions": [],
+        "improvements": [
+          {
+            "kind": "accuracy",
+            "baseline": [
+              0.6667,
+              0.6667,
+              0.6667
+            ],
+            "candidate": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          }
+        ],
+        "baseline": {
+          "output": [
+            "Microwave/EQUIPMENT",
+            "leftover curry/DISH"
+          ],
+          "score_runs": [
+            0.6667,
+            0.6667,
+            0.6667
+          ],
+          "errors": [
+            {
+              "type": "boundary",
+              "gold": [
+                "curry",
+                "DISH"
+              ],
+              "pred": [
+                "leftover curry",
+                "DISH"
+              ]
+            },
+            {
+              "type": "spurious",
+              "pred": [
+                "microwave",
+                "EQUIPMENT"
+              ]
+            }
+          ],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "curry/DISH"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      },
+      {
+        "intermittent_failures": [],
+        "input_id": "ner-20",
+        "text": "Fold the blueberries into the batter gently with a rubber spatula.",
+        "tricky": false,
+        "verdict": "SAME",
+        "regressions": [],
+        "improvements": [],
+        "baseline": {
+          "output": [
+            "blueberries/INGREDIENT",
+            "batter/INGREDIENT",
+            "rubber spatula/EQUIPMENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true
+        },
+        "candidate": {
+          "output": [
+            "blueberries/INGREDIENT",
+            "batter/INGREDIENT",
+            "rubber spatula/EQUIPMENT"
+          ],
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "errors": [],
+          "stable": true,
+          "failing_raw_output": null
+        }
+      }
+    ]
+  }
+}

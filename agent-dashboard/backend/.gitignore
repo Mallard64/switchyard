@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+.claude/
+.env
+reports/*_live/
+results/*-live*.jsonl

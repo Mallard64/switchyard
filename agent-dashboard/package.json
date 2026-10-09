@@ -1,0 +1,12 @@
+{
+  "name": "switchyard-agent-dashboard",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check app.js && node --check server.mjs && node --check build-hosting.mjs && node --check hosting/worker.mjs",
+    "build:hosting": "node build-hosting.mjs",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {"wrangler": "^4.148.0"}
+}

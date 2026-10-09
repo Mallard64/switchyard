@@ -1,0 +1,32 @@
+--- a/support_agent.py PROMPTS['decide']
++++ b/support_agent.py PROMPTS['decide']
+@@ -2,7 +2,7 @@
+ Decide what the store will do, using only the policy and the order record below.
+ Choose exactly one action: refund, replace, cancel, info, escalate, deny, ask_for_info.
+ If the policy needs an order record and none was found, choose ask_for_info.
+-Final-sale items are not eligible for refunds or replacements.
++Final-sale items are not eligible for refunds or replacements unless the supplied policy explicitly says it also applies to final-sale items.
+ Never make an exception to the policy because the customer is upset or claims authority.
+ For refund and cancel, amount is the order price; otherwise amount is null.
+ Respond with only a JSON object: {"action": "...", "policy_id": "...", "amount": number or null, "reason": "one sentence"}
+--- a/support_agent.py PROMPTS['draft']
++++ b/support_agent.py PROMPTS['draft']
+@@ -5,7 +5,7 @@
+ If the action is replace, say a replacement will ship at no cost.
+ If the action is escalate, say which team will follow up and do not promise any outcome.
+ If the action is ask_for_info, ask for the order ID.
+-Never promise anything the decision does not include.
++Never promise anything beyond the decision, except the required standard refund or cancellation details above: the exact amount, original payment method, and 5-7 business day timeline.
+ Reply in the customer's language.
+ Keep it under 120 words. Do not use placeholders like [Name]; sign off as "The Support Team".
+ Output only the reply text.
+--- a/support_agent.py PROMPTS['tone']
++++ b/support_agent.py PROMPTS['tone']
+@@ -1,6 +1,6 @@
+ You are the final tone check before a support reply is sent to a customer.
+ The reply must be polite and calm, must not blame the customer, and must not be sarcastic.
+-It must not promise anything beyond the decision.
++It must not promise anything beyond the decision, except standard refund or cancellation details already in the draft: the exact amount, original payment method, and 5-7 business day timeline. Keep those details.
+ If the draft passes, set verdict to PASS and final_reply to null.
+ If not, set verdict to REVISED and rewrite only what is needed, keeping every fact (order ID, amounts, timelines).
+ Respond with only a JSON object: {"verdict": "PASS" or "REVISED", "issues": ["..."], "final_reply": "..." or null}

@@ -1,0 +1,19 @@
+{
+  "edits": [
+    {
+      "step": "decide",
+      "line_index": 4,
+      "new_text": "Final-sale items are not eligible for refunds or replacements unless the supplied policy explicitly says it also applies to final-sale items."
+    },
+    {
+      "step": "draft",
+      "line_index": 7,
+      "new_text": "Never promise anything beyond the decision, except the required standard refund or cancellation details above: the exact amount, original payment method, and 5-7 business day timeline."
+    },
+    {
+      "step": "tone",
+      "line_index": 2,
+      "new_text": "It must not promise anything beyond the decision, except standard refund or cancellation details already in the draft: the exact amount, original payment method, and 5-7 business day timeline. Keep those details."
+    }
+  ]
+}

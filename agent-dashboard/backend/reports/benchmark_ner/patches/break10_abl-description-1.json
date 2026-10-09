@@ -1,0 +1,6 @@
+{
+  "label_definitions": {
+    "EQUIPMENT": "Any kind of cooking equipment. e.g. oven, cooking pot, grill, bowl, plate, cup"
+  },
+  "description": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nPronouns are not entities."
+}

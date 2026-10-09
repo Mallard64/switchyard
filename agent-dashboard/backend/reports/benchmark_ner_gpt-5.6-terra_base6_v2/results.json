@@ -1,0 +1,612 @@
+{
+  "model": "gpt-5.6-terra",
+  "model_config": {},
+  "n_inputs": 50,
+  "runs": 3,
+  "break_set": "v2",
+  "screen": {
+    "v2b01": {
+      "f1": 0.9164,
+      "pass_rate": 0.76,
+      "f1_floor": 0.946,
+      "pass_floor": 1.0,
+      "effective": true
+    },
+    "v2b02": {
+      "f1": 0.9127,
+      "pass_rate": 1.0,
+      "f1_floor": 0.946,
+      "pass_floor": 1.0,
+      "effective": true
+    },
+    "v2b03": {
+      "f1": 0.96,
+      "pass_rate": 1.0,
+      "f1_floor": 0.946,
+      "pass_floor": 1.0,
+      "effective": false
+    },
+    "v2b04": {
+      "f1": 0.9337,
+      "pass_rate": 1.0,
+      "f1_floor": 0.946,
+      "pass_floor": 1.0,
+      "effective": true
+    },
+    "v2b05": {
+      "f1": 0.8407,
+      "pass_rate": 0.9,
+      "f1_floor": 0.946,
+      "pass_floor": 1.0,
+      "effective": true
+    },
+    "v2b06": {
+      "f1": 0.8217,
+      "pass_rate": 0.96,
+      "f1_floor": 0.946,
+      "pass_floor": 1.0,
+      "effective": true
+    },
+    "v2b07": {
+      "f1": 0.9733,
+      "pass_rate": 1.0,
+      "f1_floor": 0.946,
+      "pass_floor": 1.0,
+      "effective": false
+    },
+    "v2b08": {
+      "f1": 0.8904,
+      "pass_rate": 0.98,
+      "f1_floor": 0.946,
+      "pass_floor": 1.0,
+      "effective": true
+    },
+    "v2b09": {
+      "f1": 0.9627,
+      "pass_rate": 1.0,
+      "f1_floor": 0.946,
+      "pass_floor": 1.0,
+      "effective": false
+    },
+    "v2b10": {
+      "f1": 0.9593,
+      "pass_rate": 1.0,
+      "f1_floor": 0.946,
+      "pass_floor": 1.0,
+      "effective": false
+    }
+  },
+  "breaks": [
+    {
+      "id": "v2b01",
+      "component": "description",
+      "kind": "contradict",
+      "new_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs are not entities.\nPronouns that refer to food are entities.",
+      "caught": true,
+      "n_regressed": 13,
+      "regressed_ids": [
+        "ner-01",
+        "ner-06",
+        "ner-07",
+        "ner-11",
+        "ner-14",
+        "ner-17",
+        "ner-21",
+        "ner-22",
+        "ner-23",
+        "ner-26",
+        "ner-33",
+        "ner-34",
+        "ner-41"
+      ],
+      "suspects_seen": [
+        "description",
+        "label_definitions.DISH",
+        "label_definitions.EQUIPMENT",
+        "label_definitions.INGREDIENT"
+      ],
+      "component_named": true,
+      "component_top": false,
+      "first20": {
+        "caught": true,
+        "n_regressed": 6,
+        "regressed_ids": [
+          "ner-01",
+          "ner-06",
+          "ner-07",
+          "ner-11",
+          "ner-14",
+          "ner-17"
+        ],
+        "suspects_seen": [
+          "description",
+          "label_definitions.DISH",
+          "label_definitions.INGREDIENT"
+        ],
+        "component_named": true,
+        "component_top": false
+      },
+      "fix_attempted": true,
+      "fix_accepted": true,
+      "fix_edit": {
+        "component": "description",
+        "new_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs, and pronouns are not entities.",
+        "rationale": "This replaces the ambiguous exception for food-referential pronouns with an explicit exclusion while preserving the existing entity categories.",
+        "old_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs are not entities.\nPronouns that refer to food are entities."
+      },
+      "fix_attempts": [
+        {
+          "attempt": 1,
+          "edit": {
+            "component": "description",
+            "new_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs, and pronouns are not entities.",
+            "rationale": "This replaces the ambiguous exception for food-referential pronouns with an explicit exclusion while preserving the existing entity categories.",
+            "old_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs are not entities.\nPronouns that refer to food are entities."
+          },
+          "verdict_counts": {
+            "REGRESSED": 0,
+            "IMPROVED": 0,
+            "CHANGED": 1,
+            "SAME": 49
+          },
+          "still_regressed": [],
+          "accepted": true,
+          "accepted_first20": true
+        }
+      ],
+      "fix_first_attempt": true,
+      "fix_targets_planted": true
+    },
+    {
+      "id": "v2b02",
+      "component": "description",
+      "kind": "contradict",
+      "new_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs are not entities.\nPronouns are not entities.\nCooking methods such as grilling, roasting or frying count as EQUIPMENT.",
+      "caught": true,
+      "n_regressed": 8,
+      "regressed_ids": [
+        "ner-01",
+        "ner-07",
+        "ner-11",
+        "ner-17",
+        "ner-23",
+        "ner-25",
+        "ner-27",
+        "ner-28"
+      ],
+      "suspects_seen": [
+        "description",
+        "label_definitions.EQUIPMENT"
+      ],
+      "component_named": true,
+      "component_top": true,
+      "first20": {
+        "caught": true,
+        "n_regressed": 4,
+        "regressed_ids": [
+          "ner-01",
+          "ner-07",
+          "ner-11",
+          "ner-17"
+        ],
+        "suspects_seen": [
+          "description",
+          "label_definitions.EQUIPMENT"
+        ],
+        "component_named": true,
+        "component_top": true
+      },
+      "fix_attempted": true,
+      "fix_accepted": true,
+      "fix_edit": {
+        "component": "description",
+        "new_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs are not entities.\nPronouns are not entities.\nCooking methods such as grilling, roasting or frying count as EQUIPMENT only when referring to physical cooking equipment, not an action.",
+        "rationale": "This preserves equipment mentions such as grills while preventing cooking-action words from being labeled as EQUIPMENT.",
+        "old_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs are not entities.\nPronouns are not entities.\nCooking methods such as grilling, roasting or frying count as EQUIPMENT."
+      },
+      "fix_attempts": [
+        {
+          "attempt": 1,
+          "edit": {
+            "component": "description",
+            "new_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs are not entities.\nPronouns are not entities.\nCooking methods such as grilling, roasting or frying count as EQUIPMENT only when referring to physical cooking equipment, not an action.",
+            "rationale": "This preserves equipment mentions such as grills while preventing cooking-action words from being labeled as EQUIPMENT.",
+            "old_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs are not entities.\nPronouns are not entities.\nCooking methods such as grilling, roasting or frying count as EQUIPMENT."
+          },
+          "verdict_counts": {
+            "REGRESSED": 0,
+            "IMPROVED": 0,
+            "CHANGED": 1,
+            "SAME": 49
+          },
+          "still_regressed": [],
+          "accepted": true,
+          "accepted_first20": true
+        }
+      ],
+      "fix_first_attempt": true,
+      "fix_targets_planted": true
+    },
+    {
+      "id": "v2b04",
+      "component": "label_definitions.DISH",
+      "kind": "contradict",
+      "new_text": "Any food item, including single ingredients.",
+      "caught": true,
+      "n_regressed": 5,
+      "regressed_ids": [
+        "ner-01",
+        "ner-10",
+        "ner-20",
+        "ner-32",
+        "ner-50"
+      ],
+      "suspects_seen": [
+        "description",
+        "label_definitions.DISH"
+      ],
+      "component_named": true,
+      "component_top": true,
+      "first20": {
+        "caught": true,
+        "n_regressed": 3,
+        "regressed_ids": [
+          "ner-01",
+          "ner-10",
+          "ner-20"
+        ],
+        "suspects_seen": [
+          "description",
+          "label_definitions.DISH"
+        ],
+        "component_named": true,
+        "component_top": true
+      },
+      "fix_attempted": true,
+      "fix_accepted": true,
+      "fix_edit": {
+        "component": "label_definitions.DISH",
+        "new_text": "Any prepared food dish.",
+        "rationale": "Removing the inclusion of single ingredients disambiguates ingredients from completed dishes while preserving dish labels for prepared foods.",
+        "old_text": "Any food item, including single ingredients."
+      },
+      "fix_attempts": [
+        {
+          "attempt": 1,
+          "edit": {
+            "component": "label_definitions.DISH",
+            "new_text": "Any prepared food dish.",
+            "rationale": "Removing the inclusion of single ingredients disambiguates ingredients from completed dishes while preserving dish labels for prepared foods.",
+            "old_text": "Any food item, including single ingredients."
+          },
+          "verdict_counts": {
+            "REGRESSED": 0,
+            "IMPROVED": 1,
+            "CHANGED": 1,
+            "SAME": 48
+          },
+          "still_regressed": [],
+          "accepted": true,
+          "accepted_first20": true
+        }
+      ],
+      "fix_first_attempt": true,
+      "fix_targets_planted": true
+    },
+    {
+      "id": "v2b05",
+      "component": "label_definitions.DISH",
+      "kind": "contradict",
+      "new_text": "Restaurant menu items only; home-cooked food is not a dish.",
+      "caught": true,
+      "n_regressed": 12,
+      "regressed_ids": [
+        "ner-02",
+        "ner-05",
+        "ner-08",
+        "ner-09",
+        "ner-19",
+        "ner-23",
+        "ner-27",
+        "ner-31",
+        "ner-34",
+        "ner-39",
+        "ner-44",
+        "ner-49"
+      ],
+      "suspects_seen": [
+        "description",
+        "label_definitions.DISH",
+        "label_definitions.EQUIPMENT",
+        "label_definitions.INGREDIENT"
+      ],
+      "component_named": true,
+      "component_top": true,
+      "first20": {
+        "caught": true,
+        "n_regressed": 5,
+        "regressed_ids": [
+          "ner-02",
+          "ner-05",
+          "ner-08",
+          "ner-09",
+          "ner-19"
+        ],
+        "suspects_seen": [
+          "description",
+          "label_definitions.DISH",
+          "label_definitions.EQUIPMENT",
+          "label_definitions.INGREDIENT"
+        ],
+        "component_named": true,
+        "component_top": true
+      },
+      "fix_attempted": true,
+      "fix_accepted": false,
+      "fix_edit": null,
+      "fix_attempts": [
+        {
+          "attempt": 1,
+          "edit": {
+            "component": "label_definitions.DISH",
+            "new_text": "Restaurant menu items only; home-cooked food is also a dish.",
+            "rationale": "This minimally clarifies that dishes need not be restaurant menu items, covering prepared foods in home-cooking contexts.",
+            "old_text": "Restaurant menu items only; home-cooked food is not a dish."
+          },
+          "verdict_counts": {
+            "REGRESSED": 1,
+            "IMPROVED": 0,
+            "CHANGED": 2,
+            "SAME": 47
+          },
+          "still_regressed": [
+            "ner-42"
+          ],
+          "accepted": false,
+          "accepted_first20": true
+        },
+        {
+          "attempt": 2,
+          "edit": {
+            "component": "label_definitions.DISH",
+            "new_text": "Restaurant menu items and home-cooked prepared foods are dishes; food used as an ingredient is not a dish.",
+            "rationale": "This removes the restaurant-only restriction while preserving the distinction between prepared dishes and ingredients used during cooking.",
+            "old_text": "Restaurant menu items only; home-cooked food is not a dish."
+          },
+          "verdict_counts": {
+            "REGRESSED": 1,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 49
+          },
+          "still_regressed": [
+            "ner-42"
+          ],
+          "accepted": false,
+          "accepted_first20": true
+        },
+        {
+          "attempt": 3,
+          "edit": {
+            "component": "description",
+            "new_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nFood dishes include prepared foods, whether restaurant menu items or home-cooked.\nAdjectives, verbs, adverbs are not entities.\nPronouns are not entities.",
+            "rationale": "This clarifies that dish entities are not limited to restaurant-menu contexts while preserving the existing distinctions for ingredients and equipment.",
+            "old_text": "Entities are the names food dishes,\ningredients, and any kind of cooking equipment.\nAdjectives, verbs, adverbs are not entities.\nPronouns are not entities."
+          },
+          "verdict_counts": {
+            "REGRESSED": 12,
+            "IMPROVED": 0,
+            "CHANGED": 1,
+            "SAME": 37
+          },
+          "still_regressed": [
+            "ner-02",
+            "ner-05",
+            "ner-08",
+            "ner-09",
+            "ner-14",
+            "ner-19",
+            "ner-23",
+            "ner-27",
+            "ner-31",
+            "ner-34",
+            "ner-44",
+            "ner-49"
+          ],
+          "accepted": false,
+          "accepted_first20": false
+        }
+      ],
+      "fix_first_attempt": false,
+      "fix_targets_planted": false
+    },
+    {
+      "id": "v2b06",
+      "component": "label_definitions.INGREDIENT",
+      "kind": "contradict",
+      "new_text": "Raw, unprocessed foods only; sauces, cheeses and doughs are not ingredients.",
+      "caught": true,
+      "n_regressed": 16,
+      "regressed_ids": [
+        "ner-01",
+        "ner-02",
+        "ner-05",
+        "ner-07",
+        "ner-10",
+        "ner-11",
+        "ner-13",
+        "ner-20",
+        "ner-23",
+        "ner-26",
+        "ner-29",
+        "ner-30",
+        "ner-31",
+        "ner-43",
+        "ner-44",
+        "ner-50"
+      ],
+      "suspects_seen": [
+        "description",
+        "label_definitions.INGREDIENT"
+      ],
+      "component_named": true,
+      "component_top": true,
+      "first20": {
+        "caught": true,
+        "n_regressed": 8,
+        "regressed_ids": [
+          "ner-01",
+          "ner-02",
+          "ner-05",
+          "ner-07",
+          "ner-10",
+          "ner-11",
+          "ner-13",
+          "ner-20"
+        ],
+        "suspects_seen": [
+          "description",
+          "label_definitions.INGREDIENT"
+        ],
+        "component_named": true,
+        "component_top": true
+      },
+      "fix_attempted": true,
+      "fix_accepted": true,
+      "fix_edit": {
+        "component": "label_definitions.INGREDIENT",
+        "new_text": "Foods used in cooking, including raw and processed foods; sauces, cheeses and doughs are ingredients.",
+        "rationale": "This removes the exclusion that causes prepared food components to be omitted while preserving the existing entity categories.",
+        "old_text": "Raw, unprocessed foods only; sauces, cheeses and doughs are not ingredients."
+      },
+      "fix_attempts": [
+        {
+          "attempt": 1,
+          "edit": {
+            "component": "label_definitions.INGREDIENT",
+            "new_text": "Foods used in cooking, including raw and processed foods; sauces, cheeses and doughs are ingredients.",
+            "rationale": "This removes the exclusion that causes prepared food components to be omitted while preserving the existing entity categories.",
+            "old_text": "Raw, unprocessed foods only; sauces, cheeses and doughs are not ingredients."
+          },
+          "verdict_counts": {
+            "REGRESSED": 0,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 50
+          },
+          "still_regressed": [],
+          "accepted": true,
+          "accepted_first20": true
+        }
+      ],
+      "fix_first_attempt": true,
+      "fix_targets_planted": true
+    },
+    {
+      "id": "v2b08",
+      "component": "label_definitions.EQUIPMENT",
+      "kind": "contradict",
+      "new_text": "Electric appliances only, e.g. blender, microwave, toaster.",
+      "caught": true,
+      "n_regressed": 13,
+      "regressed_ids": [
+        "ner-01",
+        "ner-03",
+        "ner-07",
+        "ner-09",
+        "ner-11",
+        "ner-12",
+        "ner-17",
+        "ner-20",
+        "ner-30",
+        "ner-31",
+        "ner-33",
+        "ner-37",
+        "ner-50"
+      ],
+      "suspects_seen": [
+        "description",
+        "label_definitions.EQUIPMENT"
+      ],
+      "component_named": true,
+      "component_top": true,
+      "first20": {
+        "caught": true,
+        "n_regressed": 8,
+        "regressed_ids": [
+          "ner-01",
+          "ner-03",
+          "ner-07",
+          "ner-09",
+          "ner-11",
+          "ner-12",
+          "ner-17",
+          "ner-20"
+        ],
+        "suspects_seen": [
+          "description",
+          "label_definitions.EQUIPMENT"
+        ],
+        "component_named": true,
+        "component_top": true
+      },
+      "fix_attempted": true,
+      "fix_accepted": true,
+      "fix_edit": {
+        "component": "label_definitions.EQUIPMENT",
+        "new_text": "Electric appliances and non-electric cooking tools or vessels, e.g. blender, microwave, toaster.",
+        "rationale": "This clarifies that EQUIPMENT includes non-electric cookware and utensils as well as electric appliances.",
+        "old_text": "Electric appliances only, e.g. blender, microwave, toaster."
+      },
+      "fix_attempts": [
+        {
+          "attempt": 1,
+          "edit": {
+            "component": "label_definitions.EQUIPMENT",
+            "new_text": "Electric appliances and non-electric cooking tools or vessels, e.g. blender, microwave, toaster.",
+            "rationale": "This clarifies that EQUIPMENT includes non-electric cookware and utensils as well as electric appliances.",
+            "old_text": "Electric appliances only, e.g. blender, microwave, toaster."
+          },
+          "verdict_counts": {
+            "REGRESSED": 0,
+            "IMPROVED": 0,
+            "CHANGED": 0,
+            "SAME": 50
+          },
+          "still_regressed": [],
+          "accepted": true,
+          "accepted_first20": true
+        }
+      ],
+      "fix_first_attempt": true,
+      "fix_targets_planted": true
+    }
+  ],
+  "false_alarm": {
+    "verdict_counts": {
+      "REGRESSED": 0,
+      "IMPROVED": 0,
+      "CHANGED": 0,
+      "SAME": 50
+    },
+    "false_alarms": 0
+  },
+  "all_inputs": {
+    "n_breaks": 6,
+    "caught": 6,
+    "catch_rate": 1.0,
+    "right_component_rate": 1.0,
+    "top_component_rate": 0.8333333333333334
+  },
+  "first20": {
+    "n_breaks": 6,
+    "caught": 6,
+    "catch_rate": 1.0,
+    "right_component_rate": 1.0,
+    "top_component_rate": 0.8333333333333334
+  },
+  "fix_rate_first_attempt": 0.8333333333333334,
+  "fix_rate_within_attempts": 0.8333333333333334,
+  "max_fix_attempts": 3,
+  "spend_usd": 6.6723
+}

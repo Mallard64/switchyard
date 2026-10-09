@@ -1,0 +1,297 @@
+{
+  "old_model": "gpt-4",
+  "candidate": "gpt-5.6-sol",
+  "runs": 3,
+  "baseline_file": "agent__gpt-4__hard.jsonl",
+  "candidate_file": "agent__gpt-5.6-sol__hard.jsonl",
+  "regressed": [
+    "t27",
+    "t29",
+    "t36"
+  ],
+  "summary": {
+    "classify": {
+      "explains": 1,
+      "of": 3,
+      "pct": 33
+    },
+    "decide": {
+      "explains": 0,
+      "of": 3,
+      "pct": 0
+    },
+    "draft": {
+      "explains": 1,
+      "of": 3,
+      "pct": 33
+    },
+    "tone": {
+      "explains": 2,
+      "of": 3,
+      "pct": 67
+    }
+  },
+  "unexplained": [],
+  "tickets": [
+    {
+      "input_id": "t27",
+      "text": "Two orders came this week, A1005 and A1011. The mugs are fine, but I'd like to send back the scarf from A1011, it's unopened.",
+      "tricky": true,
+      "baseline_output": "refund/refund",
+      "candidate_output": "refund/refund",
+      "causal_steps": [
+        "classify",
+        "tone"
+      ],
+      "status": "necessary_only",
+      "necessity": {
+        "classify": {
+          "verdict": "SAME",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol__classify-gpt-4.jsonl"
+        },
+        "decide": {
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol__decide-gpt-4.jsonl"
+        },
+        "draft": {
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol__draft-gpt-4.jsonl"
+        },
+        "tone": {
+          "verdict": "SAME",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol__tone-gpt-4.jsonl"
+        }
+      },
+      "pairs": {},
+      "sufficiency": {
+        "classify+tone": {
+          "verdict": "SAME",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0
+          ],
+          "file": "agent__gpt-4__classify-gpt-5.6-sol__tone-gpt-5.6-sol.jsonl"
+        }
+      },
+      "narrowed": null,
+      "step_outputs": {
+        "classify": {
+          "new": {
+            "model": "gpt-5.6-sol",
+            "raw": "{\"category\":\"refund\",\"order_id\":\"A1011\"}"
+          },
+          "old": {
+            "model": "gpt-4",
+            "raw": "{\"category\": \"refund\", \"order_id\": \"A1011\"}"
+          }
+        },
+        "tone": {
+          "new": {
+            "model": "gpt-5.6-sol",
+            "raw": "{\"verdict\":\"REVISED\",\"issues\":[\"The draft promises a refund method and 5\u20137 business day timeline that are not included in the decision.\"],\"final_reply\":\"Your refund of $54.50 for the unopened scarf from order A1011 has been approved because it is unused and within 30 days of delivery.\\n\\nThe Support Team\"}"
+          },
+          "old": {
+            "model": "gpt-4",
+            "raw": "{\"verdict\": \"PASS\", \"issues\": [], \"final_reply\": null}"
+          }
+        }
+      }
+    },
+    {
+      "input_id": "t29",
+      "text": "Please cancel order A1006. Also, can you refund the shipping fee I paid on it?",
+      "tricky": true,
+      "baseline_output": "cancel/cancel",
+      "candidate_output": "cancel/cancel",
+      "causal_steps": [
+        "tone"
+      ],
+      "status": "confirmed",
+      "necessity": {
+        "classify": {
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol__classify-gpt-4.jsonl"
+        },
+        "decide": {
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol__decide-gpt-4.jsonl"
+        },
+        "draft": {
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol__draft-gpt-4.jsonl"
+        },
+        "tone": {
+          "verdict": "SAME",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol__tone-gpt-4.jsonl"
+        }
+      },
+      "pairs": {},
+      "sufficiency": {
+        "tone": {
+          "verdict": "REGRESSED",
+          "output": "cancel/cancel",
+          "score_runs": [
+            1.0
+          ],
+          "file": "agent__gpt-4__tone-gpt-5.6-sol.jsonl"
+        }
+      },
+      "narrowed": null,
+      "step_outputs": {
+        "tone": {
+          "new": {
+            "model": "gpt-5.6-sol",
+            "raw": "{\"verdict\":\"REVISED\",\"issues\":[\"The 5\u20137 business day timeline and refund to the original payment method are not included in the decision and should not be promised.\"],\"final_reply\":\"Order A1006 has been canceled because it was still processing. A full refund of $249.00 will be issued. A separate shipping-fee refund is not included because no shipping fee is recorded on the order.\\n\\nThe Support Team\"}"
+          },
+          "old": {
+            "model": "gpt-4",
+            "raw": "{\"verdict\": \"PASS\", \"issues\": [], \"final_reply\": null}"
+          }
+        }
+      }
+    },
+    {
+      "input_id": "t36",
+      "text": "I want to return the scarf from A1011, unopened. Please refund $60 to cover the shipping I paid too.",
+      "tricky": true,
+      "baseline_output": "refund/refund",
+      "candidate_output": "refund/refund",
+      "causal_steps": [
+        "draft"
+      ],
+      "status": "confirmed",
+      "necessity": {
+        "classify": {
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol__classify-gpt-4.jsonl"
+        },
+        "decide": {
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol__decide-gpt-4.jsonl"
+        },
+        "draft": {
+          "verdict": "SAME",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol__draft-gpt-4.jsonl"
+        },
+        "tone": {
+          "verdict": "SAME",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0,
+            0.75,
+            1.0
+          ],
+          "file": "agent__gpt-5.6-sol__tone-gpt-4.jsonl"
+        }
+      },
+      "pairs": {},
+      "sufficiency": {
+        "draft": {
+          "verdict": "REGRESSED",
+          "output": "refund/refund",
+          "score_runs": [
+            1.0
+          ],
+          "file": "agent__gpt-4__draft-gpt-5.6-sol.jsonl"
+        }
+      },
+      "narrowed": {
+        "from": [
+          "draft",
+          "tone"
+        ],
+        "to": [
+          "draft"
+        ]
+      },
+      "step_outputs": {
+        "draft": {
+          "new": {
+            "model": "gpt-5.6-sol",
+            "raw": "Your refund for order A1011 has been approved for $54.50. The unopened scarf is eligible for a full refund within 30 days, but the refund is limited to the item\u2019s order price and does not include shipping costs.\n\nThe $54.50 will be returned to your original payment method within 5\u20137 business days.\n\nThe Support Team"
+          },
+          "old": {
+            "model": "gpt-4",
+            "raw": "Dear Customer,\n\nWe have processed your refund for order A1011. The amount of $54.50 will be returned to your original payment method. This amount reflects the cost of the scarf, but please note that shipping costs are non-refundable. You can expect to see the refund in your account within 5-7 business days. This decision was made because the item is unused and within our 30-day return period.\n\nBest regards,\nThe Support Team"
+          }
+        }
+      }
+    }
+  ],
+  "live_calls": {
+    "gpt-4": {
+      "calls": 121,
+      "usd": 1.2264
+    },
+    "gpt-5.6-sol": {
+      "calls": 209,
+      "usd": 1.5772
+    }
+  }
+}

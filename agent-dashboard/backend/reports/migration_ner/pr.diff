@@ -1,0 +1,10 @@
+--- a/usage_examples/ner_v3_openai/fewshot.cfg
++++ b/usage_examples/ner_v3_openai/fewshot.cfg
+@@ -28,4 +28,6 @@
+ path = "${paths.examples}"
+ 
+ [components.llm.model]
+-@llm_models = "spacy.GPT-3-5.v1"
++@llm_models = "spacy.GPT-4.v3"
++name = "gpt-5.6-sol"
++config = {}

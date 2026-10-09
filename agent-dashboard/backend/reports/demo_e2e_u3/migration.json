@@ -1,0 +1,511 @@
+{
+  "title": "Demo: the `u3` regression shows up downstream, but the cause is one `classify` line",
+  "why": [
+    "Planted break for the demo: classify calls late or missing orders cancellations (symptom: decide denies or cancels). Old and new are both `gpt-5.6-terra`; only the new side's prompt changed, so the true cause is known."
+  ],
+  "comparison_file": "compare_candidate.json",
+  "group": "Demos",
+  "label": "end-to-end \u00b7 u3",
+  "old_model": "gpt-5.6-terra (clean)",
+  "new_model": "gpt-5.6-terra+u3",
+  "n_inputs": 24,
+  "model_change": [],
+  "cli": "python demo_e2e.py --break u3",
+  "steps": {
+    "names": [
+      "classify",
+      "decide",
+      "draft",
+      "tone"
+    ],
+    "summary": {
+      "classify": {
+        "explains": 3,
+        "of": 3,
+        "pct": 100
+      },
+      "decide": {
+        "explains": 0,
+        "of": 3,
+        "pct": 0
+      },
+      "draft": {
+        "explains": 0,
+        "of": 3,
+        "pct": 0
+      },
+      "tone": {
+        "explains": 0,
+        "of": 3,
+        "pct": 0
+      }
+    },
+    "method": "For 3 regressed tickets, each step was swapped back to the old side one at a time (1 run each, earlier steps replayed); a causal step is then checked the other way round (only that step on the new side)."
+  },
+  "causes": [
+    {
+      "input_id": "t09",
+      "text": "Where is my blender? Order A1004 was supposed to arrive on the 4th.",
+      "baseline_output": "shipping/info",
+      "candidate_output": "cancel/deny",
+      "fixed_output": "shipping/info",
+      "step_evidence": [
+        "`gpt-5.6-terra+u3` everywhere except `classify` (old prompt) \u2192 SAME (shipping/info)",
+        "`gpt-5.6-terra+u3` everywhere except `decide` (old prompt) \u2192 REGRESSED (cancel/deny)",
+        "`gpt-5.6-terra+u3` everywhere except `draft` (old prompt) \u2192 REGRESSED (cancel/deny)",
+        "`gpt-5.6-terra+u3` everywhere except `tone` (old prompt) \u2192 REGRESSED (cancel/deny)",
+        "old everywhere except `classify` (new prompt) \u2192 REGRESSED (cancel/deny)"
+      ],
+      "confirmed_lines": [
+        {
+          "component": "classify prompt, line 5",
+          "text": "Tickets about late or missing orders are cancel requests."
+        }
+      ],
+      "causal_steps": [
+        "classify"
+      ],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "shipping/info",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/info",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false
+        }
+      ],
+      "lines_tested": 6,
+      "status": "confirmed",
+      "confirmed_by": "ablation",
+      "confirmed_component": null,
+      "suspects": []
+    },
+    {
+      "input_id": "t10",
+      "text": "Order A1010 still hasn't shown up. The tracking page said September 26. That's over a week ago.",
+      "baseline_output": "shipping/replace",
+      "candidate_output": "cancel/deny",
+      "fixed_output": "shipping/replace",
+      "step_evidence": [
+        "`gpt-5.6-terra+u3` everywhere except `classify` (old prompt) \u2192 SAME (shipping/replace)",
+        "`gpt-5.6-terra+u3` everywhere except `decide` (old prompt) \u2192 REGRESSED (cancel/deny)",
+        "`gpt-5.6-terra+u3` everywhere except `draft` (old prompt) \u2192 REGRESSED (cancel/deny)",
+        "`gpt-5.6-terra+u3` everywhere except `tone` (old prompt) \u2192 REGRESSED (cancel/deny)",
+        "old everywhere except `classify` (new prompt) \u2192 REGRESSED (cancel/deny)"
+      ],
+      "confirmed_lines": [
+        {
+          "component": "classify prompt, line 5",
+          "text": "Tickets about late or missing orders are cancel requests."
+        }
+      ],
+      "causal_steps": [
+        "classify"
+      ],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "shipping/replace",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/replace",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false
+        }
+      ],
+      "lines_tested": 6,
+      "status": "confirmed",
+      "confirmed_by": "ablation",
+      "confirmed_component": null,
+      "suspects": []
+    },
+    {
+      "input_id": "t23",
+      "text": "my order a1010 never came?? its been forever",
+      "baseline_output": "shipping/replace",
+      "candidate_output": "cancel/deny",
+      "fixed_output": "shipping/replace",
+      "step_evidence": [
+        "`gpt-5.6-terra+u3` everywhere except `classify` (old prompt) \u2192 SAME (shipping/replace)",
+        "`gpt-5.6-terra+u3` everywhere except `decide` (old prompt) \u2192 REGRESSED (cancel/deny)",
+        "`gpt-5.6-terra+u3` everywhere except `draft` (old prompt) \u2192 REGRESSED (cancel/deny)",
+        "`gpt-5.6-terra+u3` everywhere except `tone` (old prompt) \u2192 REGRESSED (cancel/deny)",
+        "old everywhere except `classify` (new prompt) \u2192 REGRESSED (cancel/deny)"
+      ],
+      "confirmed_lines": [
+        {
+          "component": "classify prompt, line 5",
+          "text": "Tickets about late or missing orders are cancel requests."
+        }
+      ],
+      "causal_steps": [
+        "classify"
+      ],
+      "experiments": [
+        {
+          "label": "Old pipeline",
+          "models": {
+            "classify": "old",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "shipping/replace",
+          "ok": true,
+          "kind": "reference"
+        },
+        {
+          "label": "New pipeline",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "reference"
+        },
+        {
+          "label": "Swap classify back to old",
+          "models": {
+            "classify": "old",
+            "decide": "new",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "shipping/replace",
+          "ok": true,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap decide back to old",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "new",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap draft back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "old",
+            "tone": "new"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Swap tone back to old",
+          "models": {
+            "classify": "new",
+            "decide": "new",
+            "draft": "new",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false,
+          "kind": "swap_back"
+        },
+        {
+          "label": "Only classify new",
+          "kind": "only_new",
+          "models": {
+            "classify": "new",
+            "decide": "old",
+            "draft": "old",
+            "tone": "old"
+          },
+          "output": "cancel/deny",
+          "ok": false
+        }
+      ],
+      "lines_tested": 6,
+      "status": "confirmed",
+      "confirmed_by": "ablation",
+      "confirmed_component": null,
+      "suspects": []
+    }
+  ],
+  "evidence": {
+    "table": [
+      [
+        "Passed all hard checks",
+        "86%",
+        "96%",
+        "83%"
+      ],
+      [
+        "Gold score",
+        "1.00",
+        "0.94",
+        "1.00"
+      ],
+      [
+        "Tickets regressed vs old",
+        "\u2013",
+        3,
+        1
+      ],
+      [
+        "Cost per 1k tickets",
+        "$4.81",
+        "$4.53",
+        "$4.63"
+      ]
+    ],
+    "noise_floor": "1 run per configuration (kept minimal for cost); the old side has 3 cached runs."
+  },
+  "fixes": [
+    {
+      "id": "fix1",
+      "step": "classify",
+      "component": "classify prompt, line 5",
+      "kind": "remove_line",
+      "old_text": "Tickets about late or missing orders are cancel requests.",
+      "new_text": null,
+      "new_lines": [
+        "You are the triage step of a customer-support pipeline for an online store.",
+        "Classify the ticket into exactly one category: refund, damaged, shipping, cancel, billing, account, other.",
+        "refund: wants money back for an item they no longer want. damaged: item arrived broken or defective. shipping: order is late or missing. cancel: wants to cancel an order. billing: charges or payment disputes. account: login, password or account details. other: anything else.",
+        "Extract the order ID if the ticket gives one: the letter A followed by 4 digits, in uppercase (e.g. A1234). Use null if there is none.",
+        "Respond with only a JSON object: {\"category\": \"...\", \"order_id\": \"...\" or null}"
+      ],
+      "line_index": 4,
+      "summary": "remove line 5 of the `classify` prompt",
+      "source": "line-finder (removing this line alone repaired the sampled regressions)",
+      "verification": {
+        "inputs": 24,
+        "runs": 1,
+        "verdict_counts": {
+          "REGRESSED": 1,
+          "IMPROVED": 0,
+          "CHANGED": 0,
+          "SAME": 23
+        },
+        "still_regressed": [],
+        "newly_regressed": [
+          "t21"
+        ],
+        "passes": false,
+        "report_file": "compare_fix1.json"
+      },
+      "decision": "pending",
+      "decided_at": null
+    }
+  ],
+  "other_differences": [],
+  "lines": [
+    {
+      "step": "classify",
+      "line_index": 0,
+      "text": "You are the triage step of a customer-support pipeline for an online store.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "classify",
+      "line_index": 1,
+      "text": "Classify the ticket into exactly one category: refund, damaged, shipping, cancel, billing, account, other.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "classify",
+      "line_index": 2,
+      "text": "refund: wants money back for an item they no longer want. damaged: item arrived broken or defective. shipping: order is late or missing. cancel: wants to cancel an order. billing: charges or payment disputes. account: login, password or account details. other: anything else.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "classify",
+      "line_index": 3,
+      "text": "Extract the order ID if the ticket gives one: the letter A followed by 4 digits, in uppercase (e.g. A1234). Use null if there is none.",
+      "proven": false,
+      "repaired": "0/3"
+    },
+    {
+      "step": "classify",
+      "line_index": 4,
+      "text": "Tickets about late or missing orders are cancel requests.",
+      "proven": true,
+      "repaired": "3/3"
+    },
+    {
+      "step": "classify",
+      "line_index": 5,
+      "text": "Respond with only a JSON object: {\"category\": \"...\", \"order_id\": \"...\" or null}",
+      "proven": false,
+      "repaired": "0/3"
+    }
+  ],
+  "limits": [
+    "1 run per configuration and 3 tickets localized: enough to show the method, not a noise-robust measurement.",
+    "Planted break; 24 synthetic tickets."
+  ],
+  "live_calls": {
+    "gpt-5.6-terra": {
+      "calls": 264,
+      "usd": 0.3086
+    }
+  }
+}
