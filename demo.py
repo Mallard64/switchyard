@@ -107,7 +107,7 @@ def main():
     s = args.speed
     c = demo["confidence"]
     try:
-        print(f"\n{BOLD}samegrade{RESET} · support agent · gpt-4 → gpt-5.6-sol · replaying a real recorded run "
+        print(f"\n{BOLD}upshift{RESET} · support agent · gpt-4 → gpt-5.6-sol · replaying a real recorded run "
               f"{DIM}(hand-written tickets, real model outputs){RESET}")
         say(1, f"Only the model changes. {c['dev_tickets']} tickets × {c['runs_per_ticket']} runs on gpt-5.6-sol, "
                f"same prompts, tools and tickets as gpt-4.", s)

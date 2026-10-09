@@ -29,7 +29,7 @@ The inputs in `inputs/` are 20 texts per task, each with a hand-written correct 
 Requirements: Python 3.11+ (tested on 3.11 and 3.14) and Node.js 18+ for the dashboard. No npm install is needed.
 
 ```bash
-git clone <this repo> samegrade && cd samegrade
+git clone <this repo> upshift && cd upshift
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env

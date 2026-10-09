@@ -1,7 +1,7 @@
-# samegrade demo
+# upshift demo
 
 A 2-minute demo of a real model migration: gpt-4 retires Oct 23, 2026; the support agent moves to gpt-5.6-sol.
-samegrade finds the one step and the one prompt line the new model broke, writes a 1-line fix, and proves it on
+upshift finds the one step and the one prompt line the new model broke, writes a 1-line fix, and proves it on
 tickets the fixer never saw. Everything replays from cache, offline.
 
 **What's real and what isn't.** The model outputs, costs and token counts are real recorded runs. The 36 support
@@ -14,7 +14,7 @@ problem is gpt-5.6-sol's own behavior. The step-finder accuracy figure (34/39) c
 One-time setup (any machine; needs Python 3.11+ and Node 18+):
 
 ```bash
-git clone https://github.com/Mallard64/samegrade && cd samegrade
+git clone https://github.com/Mallard64/switchyard upshift && cd upshift
 git checkout demo
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt

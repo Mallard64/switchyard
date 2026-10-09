@@ -1,4 +1,4 @@
-"""Export every tested planted break (agent_bench.py runs) as a Switchyard dashboard report, so the
+"""Export every tested planted break (agent_bench.py runs) as a Upshift dashboard report, so the
 dashboard shows whatever has been tested, not a hand-picked few.
 
 Each break becomes reports/bench_<set>_<id>/dashboard.json: all 24 tickets old vs new, and for the

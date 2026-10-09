@@ -125,7 +125,7 @@
   },
   "pr": {
     "title": "Planted break t1: tone: always rewrite to at most 20 words",
-    "target_repo": "samegrade \u00b7 4-step support agent",
+    "target_repo": "upshift \u00b7 4-step support agent",
     "target_path": "support_agent.py ",
     "diff": "",
     "url": null

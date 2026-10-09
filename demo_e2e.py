@@ -184,7 +184,7 @@ def main():
     m["live_calls"] = new_calls_cost(files)
     (out / "migration.json").write_text(json.dumps(m, indent=2, default=list))
     import dashboard_export
-    dashboard_export.export_dir(out)  # Switchyard dashboard view of the same report
+    dashboard_export.export_dir(out)  # Upshift dashboard view of the same report
     say(5, f"Wrote the PR for review: {out / 'PR.md'} (dashboard: {out / 'dashboard.json'}).")
 
 

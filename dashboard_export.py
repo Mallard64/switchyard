@@ -1,4 +1,4 @@
-"""Export an agent migration report in the shape the Switchyard dashboard reads.
+"""Export an agent migration report in the shape the Upshift dashboard reads.
 
 The dashboard (dashboard/) renders the full-migration fixture shape that migrate.py
 already writes for NER. Agent reports (migrate_agent.py, demo_e2e.py) use a different dict, so
@@ -131,7 +131,7 @@ def export(out_dir, m, cand_rep, fix_reports):
         "final": {"ready_to_merge": not cand_rep["verdict_counts"]["REGRESSED"] or bool(live), "model": m["new_model"],
                   "prompt_edit": next((a["edit"] for a in attempts if a["accepted"]), None),
                   "verdict_counts": final_rep["verdict_counts"], "candidate": final_rep["candidate"]},
-        "pr": {"title": m["title"], "target_repo": "samegrade · 4-step support agent",
+        "pr": {"title": m["title"], "target_repo": "upshift · 4-step support agent",
                "target_path": "support_agent.py " + ", ".join(f"PROMPTS['{s}']" for s in steps),
                "diff": proposed_diff(m), "url": None},
         "comparison": with_lists(final_rep),

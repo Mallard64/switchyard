@@ -102,7 +102,7 @@
   },
   "pr": {
     "title": "Planted break d1: decide: upset or urgent customers get what they ask for",
-    "target_repo": "samegrade \u00b7 4-step support agent",
+    "target_repo": "upshift \u00b7 4-step support agent",
     "target_path": "support_agent.py ",
     "diff": "",
     "url": null

@@ -188,7 +188,7 @@ def main():
         "_note": "Real runs of the 4-step support agent (clean prompts, nothing planted). Tickets are hand-written "
                  "(synthetic); model behavior is real. cost_per_1k_calls_usd = per 1k ticket runs (4 calls).",
         "run_id": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "repo": {"name": "samegrade support agent (demo)", "call_site": f"support_agent.py: PROMPTS['{step}']"},
+        "repo": {"name": "upshift support agent (demo)", "call_site": f"support_agent.py: PROMPTS['{step}']"},
         "baseline": {"model": OLD, "provider": "OpenAI", "retires_on": "2026-10-23", "runs_per_input": 3,
                      "noise_rate": round(noisy / (len(dev) + len(hard)), 4), "cost_per_1k_calls_usd": old_cost,
                      "latency_p50_ms": base_ms},
