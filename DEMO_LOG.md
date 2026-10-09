@@ -161,7 +161,7 @@ Spend after task 2: **$10.59**.
 3. **Small held-out set.** The patch was verified on 12 tickets (3 → 0). That's real but small; a design partner's traffic is the next test.
 4. **Mixed prices in legacy reports.** Rows recorded before tonight stored `cost_usd` at the user-supplied Oct 6 rates (sol $5/$30, terra $2.50/$15), while compare.py fills in missing costs at the verified rates. Regenerating `reports/migration_agent*` would mix the two in one table ($8.70 next to $10.80), so I left those reports' numbers alone. The demo report recomputes every cost from tokens × `prices.yml` and is consistent. The fix is for compare.py to always recompute from usage.
 5. **Phone width:** the existing dashboard layout overflows at 390 px (the intro and note box clip). The new demo views reflow, but the page as a whole doesn't. It's fine on a laptop.
-6. **The design canvas from earlier** (claude.ai artifact "Switchyard dashboard redesign") says "37 times" for the benchmark. Fix it to the held-out 34/39 before sharing it.
+6. ~~The design canvas from earlier says "37 times" for the benchmark.~~ Fixed Oct 8: the canvas (now "Upshift dashboard redesign") quotes the held-out 34/39.
 7. **Not pushed.** `demo` is based on `overnight`, and neither branch is on GitHub.
 
 ### Reproduce
