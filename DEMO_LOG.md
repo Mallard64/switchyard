@@ -270,3 +270,24 @@ This was an engineer edit, written from the t42 failure.
 | open weights | open-source model on your own computer |
 
 Code names and JSON fields are unchanged, so the frontend contract holds. Committed older reports (`reports/*/PR.md`) keep their old wording until they're regenerated.
+
+## Follow-up 4 (Oct 9): the support agent as its own repo; slide 4 opens a real PR
+- **New repo `Mallard64/customer-support-agent` (private)**: the 4-step agent as a standalone app.
+  - It's the pre-migration state: gpt-4 at temperature 0 on every step, with the original prompts and no planted line.
+  - Files: prompts in `prompts/<step>.txt` (one instruction per line), models in `config.yml`, fake tools reading `data/orders.json` and `data/policies.json`, plus `agent.py`, a README and 4 offline tests.
+  - Prompts and data were generated from `support_agent.py`, so they match what was tested.
+  - One live gpt-4 run worked and kept the "5–7 business days" line.
+- **`open_pr.py` + `config/target_repo.yml`:**
+  - Takes the reviewer's accept / edit / reject decisions and clones the app repo.
+  - Applies only the included changes: models in `config.yml` (dropping `temperature: 0`) and tone line 3. It checks the line still matches what was tested.
+  - Pushes `upshift/<model>-<hash>` and runs `gh pr create` with the evidence in the description. Edited changes are flagged as untested; rejected ones are listed as left out.
+  - The same changes reuse the open PR. A branch left over from a closed PR is overwritten, since `upshift/*` branches belong to upshift.
+- **Dashboard:**
+  - `POST /api/create-pr` (same-origin only, one at a time, 3-minute timeout) runs `open_pr.py`.
+  - Slide 4's "Create pull request in Mallard64/customer-support-agent" button is enabled once every change has a decision. It shows the link or a plain-language error.
+- **Tested for real:**
+  - **https://github.com/Mallard64/customer-support-agent/pull/1** was created through the endpoint. Its diff is exactly the 4 model lines and tone line 3.
+  - A repeat request returned the same PR, and a cross-site request was refused.
+  - In headless Chrome, the button was disabled before the decisions, enabled after accepting both, and the click showed the PR link.
+- 7 new offline tests (`tests/test_open_pr.py`); 25 in total.
+- Spend: about $0.04 for the one live gpt-4 smoke run of the standalone agent.

@@ -170,6 +170,18 @@ function slidePR(data) {
     </article>`;
   }).join('');
   const ready = changes.every(ch => status(ch.id) === 'accepted');
+  const included = changes.filter(ch => ['accepted', 'edited'].includes(status(ch.id)));
+  const undecided = changes.filter(ch => status(ch.id) === 'pending');
+  const pr = demoState.pr || {};
+  const create = !d.target_repo ? '' : `<div class="sl-create">
+    <button class="button primary" id="sl-create"${!included.length || undecided.length || pr.busy ? ' disabled' : ''}>${pr.busy ? 'Opening pull request…' : `Create pull request in ${esc(d.target_repo)}`}</button>
+    <div aria-live="polite">
+      ${pr.url ? `<p class="dm-good">Pull request ${pr.existed ? 'already open' : 'opened'}: <a href="${esc(pr.url)}" target="_blank" rel="noopener noreferrer">${esc(pr.url)}</a></p>` : ''}
+      ${pr.error ? `<p class="dm-bad">Couldn't open the pull request: ${esc(pr.error)}</p>` : ''}
+      <p class="dm-foot">${undecided.length ? 'Decide every change first: accept, edit or reject.' : !included.length ? 'Accept or edit at least one change.'
+        : `Opens a real pull request with ${included.length} change${included.length > 1 ? 's' : ''}. Rejected changes are left out; edited ones are marked untested.`}</p>
+    </div>
+  </div>`;
   return `
   <div class="dm-change-head"><div><p class="sl-kicker">Draft pull request · ${changes.length} changes</p>
     <h2 class="sl-title" tabindex="-1">${esc(data.pr.title)}</h2></div>
@@ -180,7 +192,8 @@ function slidePR(data) {
     <li><strong>Proof:</strong> tickets that got worse ${d.confidence.regressed_dev + d.confidence.regressed_heldout_before} → ${data.candidates[0].summary.verdict_counts_after_fix?.REGRESSED} of ${total}, including ${p.heldout_before.REGRESSED} → ${p.heldout_after.REGRESSED} on ${d.confidence.heldout_tickets} fresh test tickets the fix never saw.</li>
     <li><strong>Cost:</strong> ${usd(d.totals_usd_per_1k.all_old)} → ${usd(d.recommended.usd_per_1k)} per 1,000 tickets.</li>
   </ul>
-  ${items}`;
+  ${items}
+  ${create}`;
 }
 
 // ---- Deck ------------------------------------------------------------------------------------------------
@@ -234,10 +247,28 @@ export function bindDemo(root, data) {
     panel.querySelector('#dm-after').textContent = usd(v * rec / 1000, 0);
     panel.querySelector('#dm-save').textContent = usd(v * (old - rec) / 1000, 0);
   };
+  const create = panel.querySelector('#sl-create');
+  if (create) create.onclick = async () => {
+    const changes = prChanges(data).map(ch => ({id: ch.id, decision: demoState.decisions[ch.id] || 'pending',
+      ...(demoState.edits[ch.id] != null ? {text: demoState.edits[ch.id]} : {})}));
+    demoState.pr = {busy: true};
+    redraw();
+    try {
+      const r = await fetch('/api/create-pr', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({changes})});
+      const out = await r.json().catch(() => ({error: `the server answered ${r.status}`}));
+      demoState.pr = {...out, busy: false};
+    } catch {
+      demoState.pr = {busy: false, error: 'the upshift server isn\'t reachable (start it with npm start)'};
+    }
+    const current = document.querySelector('#demo-panel');  // the viewer may have changed slides meanwhile
+    if (current) { current.outerHTML = demoSection(data); bindDemo(root, data); }
+    document.querySelector('#sl-create')?.focus();
+  };
   panel.querySelectorAll('.dm-change').forEach(el => {
     const id = el.dataset.change;
     el.querySelectorAll('[data-act]').forEach(btn => btn.onclick = () => {
       const act = btn.dataset.act;
+      if (act !== 'edit' && act !== 'cancel') demoState.pr = null;  // a new decision means a different pull request
       if (act === 'accept') demoState.decisions[id] = 'accepted';
       if (act === 'reject') demoState.decisions[id] = 'rejected';
       if (act === 'edit') demoState.editing = id;

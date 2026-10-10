@@ -130,8 +130,18 @@ when the new model also wrote the draft. Say so if asked.
 ![Slide 4: the pull request](docs/demo/slide-4-pr.png)
 
 Two changes, each with Accept / Edit / Reject: the model swap (gpt-4 at temperature 0 → gpt-5.6-sol at its default,
-because it rejects 0) and tone line 3. An edited line is marked "re-run needed". The page never presents an untested
-edit as verified. Nothing is posted anywhere; the PR is a draft on this page.
+because it rejects 0) and tone line 3. An edited line is marked "re-run needed".
+
+**Create pull request** opens a real PR in the app repo, [Mallard64/customer-support-agent](https://github.com/Mallard64/customer-support-agent)
+(private; set in `config/target_repo.yml`). It's enabled once every change is accepted, edited or rejected:
+- Only accepted and edited changes go in. Edited ones are marked "not re-tested" in the PR, and rejected ones are listed as left out.
+- Before changing a prompt line, it checks that the line still says what upshift tested.
+- The same set of changes always reuses the PR that's already open, so clicking twice doesn't create a duplicate.
+
+Needs internet and `gh auth login` with access to that repo. It's the one part of the demo that isn't offline.
+
+**Before a pitch:** PR #1 is already open from testing, so the button will show "already open". To create it live in
+front of people, close PR #1 first (`gh pr close 1 --repo Mallard64/customer-support-agent`). The next click opens a fresh one.
 
 ## Likely questions
 
