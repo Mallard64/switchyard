@@ -255,7 +255,9 @@ export function bindDemo(root, data) {
     redraw();
     try {
       const r = await fetch('/api/create-pr', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({changes})});
-      const out = await r.json().catch(() => ({error: `the server answered ${r.status}`}));
+      const out = r.status === 404
+        ? {error: 'the dashboard server is older than this page. Restart it (Ctrl+C in its terminal, then npm start) and reload'}
+        : await r.json().catch(() => ({error: `the server answered ${r.status}`}));
       demoState.pr = {...out, busy: false};
     } catch {
       demoState.pr = {busy: false, error: 'the upshift server isn\'t reachable (start it with npm start)'};

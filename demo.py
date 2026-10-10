@@ -68,6 +68,19 @@ def port_open(port):
         return s.connect_ex(("127.0.0.1", port)) == 0
 
 
+def server_is_current(port):
+    """A current dashboard server knows /api/create-pr (it refuses a GET with 403); an old one answers 404."""
+    import urllib.error
+    import urllib.request
+    try:
+        urllib.request.urlopen(f"http://127.0.0.1:{port}/api/create-pr", timeout=2)
+    except urllib.error.HTTPError as e:
+        return e.code != 404
+    except OSError:
+        return True  # can't tell; don't warn
+    return True
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--demo", action="store_true", help="replay the cached real run (required; there is no live mode here)")
@@ -94,6 +107,9 @@ def main():
     if not args.no_server:
         if port_open(args.port):
             print(f"{DIM}Dashboard already running on :{args.port}{RESET}")
+            if not server_is_current(args.port):
+                print(f"{ORANGE}That server is older than this code (no /api/create-pr), so slide 4's button will fail. "
+                      f"Stop it and run this again.{RESET}")
         else:
             server = subprocess.Popen(["node", str(HERE / "dashboard" / "server.mjs")],
                                       env={**os.environ, "PORT": str(args.port)},
