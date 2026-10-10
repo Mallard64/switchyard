@@ -2,6 +2,8 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { open, readFile, readdir, stat } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 // The upshift backend (this folder's parent repo). Reports and live run results are read from it; nothing is written.
@@ -162,6 +164,26 @@ async function startReplay(file, seconds) {
   };
   step();
 }
+let prBusy = false;
+function createPR(payload) {
+  // One at a time; open_pr.py clones, commits, pushes and runs `gh pr create`, then prints JSON.
+  if (prBusy) return Promise.resolve({error: 'a pull request is already being created'});
+  prBusy = true;
+  const venv = path.join(BACKEND, '.venv', 'bin', 'python');
+  const py = existsSync(venv) ? venv : 'python3';
+  return new Promise(resolve => {
+    const child = spawn(py, [path.join(BACKEND, 'open_pr.py')], {cwd: BACKEND});
+    let out = '';
+    const timer = setTimeout(() => child.kill(), 180000);
+    child.stdout.on('data', d => { out += d; });
+    child.on('error', e => { clearTimeout(timer); prBusy = false; resolve({error: `could not start open_pr.py: ${e.message}`}); });
+    child.on('close', () => {
+      clearTimeout(timer); prBusy = false;
+      try { resolve(JSON.parse(out.trim().split('\n').pop())); } catch { resolve({error: 'open_pr.py gave no answer (offline, or gh not logged in?)'}); }
+    });
+    child.stdin.end(JSON.stringify(payload));
+  });
+}
 function sameOrigin(req) {
   // Only the dashboard page itself may start or stop replays (blocks cross-site requests and DNS rebinding).
   const ok = [`localhost:${port}`, `127.0.0.1:${port}`];
@@ -193,6 +215,18 @@ http.createServer(async (req, res) => {
   }
   if (url.pathname === '/api/replays') {
     return sendJSON(res, 200, {runs: await reportRuns(url.searchParams.get('report') || ''), active: publicReplay()});
+  }
+  if (url.pathname === '/api/create-pr') {
+    // Opens a real pull request in the app repo (config/target_repo.yml) via open_pr.py; slide 4's button.
+    if (req.method !== 'POST' || !sameOrigin(req) || !String(req.headers['content-type']).startsWith('application/json'))
+      return sendJSON(res, 403, {error: 'pull requests can only be created from the dashboard page'});
+    const body = await readBody(req);
+    const changes = Array.isArray(body?.changes) ? body.changes.slice(0, 10).map(c => ({
+      id: String(c?.id || '').slice(0, 20), decision: String(c?.decision || '').slice(0, 20),
+      ...(c?.text != null ? {text: String(c.text).slice(0, 2000)} : {})})) : null;
+    if (!changes) return sendJSON(res, 400, {error: 'expected {changes: [...]}'});
+    const out = await createPR({changes});
+    return sendJSON(res, out.error ? 502 : 200, out);
   }
   if (url.pathname === '/api/replay' || url.pathname === '/api/replay/stop') {
     if (req.method !== 'POST' || !sameOrigin(req) || !String(req.headers['content-type']).startsWith('application/json'))

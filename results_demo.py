@@ -230,6 +230,7 @@ def main():
                           "note": "9 planted prompt breaks, terra as old and sol as new; held-out numbers (before the narrowing fix)"},
             "prices": {m: {k: p.get(k) for k in ("input_per_1m", "output_per_1m", "source", "checked")}
                        for m, p in prices.items() if m in ("gpt-4", "gpt-5.6-sol", "gpt-5.6-terra")},
+            "target_repo": yaml.safe_load((HERE / "config" / "target_repo.yml").read_text())["repo"],
             "monthly_requests_default": MONTHLY_REQUESTS_DEFAULT,
             "monthly_requests_note": "assumption for the savings calculator; edit it on the page",
         },
@@ -239,11 +240,13 @@ def main():
         pool = json.loads(pool_path.read_text())
         count = lambda v: {"regressed": v["verdict_counts"]["REGRESSED"], "of": v["tickets"], "passed_all": v["passed_all"],
                            "gold": v["gold"], "errors": v.get("errors", 0)}
+        step_cost = lambda per: {st: {"usd_per_1k": v["usd_per_1k"], "tokens": round(v["prompt_tokens"] + v["completion_tokens"])}
+                                 for st, v in per.items()}
         models = [{"model": OLD, "hosting": "api", "role": "today", "usd_per_1k": old_cost, "tokens_per_ticket": None,
-                   "sets": {}, "synthetic": False}]
+                   "per_step": step_cost(costs["all_old"]), "sets": {}, "synthetic": False}]
         for r in pool["screening"]:
             models.append({"model": r["model"], "hosting": r["hosting"], "role": "candidate", "usd_per_1k": r["usd_per_1k"],
-                           "tokens_per_ticket": r["tokens_per_ticket"], "synthetic": False,
+                           "tokens_per_ticket": r["tokens_per_ticket"], "per_step": step_cost(r["per_step"]), "synthetic": False,
                            "sets": {s: count(v) for s, v in r["sets"].items()}})
         data["demo"]["models"] = models
         data["demo"]["pool"] = {

@@ -1,0 +1,5 @@
+# The app repo that upshift opens the migration pull request against (dashboard slide 4, open_pr.py).
+repo: Mallard64/customer-support-agent
+base: main
+prompts_dir: prompts      # prompts/<step>.txt, one instruction per line
+config_file: config.yml   # steps.<step>.model / temperature

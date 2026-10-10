@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "_note": "Real runs of the 4-step support agent (clean prompts, nothing planted). Tickets are hand-written (synthetic); model behavior is real. cost_per_1k_calls_usd = per 1k ticket runs (4 calls).",
-  "run_id": "2026-10-09T06:26:31Z",
+  "run_id": "2026-10-10T01:16:37Z",
   "repo": {
     "name": "upshift support agent (demo)",
     "call_site": "support_agent.py: PROMPTS['tone']"
@@ -2020,6 +2020,7 @@
         "checked": "2026-10-08"
       }
     },
+    "target_repo": "Mallard64/customer-support-agent",
     "monthly_requests_default": 100000,
     "monthly_requests_note": "assumption for the savings calculator; edit it on the page",
     "models": [
@@ -2029,6 +2030,24 @@
         "role": "today",
         "usd_per_1k": 39.3197,
         "tokens_per_ticket": null,
+        "per_step": {
+          "classify": {
+            "usd_per_1k": 6.58,
+            "tokens": 204
+          },
+          "decide": {
+            "usd_per_1k": 10.8342,
+            "tokens": 322
+          },
+          "draft": {
+            "usd_per_1k": 12.7761,
+            "tokens": 360
+          },
+          "tone": {
+            "usd_per_1k": 9.1294,
+            "tokens": 286
+          }
+        },
         "sets": {},
         "synthetic": false
       },
@@ -2038,6 +2057,24 @@
         "role": "candidate",
         "usd_per_1k": 8.76,
         "tokens_per_ticket": 1241.4,
+        "per_step": {
+          "classify": {
+            "usd_per_1k": 1.1049,
+            "tokens": 204
+          },
+          "decide": {
+            "usd_per_1k": 2.0177,
+            "tokens": 322
+          },
+          "draft": {
+            "usd_per_1k": 2.4187,
+            "tokens": 355
+          },
+          "tone": {
+            "usd_per_1k": 3.2187,
+            "tokens": 360
+          }
+        },
         "synthetic": false,
         "sets": {
           "dev": {
@@ -2069,6 +2106,24 @@
         "role": "candidate",
         "usd_per_1k": null,
         "tokens_per_ticket": 1309.4,
+        "per_step": {
+          "classify": {
+            "usd_per_1k": null,
+            "tokens": 218
+          },
+          "decide": {
+            "usd_per_1k": null,
+            "tokens": 335
+          },
+          "draft": {
+            "usd_per_1k": null,
+            "tokens": 382
+          },
+          "tone": {
+            "usd_per_1k": null,
+            "tokens": 375
+          }
+        },
         "synthetic": false,
         "sets": {
           "dev": {
@@ -2100,6 +2155,24 @@
         "role": "candidate",
         "usd_per_1k": null,
         "tokens_per_ticket": 1252.8,
+        "per_step": {
+          "classify": {
+            "usd_per_1k": null,
+            "tokens": 212
+          },
+          "decide": {
+            "usd_per_1k": null,
+            "tokens": 335
+          },
+          "draft": {
+            "usd_per_1k": null,
+            "tokens": 376
+          },
+          "tone": {
+            "usd_per_1k": null,
+            "tokens": 330
+          }
+        },
         "synthetic": false,
         "sets": {
           "dev": {
@@ -2131,6 +2204,24 @@
         "role": "candidate",
         "usd_per_1k": null,
         "tokens_per_ticket": 1289.5,
+        "per_step": {
+          "classify": {
+            "usd_per_1k": null,
+            "tokens": 211
+          },
+          "decide": {
+            "usd_per_1k": null,
+            "tokens": 333
+          },
+          "draft": {
+            "usd_per_1k": null,
+            "tokens": 378
+          },
+          "tone": {
+            "usd_per_1k": null,
+            "tokens": 366
+          }
+        },
         "synthetic": false,
         "sets": {
           "dev": {
@@ -2162,6 +2253,24 @@
         "role": "candidate",
         "usd_per_1k": 1.7275,
         "tokens_per_ticket": 5214.0,
+        "per_step": {
+          "classify": {
+            "usd_per_1k": 0.0849,
+            "tokens": 375
+          },
+          "decide": {
+            "usd_per_1k": 0.2686,
+            "tokens": 914
+          },
+          "draft": {
+            "usd_per_1k": 0.5109,
+            "tokens": 1536
+          },
+          "tone": {
+            "usd_per_1k": 0.8631,
+            "tokens": 2389
+          }
+        },
         "synthetic": false,
         "sets": {
           "dev": {
@@ -2193,6 +2302,24 @@
         "role": "candidate",
         "usd_per_1k": 0.1555,
         "tokens_per_ticket": 1149.5,
+        "per_step": {
+          "classify": {
+            "usd_per_1k": 0.0246,
+            "tokens": 202
+          },
+          "decide": {
+            "usd_per_1k": 0.0454,
+            "tokens": 322
+          },
+          "draft": {
+            "usd_per_1k": 0.0507,
+            "tokens": 345
+          },
+          "tone": {
+            "usd_per_1k": 0.0348,
+            "tokens": 280
+          }
+        },
         "synthetic": false,
         "sets": {
           "dev": {
@@ -2224,6 +2351,24 @@
         "role": "candidate",
         "usd_per_1k": 0.5309,
         "tokens_per_ticket": 1275.7,
+        "per_step": {
+          "classify": {
+            "usd_per_1k": 0.056,
+            "tokens": 202
+          },
+          "decide": {
+            "usd_per_1k": 0.1381,
+            "tokens": 344
+          },
+          "draft": {
+            "usd_per_1k": 0.129,
+            "tokens": 351
+          },
+          "tone": {
+            "usd_per_1k": 0.2078,
+            "tokens": 379
+          }
+        },
         "synthetic": false,
         "sets": {
           "dev": {
@@ -2255,6 +2400,24 @@
         "role": "candidate",
         "usd_per_1k": 1.5137,
         "tokens_per_ticket": 1176.5,
+        "per_step": {
+          "classify": {
+            "usd_per_1k": 0.214,
+            "tokens": 203
+          },
+          "decide": {
+            "usd_per_1k": 0.4135,
+            "tokens": 321
+          },
+          "draft": {
+            "usd_per_1k": 0.4381,
+            "tokens": 342
+          },
+          "tone": {
+            "usd_per_1k": 0.4481,
+            "tokens": 310
+          }
+        },
         "synthetic": false,
         "sets": {
           "dev": {
@@ -2286,6 +2449,24 @@
         "role": "candidate",
         "usd_per_1k": 3.7953,
         "tokens_per_ticket": 1148.6,
+        "per_step": {
+          "classify": {
+            "usd_per_1k": 0.559,
+            "tokens": 202
+          },
+          "decide": {
+            "usd_per_1k": 1.0863,
+            "tokens": 321
+          },
+          "draft": {
+            "usd_per_1k": 1.1233,
+            "tokens": 336
+          },
+          "tone": {
+            "usd_per_1k": 1.0267,
+            "tokens": 289
+          }
+        },
         "synthetic": false,
         "sets": {
           "dev": {

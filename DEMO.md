@@ -27,7 +27,8 @@ python demo.py --demo
 ```
 
 That narrates the run in the terminal (about 1 minute) and serves the dashboard. Open
-**http://localhost:4173/#savings**. The tabs are also direct links: `#evidence`, `#pr`.
+**http://localhost:4173/** for a four-slide deck. Use Next/Back, the numbered slide buttons, or the ← → keys.
+Each slide has its own link: `#results`, `#models`, `#choice`, `#pr`.
 
 | Flag | Use it when |
 |---|---|
@@ -51,11 +52,11 @@ python results_demo.py
 ```
 
 **Wi-Fi backup.** Before the pitch, run `python demo.py --demo --speed 10` once with Wi-Fi off to confirm. If the
-laptop dies, `docs/demo/` has the three screenshots and the terminal transcript (`terminal.txt`).
+laptop dies, `docs/demo/` has the four slide screenshots and the terminal transcript (`terminal.txt`).
 
 ## 2-minute script
 
-**0:00 · Problem (Savings tab open).**
+**0:00 · Slide 1 (The result) on screen.**
 "gpt-4 shuts down October 23rd. Every team on it has to switch, and the hard part isn't the switch. It's knowing
 what broke. We took a 4-step support agent and changed only the model."
 
@@ -65,58 +66,82 @@ gpt-4 gave the same answer every run, so it isn't noise. The reply stops telling
 5 to 7 business days."
 
 **0:35 · Stage 2 scrolls by.**
-"Which step? We put gpt-4 back one step at a time. Only the tone step repairs it: 4 out of 4. Then the reverse
-check: new model on that step alone breaks it again on 2 of 4. That's proof, not a guess."
+"Which step? We put gpt-4 back one step at a time. Only the tone step fixes it: 4 out of 4. Then the reverse check:
+the new model on that step alone breaks it again on 2 of 4. That's proof, not a guess."
 
-**0:55 · Stage 3 and 4.**
-"Which line? Remove each line of the tone prompt. Only line 3, 'must not promise anything beyond the decision',
-repairs it. The new model reads the refund timeline as an extra promise and deletes it. The fixer rewrites that one
-line, and it only saw these 4 tickets."
+**0:55 · Stages 3 and 4.**
+"Which line? Remove each line of the tone prompt. Only line 3, 'must not promise anything beyond the decision', fixes
+it. The new model reads the refund timeline as an extra promise and deletes it. The fix rewrites that one line, and
+it was written from these 4 tickets only."
 
-**1:15 · Stage 5, then Evidence tab.**
-"Then the test that matters: 12 tickets the fixer never saw. 3 broke before the fix, 0 after. Here's one: gpt-4's
-reply, the new model dropping the timeline, the fixed reply keeping it."
+**1:10 · Back to slide 1.**
+"Then the test that matters: 12 tickets the fix never saw. 3 broke before, 0 after. Cost per 1,000 tickets goes
+from $39 to $7.84, 80% lower, with the same pass rate. Type in your own volume: at 100,000 tickets a month that's
+about $3,100 a month."
 
-**1:35 · Savings tab.**
-"And the reason to switch at all: model cost per 1,000 tickets goes from $39 to $7.84, 80% lower, with the same
-pass rate on every check. Type in your own volume: at 100,000 tickets a month that's about $3,100 a month. We also
-tried the cheapest model on every step. It looked cheaper but broke a test ticket it hadn't seen, so we don't recommend it."
+**1:30 · Slide 2 (Every model we tried).**
+"We also tried seven cheaper models, including open-source ones running on a laptop. Alone, every one of them breaks
+something. But step by step, some are good enough."
 
-**1:50 · Pull request tab.**
+**1:40 · Slide 3 (Cheapest safe choice + fixes).**
+"gpt-5.6-luna can do three steps and a free local Llama can do tone. It first broke a ticket with a lowercase order
+ID; one line fixed that, and it passed 8 new tickets at 31 cents per 1,000. That's a small test, so today we
+recommend sol plus the tone fix."
+
+**1:50 · Slide 4 (The pull request).**
 "The output is a pull request: the model swap and one prompt line, each accepted, edited or rejected by your
 engineer. We investigate; you decide."
 
-## What each screen proves
+## What each slide proves
 
-### Savings (`#savings`), for the buyer
-![Savings view](docs/demo/savings.png)
+### Slide 1 · The result (`#results`), for the buyer
+![Slide 1: the result](docs/demo/slide-1-results.png)
 
 | Shows | Comes from | Doesn't claim |
 |---|---|---|
-| $39.32 → $7.84 per 1,000 tickets (−80%) | Mean real tokens per step × list prices in `config/prices.yml` (OpenAI pricing page, checked Oct 8) | Infra, engineering or caching costs. Model cost only. |
+| Tickets that got worse 7 → 0 of 36; later fresh tests 0 of 12 and 0 of 8 | `model_only.py`, `model_pool.py`, `mix_retest.py`; 3 runs per ticket | Results on real customer traffic |
+| Accuracy 97.2% → 97.2% replies passing every check (79.6% without the fix) | All 108 runs (36 tickets × 3) | Quality on real customer traffic |
+| $39.32 → $7.84 per 1,000 tickets (−80%) | Measured tokens per step × list prices in `config/prices.yml` (OpenAI pricing page, checked Oct 8) | Infra, engineering or caching costs. Model cost only. |
 | Monthly savings | The viewer's own volume × the measured cost per ticket | The default 100,000/month is an assumption, labelled on the page |
-| 97.2% → 97.2% replies passing every check (79.6% without the fix) | All 108 runs (36 tickets × 3) | Quality on real customer traffic |
-| Cheapest-per-step mix rejected | `assign.py`: terra passed classify, decide and draft on their own, but the mix broke fresh test ticket t33 | That a cheaper safe mix doesn't exist. See "Bigger model list" below. |
 
-### Evidence (`#evidence`), for the engineer
-![Evidence view](docs/demo/evidence.png)
+### Slide 2 · Every model we tried (`#models`)
+![Slide 2: every model](docs/demo/slide-2-models.png)
 
 | Shows | Comes from |
 |---|---|
-| Tone step repairs 4/4, reproduces 2/4; other steps repair 0/4 | `model_only.py` step-finder, 3 runs per experiment |
-| Removing tone line 3 alone fixes 4/4; other lines 0/4 | Removing one line at a time, 3 runs per line |
-| Before/after replies for t21 (practice ticket) and t36 (fresh test ticket) | First recorded run of each configuration |
-| Step-finder accuracy: 34/39 exact, 38/39 confirmed both ways, 0 wrong | **Practice test with planted bugs**, numbers from tickets it wasn't tuned on (`reports/agent_bench/RESULTS.md`). The 37/39 figure in that file comes after a fix designed on the same tickets, so it isn't quoted. |
+| Cost per step for every model (dollars, or tokens for open-source models on your own computer) | Real token counts from each model's runs × `config/prices.yml` |
+| "Got worse alone" on 24 practice · 12 hard · 12 fresh tickets | Each model ran the whole agent with no prompt changes, 3 runs per ticket, vs gpt-4 |
+| ✓ on the cheapest model that passed each step | The per-step test on slide 3 |
 
-Reproduce is 2/4, not 4/4: on t21 and t24, the new model's tone step only drops the timeline when the new model also
-wrote the draft. Say so if asked.
+### Slide 3 · Cheapest safe choice + fixes (`#choice`), for the engineer
+![Slide 3: cheapest choice and fixes](docs/demo/slide-3-choice.png)
 
-### Pull request (`#pr`), the product
-![Pull request view](docs/demo/pr.png)
+| Shows | Comes from |
+|---|---|
+| Per-step ladder: each step tried cheapest first until nothing got worse | `model_pool.py` (gpt-5.6-sol + fix runs every other step) |
+| Recommended: sol + tone fix. gpt-4 back at tone fixes 4/4; removing tone line 3 fixes 4/4 | `model_only.py`, 3 runs per experiment |
+| Cheapest option: luna + local Llama 3.1 8B, $0.31 per 1,000 in API calls. First failed t42 (lowercase ID), passed 8 new tickets after a one-line classify fix | `model_pool.py`, `mix_retest.py`. Small test; running Llama yourself isn't priced |
+| Step-finder accuracy 34/39 exact, 0 wrong | **Practice test with planted bugs** (`reports/agent_bench/RESULTS.md`), numbers from tickets it wasn't tuned on |
+
+The reverse check on the tone step is 2/4, not 4/4: on t21 and t24 the new model's tone step only drops the timeline
+when the new model also wrote the draft. Say so if asked.
+
+### Slide 4 · The pull request (`#pr`), the product
+![Slide 4: the pull request](docs/demo/slide-4-pr.png)
 
 Two changes, each with Accept / Edit / Reject: the model swap (gpt-4 at temperature 0 → gpt-5.6-sol at its default,
-because it rejects 0) and tone line 3. An edited line is marked "re-run needed". The page never presents an untested
-edit as verified. Nothing is posted anywhere; the PR is a draft on this page.
+because it rejects 0) and tone line 3. An edited line is marked "re-run needed".
+
+**Create pull request** opens a real PR in the app repo, [Mallard64/customer-support-agent](https://github.com/Mallard64/customer-support-agent)
+(private; set in `config/target_repo.yml`). It's enabled once every change is accepted, edited or rejected:
+- Only accepted and edited changes go in. Edited ones are marked "not re-tested" in the PR, and rejected ones are listed as left out.
+- Before changing a prompt line, it checks that the line still says what upshift tested.
+- The same set of changes always reuses the PR that's already open, so clicking twice doesn't create a duplicate.
+
+Needs internet and `gh auth login` with access to that repo. It's the one part of the demo that isn't offline.
+
+**Before a pitch:** PR #1 is already open from testing, so the button will show "already open". To create it live in
+front of people, close PR #1 first (`gh pr close 1 --repo Mallard64/customer-support-agent`). The next click opens a fresh one.
 
 ## Likely questions
 
